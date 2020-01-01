@@ -215,15 +215,17 @@ Configuration.h - Software settings:
                                    If no alarm or timer is set the LED is used as expected.
 #define DEDICATION                 Show a text on the clocks webpage.
 #define SELFTEST                   Test LEDs at startup. Colors are: white, red, green, blue. In this order.
-#define FRONTCOVER_*               Frontcover of the clock. Also sets the language of the menu and the website.
 #define SHOW_MODE_AMPM
 #define SHOW_MODE_SECONDS
 #define SHOW_MODE_WEEKDAY
 #define SHOW_MODE_DATE
 #define SHOW_MODE_MOONPHASE
 #define SHOW_MODE_TEST
+#define APIKEY                     Your OpenWeather API key.
+#define LOCATION                   Your location for OpenWeather.
 #define TIMEZONE_*                 The time zone in which the clock is located. Important for the UTC offset and the
                                    summer/winter time change.
+#define FRONTCOVER_*               Frontcover of the clock. This also sets the language of the menu and the website.
 
 ******************************************************************************
 Configuration.h - Hardware settings:
@@ -311,31 +313,6 @@ Configuration.h - Hardware settings:
    001 018 021 038 041 058 061 078 081 098 101
    000 019 020 039 040 059 060 079 080 099 100
 113                                           114
-
-******************************************************************************
-Configuration.h - Default values for the EEPROM:
-Only used when a new version of the settings is released.
-******************************************************************************
-
-#define DEFAULT_BRIGHTNESS         0 to 100 percent
-#define DEFAULT_COLOR              WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
-                                   GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
-                                   BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK
-#define DEFAULT_COLORCHANGE        COLORCHANGE_DAY, COLORCHANGE_HOUR, COLORCHANGE_FIVE, COLORCHANGE_NO
-#define DEFAULT_MODECHANGE         true (on) or false (off)
-#define DEFAULT_SHOWITIS           true (on) or false (off)
-#define DEFAULT_TRANSITION         TRANSITION_FADE, TRANSITION_NORMAL
-#define DEFAULT_TIMEOUT            Seconds for fallback
-#define DEFAULT_USELDR             true (on) or false (off)
-#define DEFAULT_ALARM1             true (on) or false (off)
-#define DEFAULT_ALARMTIME1         Seconds since 0:00h (12:00h am). E.g. 54000 for 3:00h pm
-#define DEFAULT_ALARM1WEEKDAYS     0b11111110 // Sa. Fr. Th. We. Tu. Mo. Su. 0
-#define DEFAULT_ALARM2             true (on) or false (off)
-#define DEFAULT_ALARMTIME2         Seconds since 0:00h (12:00h am). E.g. 72000 for 8:00h pm
-#define DEFAULT_ALARM2WEEKDAYS     0b11111110 // Sa. Fr. Th. We. Tu. Mo. Su. 0
-#define DEFAULT_NIGHTOFF           Seconds since 0:00h (12:00h am). E.g. 3600 for 1:00h am
-#define DEFAULT_DAYON              Seconds since 0:00h (12:00h am). E.g. 18000 for 5:00h am
-#define DEFAULT_HOURBEEP false     true (on) or false (off)
 
 ******************************************************************************
 Configuration.h - Misc:
