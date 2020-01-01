@@ -32,9 +32,9 @@ You will also find a circuit diagram, a partslist and some pictures in the "/mis
 All sensors, the RTC and the buzzer are optional.
 The clock will run with the ESP8266 module only. No PCB needed.
 
-Warning: Do not power up the clock from USB only.
-         This would blow up the ESP or even the USB port because of high power demand of the LED stripe.
-         Always use an external 5V powersupply with at least 4A.
+Warning:    Do not power up the clock from USB only.
+            This would blow up the ESP or even the USB port because of high power demand of the LED stripe.
+            Always use an external 5V powersupply with at least 4A.
 
 Disclaimer: Qlockwork uses lots of third party libraries.
             I can not guarantee the integrity of these libraries.
@@ -145,131 +145,133 @@ Press "Settings" to configure the clock via web-site.
 Press "Mode" to jump to the next mode.
 Press "Time" to always jump back to the time.
 
-*** Modes: *******************************************************************
+*** Pages: *******************************************************************
 
-Time:                              The default mode of the clock. Shows the actual time. :)
-Display AM/PM:                     Indicates whether it is AM or PM.
-Seconds:                           Shows the seconds.
-Weekday:                           Shows the weekday in local language.
-Date:                              Shows day and month.
-Moonphase:                         Shows the moonphase.
-Room temperature:                  Display of the measured temperature in the room (only with RTC or DHT22).
-Room humidity:                     Display of the measured humidity in the room (only with DHT22).
-Timer:                             Display of the remaining time if a timer is set.
-LED-Test:                          Moves a horizontal bar across the display.
-Red:                               Set all LEDs to red.
-Green:                             Set all LEDs to green.
-Blue:                              Set all LEDs to blue.
-White:                             Set all LEDs to white.
+Time:                               The default mode of the clock. Shows the actual time. :)
+Display AM/PM:                      Indicates whether it is AM or PM.
+Seconds:                            Shows the seconds.
+Weekday:                            Shows the weekday in local language.
+Date:                               Shows day and month.
+Moonphase:                          Shows the moonphase.
+Room temperature:                   Display of the measured temperature in the room (only with RTC or DHT22).
+Room humidity:                      Display of the measured humidity in the room (only with DHT22).
+Outdoor temperature:                Display the temperature for your location from OpenWeather.
+Outdoor humidity:                   Display the humidity for your location from OpenWeather.
+Timer:                              Display of the remaining time if a timer is set.
+LED-Test:                           Moves a horizontal bar across the display.
+Red:                                Set all LEDs to red.
+Green:                              Set all LEDs to green.
+Blue:                               Set all LEDs to blue.
+White:                              Set all LEDs to white.
 
 *** Settings: ****************************************************************
 
-Alarm 1:                           Enable (on) or disable (off) alarm 1.
-                                   Time for alarm 1.
-                                   Weekdays on which alarm 1 is active.
-Alarm 2:                           Enable (on) or disable (off) alarm 2.
-                                   Time for alarm 2.
-                                   Weekdays on which alarm 2 is active.
-Hourly beep:                       Short beep every full hour.
-Timer:                             Sets the minute timer. (0: disabled)
-Show temperature:                  Enable (on) or disable (off) showing the temperature in time view.
-ABC:                               Enable (on) or disable (off) adaptive brightness control.
-                                   Brightness will adjust itself in the range of MIN_BRIGHTNESS and brightness.
-Brightness:                        Brightness of the LEDs in percent. The range is MIN_BRIGHTNESS to MAX_BRIGHTNESS.
-                                   If ABC is enabled this is the maximum achievable brightness.
-Color:                             Choose one of 25 colors for the LEDs.
-Colorchange:                       Change the color in intervals.
-                                   Do not change (off), every 5 minutes (five), every hour (hour), every day (day).
-Transition:                        Choose between fast, move or fade mode transition.
-Timeout:                           Time in seconds to change mode back to time. (0: disabled)
-Night off:                         Set the time the clocks turns itself off at night.
-Day on:                            Set the time the clocks turns itself on at day.
-Show "It is":                      Enable (on) or disable (off) "It is". It will be shown every half and full hour anyway.
-Set date/time:                     Date and time of the clock. The seconds are set to zero if you press save.
+Alarm 1:                            Enable (on) or disable (off) alarm 1.
+                                    Time for alarm 1.
+                                    Weekdays on which alarm 1 is active.
+Alarm 2:                            Enable (on) or disable (off) alarm 2.
+                                    Time for alarm 2.
+                                    Weekdays on which alarm 2 is active.
+Hourly beep:                        Short beep every full hour.
+Timer:                              Sets the minute timer. (0: disabled)
+Show temperature:                   Enable (on) or disable (off) showing the temperature in time view.
+ABC:                                Enable (on) or disable (off) adaptive brightness control.
+                                    Brightness will adjust itself in the range of MIN_BRIGHTNESS and brightness.
+Brightness:                         Brightness of the LEDs in percent. The range is MIN_BRIGHTNESS to MAX_BRIGHTNESS.
+                                    If ABC is enabled this is the maximum achievable brightness.
+Color:                              Choose one of 25 colors for the LEDs.
+Colorchange:                        Change the color in intervals.
+                                    Do not change (off), every 5 minutes (five), every hour (hour), every day (day).
+Transition:                         Choose between fast, move or fade mode transition.
+Timeout:                            Time in seconds to change mode back to time. (0: disabled)
+Night off:                          Set the time the clocks turns itself off at night.
+Day on:                             Set the time the clocks turns itself on at day.
+Show "It is":                       Enable (on) or disable (off) "It is". It will be shown every half and full hour anyway.
+Set date/time:                      Date and time of the clock. The seconds are set to zero if you press save.
 
 ******************************************************************************
 Configuration.h - Software settings:
 ******************************************************************************
 
-#define HOSTNAME                   The name of the clock.
-#define WIFI_SETUP_TIMEOUT         Time in seconds set up the WiFiManager or search for a WLAN.
-                                   If no WLAN is connected the clock enters AP mode.
-                                   You can control the clock if you connect your phone or tablet to this accesspoint.
-                                   On Android you have to tell the phone that it's ok to have no internet.
-#define WIFI_AP_PASS               The password for the AP. At least 8 characters. Default is "12345678".
-#define OTA_PASS                   Password for "Over the Air" updates. Default is "1234".
-#define NTP_SERVER                 NTP server to be queried.
-#define NTP_TIMEOUT                Milliseconds to wait for NTP server to answer.
-#define WIFI_BEEPS                 Beep 3 times if WIFI is conneced, if not, beep one time on startup.
-#define SHOW_IP                    Show local IP at startup. Use this in the browser to access the clocks menue.
-#define NONE_TECHNICAL_ZERO        Displays the zero without the diagonal line.
-#define AUTO_MODECHANGE_TIME       Time in seconds to wait between switching from time to temperature.
-#define FEED_SPEED                 Feed delay in milliseconds. 120 is a good start.
-#define EVENT_TIME                 Time in seconds to wait between showing events. Comment to turn off events.
-#define ALARM_LED_COLOR            Color of the alarm LED. If not defined the display color will be used.
-                                   The possible colors are:
-                                   WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
-                                   GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
-                                   BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
-#define ABUSE_CORNER_LED_FOR_ALARM Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
-                                   If no alarm or timer is set the LED is used as expected.
-#define DEDICATION                 Show a text on the clocks webpage.
-#define SELFTEST                   Test LEDs at startup. Colors are: white, red, green, blue. In this order.
+#define HOSTNAME                    The name of the clock.
+#define WIFI_SETUP_TIMEOUT          Time in seconds set up the WiFiManager or search for a WLAN.
+                                    If no WLAN is connected the clock enters AP mode.
+                                    You can control the clock if you connect your phone or tablet to this accesspoint.
+                                    On Android you have to tell the phone that it's ok to have no internet.
+#define WIFI_AP_PASS                The password for the AP. At least 8 characters. Default is "12345678".
+#define OTA_PASS                    Password for "Over the Air" updates. Default is "1234".
+#define NTP_SERVER                  NTP server to be queried.
+#define NTP_TIMEOUT                 Milliseconds to wait for NTP server to answer.
+#define WIFI_BEEPS                  Beep 3 times if WIFI is conneced, if not, beep one time on startup.
+#define SHOW_IP                     Show local IP at startup. Use this in the browser to access the clocks menue.
+#define NONE_TECHNICAL_ZERO         Displays the zero without the diagonal line.
+#define AUTO_MODECHANGE_TIME        Time in seconds to wait between switching from time to temperature.
+#define FEED_SPEED                  Feed delay in milliseconds. 120 is a good start.
+#define EVENT_TIME                  Time in seconds to wait between showing events. Comment to turn off events.
+#define ALARM_LED_COLOR             Color of the alarm LED. If not defined the display color will be used.
+                                    The possible colors are:
+                                    WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
+                                    GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
+                                    BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
+#define ABUSE_CORNER_LED_FOR_ALARM  Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
+                                    If no alarm or timer is set the LED is used as expected.
+#define DEDICATION                  Show a text on the clocks webpage.
+#define SELFTEST                    Test LEDs at startup. Colors are: white, red, green, blue. In this order.
 #define SHOW_MODE_AMPM
 #define SHOW_MODE_SECONDS
 #define SHOW_MODE_WEEKDAY
 #define SHOW_MODE_DATE
 #define SHOW_MODE_MOONPHASE
 #define SHOW_MODE_TEST
-#define APIKEY                     Your OpenWeather API key.
-#define LOCATION                   Your location for OpenWeather.
-#define TIMEZONE_*                 The time zone in which the clock is located. Important for the UTC offset and the
-                                   summer/winter time change.
-#define FRONTCOVER_*               Frontcover of the clock. This also sets the language of the menu and the website.
+#define APIKEY                      Your OpenWeather API key.
+#define LOCATION                    Your location for OpenWeather.
+#define TIMEZONE_*                  The time zone in which the clock is located. Important for the UTC offset and the
+                                    summer/winter time change.
+#define FRONTCOVER_*                Frontcover of the clock. This also sets the language of the menu and the website.
 
 ******************************************************************************
 Configuration.h - Hardware settings:
 ******************************************************************************
 
-#define ESP_LED                    Displays the function using the LED on the ESP. It flashes once a second.
+#define ESP_LED                     Displays the function using the LED on the ESP. It flashes once a second.
 
-#define ONOFF_BUTTON               Use a hardware on/off-button.
-#define MODE_BUTTON                Use a hardware mode-button.
-#define TIME_BUTTON                Use a hardware time-button. Debug to serial will not work if defined.
+#define ONOFF_BUTTON                Use a hardware on/off-button.
+#define MODE_BUTTON                 Use a hardware mode-button.
+#define TIME_BUTTON                 Use a hardware time-button. Debug to serial will not work if defined.
 
-#define SENSOR_DHT22               Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
-#define DHT_TEMPERATURE_OFFSET     Sets how many degrees the measured room temperature (+ or -) should be corrected.
-#define DHT_HUMIDITY_OFFSET        Sets how many degrees the measured room humidity (+ or -) should be corrected.
+#define SENSOR_DHT22                Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
+#define DHT_TEMPERATURE_OFFSET      Sets how many degrees the measured room temperature (+ or -) should be corrected.
+#define DHT_HUMIDITY_OFFSET         Sets how many degrees the measured room humidity (+ or -) should be corrected.
 
-#define RTC_BACKUP                 Use an RTC as backup and room temperature.
-#define RTC_TEMPERATURE_OFFSET     Sets how many degrees the measured room temperature (+ or -) should be corrected.
+#define RTC_BACKUP                  Use an RTC as backup and room temperature.
+#define RTC_TEMPERATURE_OFFSET      Sets how many degrees the measured room temperature (+ or -) should be corrected.
 
-#define LDR                        Use an LDR for adaptive brightness control (ABC).
-#define LDR_IS_INVERSE             Combined with #define LDR inverses the value of the LDR.
-#define LDR_HYSTERESIS             Brightness control from a deviation in the range from 0 to 1023. Default: 40.
-                                   If your display is flickering increase this value.
-#define MIN_BRIGHTNESS             Minimum brightness of LEDs ranging from 0 to 255. Default: 20.
-#define MAX_BRIGHTNESS             Maximum brightness of LEDs ranging from 0 to 255. Default 255.
-                                   Your powersupply has to support this brightness.
-#define BRIGHTNESS_SELFTEST        Brightness of the LEDs while in testmode to not overload the powersupply.
+#define LDR                         Use an LDR for adaptive brightness control (ABC).
+#define LDR_IS_INVERSE              Combined with #define LDR inverses the value of the LDR.
+#define LDR_HYSTERESIS              Brightness control from a deviation in the range from 0 to 1023. Default: 40.
+                                    If your display is flickering increase this value.
+#define MIN_BRIGHTNESS              Minimum brightness of LEDs ranging from 0 to 255. Default: 20.
+#define MAX_BRIGHTNESS              Maximum brightness of LEDs ranging from 0 to 255. Default 255.
+                                    Your powersupply has to support this brightness.
+#define BRIGHTNESS_SELFTEST         Brightness of the LEDs while in testmode to not overload the powersupply.
 
-#define BUZZER                     Use a buzzer to make noise for alarmtime and timer.
-                                   If not defined all alarmfunctions are disabled.
-#define BUZZTIME_ALARM_1           Maximum time in seconds for alarm 1 to be active when not turned off manually.
-#define BUZZTIME_ALARM_2           Maximum time in seconds for alarm 2 to be active when not turned off manually.
-#define BUZZTIME_TIMER             Maximum time in seconds for the timer alarm to be active when not turned off manually.
+#define BUZZER                      Use a buzzer to make noise for alarmtime and timer.
+                                    If not defined all alarmfunctions are disabled.
+#define BUZZTIME_ALARM_1            Maximum time in seconds for alarm 1 to be active when not turned off manually.
+#define BUZZTIME_ALARM_2            Maximum time in seconds for alarm 2 to be active when not turned off manually.
+#define BUZZTIME_TIMER              Maximum time in seconds for the timer alarm to be active when not turned off manually.
 
-#define IR_REMOTE                  Use an IR remote control.
-#define IR_LETTER_OFF              Turns off the LED behind the IR sensor permanently. This improves IR reception.
-#define IR_CODE_*                  Any remote control can be used. 6 keys are supported.
-                                   Press a button on the remote control in front of the clock.
-                                   Then write the code displayed in the serial console to the file "Configuration.h".
-                                   If you see more than one try the code which is changing from button to button.
-                                   DEBUG has to be defined to show you the code.
+#define IR_REMOTE                   Use an IR remote control.
+#define IR_LETTER_OFF               Turns off the LED behind the IR sensor permanently. This improves IR reception.
+#define IR_CODE_*                   Any remote control can be used. 6 keys are supported.
+                                    Press a button on the remote control in front of the clock.
+                                    Then write the code displayed in the serial console to the file "Configuration.h".
+                                    If you see more than one try the code which is changing from button to button.
+                                    DEBUG has to be defined to show you the code.
 
-#define NEOPIXEL_TYPE              Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW and RGBW.
+#define NEOPIXEL_TYPE               Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW and RGBW.
 
-#define LED_LAYOUT_HORIZONTAL_1    Horizontal and corner LEDs at the end of the strip. (As seen from the front.)
+#define LED_LAYOUT_HORIZONTAL_1     Horizontal and corner LEDs at the end of the strip. (As seen from the front.)
 
 111                    114                    112
    000 001 002 003 004 005 006 007 008 009 010
@@ -318,88 +320,88 @@ Configuration.h - Hardware settings:
 Configuration.h - Misc:
 ******************************************************************************
 
-#define DEBUG                      Show debug infos in the serial console
-#define DEBUG_WEB                  Show debug infos on the web page
-#define DEBUG_MATRIX               Renders the output of the matrix for the German front in the serial console
-#define DEBUG_FPS                  Show number of loops per second in the serial console
+#define DEBUG                       Show debug infos in the serial console
+#define DEBUG_WEB                   Show debug infos on the web page
+#define DEBUG_MATRIX                Renders the output of the matrix for the German front in the serial console
+#define DEBUG_FPS                   Show number of loops per second in the serial console
 
-#define SYSLOGSERVER               Turn logging to a syslogserver on/off
-#define SYSLOGSERVER_SERVER        Address of the syslogserver
-#define SYSLOGSERVER_PORT          Port of the syslogserver
+#define SYSLOGSERVER                Turn logging to a syslogserver on/off
+#define SYSLOGSERVER_SERVER         Address of the syslogserver
+#define SYSLOGSERVER_PORT           Port of the syslogserver
 
-#define UPDATE_INFO_*              The update info periodically anonymously checks if there is a firmwareupdate
-                                   available. No user data is send to the host. Comment if you do not want this info
-#define UPDATE_INFOSERVER          Address of the updateinfo server
-#define UPDATE_INFOFILE            Path and name of the updateinfo file
+#define UPDATE_INFO_*               The update info periodically anonymously checks if there is a firmwareupdate
+                                    available. No user data is send to the host. Comment if you do not want this info
+#define UPDATE_INFOSERVER           Address of the updateinfo server
+#define UPDATE_INFOFILE             Path and name of the updateinfo file
 
-#define SERIAL_SPEED               Serial port speed for the console
+#define SERIAL_SPEED                Serial port speed for the console
 
 ******************************************************************************
 Events.h
 ******************************************************************************
 
-event_t events[]                   Display a textfeed on a particular day of the year.
-                                   The format of an entry in the array is:
-                                   { month, day, "Text to display.", year, color },
-                                   The last entry has no comma at the end.
-                                   Year will be used to calculate an age. "present year" - year = age.
-                                   '0' will not show an age.
-                                   There can only be one event a day.
-                                   The possible colors are:
-                                   WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
-                                   GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
-                                   BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
-                                   Do not change the first entry.
+event_t events[]                    Display a textfeed on a particular day of the year.
+                                    The format of an entry in the array is:
+                                    { month, day, "Text to display.", year, color },
+                                    The last entry has no comma at the end.
+                                    Year will be used to calculate an age. "present year" - year = age.
+                                    '0' will not show an age.
+                                    There can only be one event a day.
+                                    The possible colors are:
+                                    WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
+                                    GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
+                                    BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
+                                    Do not change the first entry.
 
 ******************************************************************************
 Web-API:
 ******************************************************************************
 
 http://your_clocks_ip/commitSettings?
-a1=0                               Alarm 1 on [1] or off [0]
-a1t=hh:mm                          Alarm 1 hour [hh] and minute [mm]
-a1w1=2                             Set Sunday
-a1w2=4                             Set Monday
-a1w3=8                             Set Tuesday
-a1w4=16                            Set Wednesday
-a1w5=32                            Set Thursday
-a1w6=64                            Set Friday
-a1w7=128                           Set Saturday
-a2=0                               Alarm 2 on [1] or off [0]
-a2t=hh:mm                          Alarm 2 hour [hh] and minute [mm]
-a2w1=2                             Set Sunday
-a2w2=4                             Set Monday
-a2w3=8                             Set Tuesday
-a2w4=16                            Set Wednesday
-a2w5=32                            Set Thursday
-a2w6=64                            Set Friday
-a2w7=128                           Set Saturday
-hb=0                               Hourly beep on [1] or off [0]
-ti=0                               Timer in minutes
-mc=0                               Modechange on [1] or off [0]
-ab=1                               ABC on [1] or off [0]
-br=50                              Brightness in percent
-co=14                              Number of the LEDs color. See Colors.h
-cc=0                               Number of colorchange. See Colors.h
-tr=1                               Number of transition. See Modes.h
-to=15                              Timeout in seconds
-no=hh:mm                           Night off hour [hh] and minute [mm]
-do=hh:mm                           Day on hour [hh] and minute [mm]
-ii=1                               "It is" on [1] or off [0]
-st=YYYY-MM-DDThh:mm                Set time and date
+a1=0                                Alarm 1 on [1] or off [0]
+a1t=hh:mm                           Alarm 1 hour [hh] and minute [mm]
+a1w1=2                              Set Sunday
+a1w2=4                              Set Monday
+a1w3=8                              Set Tuesday
+a1w4=16                             Set Wednesday
+a1w5=32                             Set Thursday
+a1w6=64                             Set Friday
+a1w7=128                            Set Saturday
+a2=0                                Alarm 2 on [1] or off [0]
+a2t=hh:mm                           Alarm 2 hour [hh] and minute [mm]
+a2w1=2                              Set Sunday
+a2w2=4                              Set Monday
+a2w3=8                              Set Tuesday
+a2w4=16                             Set Wednesday
+a2w5=32                             Set Thursday
+a2w6=64                             Set Friday
+a2w7=128                            Set Saturday
+hb=0                                Hourly beep on [1] or off [0]
+ti=0                                Timer in minutes
+mc=0                                Modechange on [1] or off [0]
+ab=1                                ABC on [1] or off [0]
+br=50                               Brightness in percent
+co=14                               Number of the LEDs color. See Colors.h
+cc=0                                Number of colorchange. See Colors.h
+tr=1                                Number of transition. See Modes.h
+to=15                               Timeout in seconds
+no=hh:mm                            Night off hour [hh] and minute [mm]
+do=hh:mm                            Day on hour [hh] and minute [mm]
+ii=1                                "It is" on [1] or off [0]
+st=YYYY-MM-DDThh:mm                 Set time and date
 
 http://your_clocks_ip/setEvent?
-day=dd                             Set day of event
-month=mm                           Set month of event
-color=0                            Color of the eventtext, 0 to 24 (optional)
-text=text                          Set text of event, max. 40 characters
-                                   e.g.: http://your_clocks_ip/setEvent?day=27&month=10&color=5&text=This%20is%20an%20event.
+day=dd                              Set day of event
+month=mm                            Set month of event
+color=0                             Color of the eventtext, 0 to 24 (optional)
+text=text                           Set text of event, max. 40 characters
+                                    e.g.: http://your_clocks_ip/setEvent?day=27&month=10&color=5&text=This%20is%20an%20event.
 
 http://your_clocks_ip/showText?
-buzzer=1                           Number of times the buzzer will beep before showing the text (optional)
-color=0                            Color of the textfeed, 0 to 24 (optional)
-text=text                          Set text of feed, max. 80 characters
-                                   e.g.: http://your_clocks_ip/showText?buzzer=2&color=1&text=Instant%20text%20on%20Qlockwork!
+buzzer=1                            Number of times the buzzer will beep before showing the text (optional)
+color=0                             Color of the textfeed, 0 to 24 (optional)
+text=text                           Set text of feed, max. 80 characters
+                                    e.g.: http://your_clocks_ip/showText?buzzer=2&color=1&text=Instant%20text%20on%20Qlockwork!
 
 ******************************************************************************
 Changelog:
