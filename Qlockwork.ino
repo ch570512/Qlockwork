@@ -426,8 +426,6 @@ void setup()
 	lastMinute = minute();
 	lastSecond = second();
 
-	getUpdateInfo();
-
 #ifdef FRONTCOVER_BINARY
 	settings.setTransition(TRANSITION_NORMAL);
 #endif
