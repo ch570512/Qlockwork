@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20200101
+#define FIRMWARE_VERSION 20200103
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -162,7 +162,7 @@ uint32_t showEventTimer = EVENT_TIME;
 
 // Misc
 uint8_t testColumn = 0;
-String updateInfo = "";
+int updateInfo = 0;
 IPAddress myIP = { 0,0,0,0 };
 uint32_t lastButtonPress = 0;
 boolean transitionInProgress = false;
@@ -425,6 +425,8 @@ void setup()
 	lastHour = hour();
 	lastMinute = minute();
 	lastSecond = second();
+
+	getUpdateInfo();
 
 #ifdef FRONTCOVER_BINARY
 	settings.setTransition(TRANSITION_NORMAL);
@@ -1447,13 +1449,13 @@ void getUpdateInfo()
 	httpClient.get(UPDATE_INFOFILE);
 	if (httpClient.responseStatusCode() == 200)
 	{
-		updateInfo = httpClient.responseBody();
-		updateInfo.trim();
-		JSONVar updateArray = JSON.parse(updateInfo);
-		updateInfo = updateArray["channel"]["unstable"]["version"];
+		String response = httpClient.responseBody();
+		response.trim();
+		JSONVar updateArray = JSON.parse(response);
+		updateInfo = (int)updateArray["channel"]["unstable"]["version"];
 	}
 #ifdef DEBUG
-	updateInfo > String(FIRMWARE_VERSION) ? Serial.println("Firmwareupdate available! (" + updateInfo + ")") : Serial.println("Firmware is uptodate.");
+	updateInfo > int(FIRMWARE_VERSION) ? Serial.println("Firmwareupdate available! (" + String(updateInfo) + ")") : Serial.println("Firmware is uptodate.");
 #endif
 }
 #endif
@@ -1712,7 +1714,7 @@ void handleRoot()
 		"<br><br><a href=\"http://tmw-it.ch/qlockwork/\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
 		"<br>Firmware: " + String(FIRMWARE_VERSION);
 #ifdef UPDATE_INFOSERVER
-	if (updateInfo > String(FIRMWARE_VERSION)) message += "<br><span style=\"color:red;\">Firmwareupdate available! (" + updateInfo + ")</span>";
+	if (updateInfo > int(FIRMWARE_VERSION)) message += "<br><span style=\"color:red;\">Firmwareupdate available! (" + String(updateInfo) + ")</span>";
 #endif
 #ifdef DEBUG_WEB
 	time_t tempEspTime = now();
