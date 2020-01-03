@@ -60,7 +60,7 @@ Support for various horizontal and vertical LED layouts. 3 layouts included.
 Webpage to control and configure the clock via WiFi.
 Adaptive brightness control when using an LDR.
 3 transitions for timechange.
-Indoor temperature and humidity from DHT sensor.
+Indoor temperature from RTC or temperature and humidity from DHT sensor.
 Outdoor temperature and humidity from OpenWeather. You need an APIKey from OpenWeather to use this feature.
 Visualisation of moonphase.
 Textfeed for events and infos, local and over the web.
@@ -82,11 +82,11 @@ Seconds
 Weekday
 Date
 Moonphase
-Room temperature (DHT22)
+Room temperature (RTX or DHT22)
 Room humidity (DHT22)
 Outdoor temperature (OpenWeather)
 Outdoor humidity (OpenWeather)
-Timer (Buzzer)
+Timer
 LED-test
 Red
 Green
