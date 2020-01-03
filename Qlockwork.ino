@@ -747,7 +747,9 @@ void loop()
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 					setMode(MODE_TEMP);
 #else
+#ifdef APIKEY
 					if (WiFi.isConnected()) setMode(MODE_EXT_TEMP);
+#endif
 #endif
 					autoMode = 0;
 					break;
