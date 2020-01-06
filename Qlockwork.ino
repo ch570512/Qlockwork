@@ -1,6 +1,6 @@
 // ******************************************************************************
 // QLOCKWORK
-// An advanced firmware for a DIY "word-clock".
+// An advanced firmware for a DIY "word-clock"
 //
 // @mc ESP8266
 // @created 12.03.2017
@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20200103
+#define FIRMWARE_VERSION 20200106
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -139,13 +139,15 @@ float roomTemperature = 0;
 float roomHumidity = 0;
 uint8_t errorCounterDHT = 0;
 
-// LDR
-uint8_t abcBrightness = map(settings.mySettings.brightness, 10, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-uint8_t brightness = abcBrightness;
+// Brightness and LDR
+uint8_t brightness = map(settings.mySettings.brightness, 10, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+uint8_t abcBrightness = brightness;
 uint16_t ldrValue = 0;
+#ifdef LDR
 uint16_t lastLdrValue = 0;
-uint16_t minLdrValue = 512;
+uint16_t minLdrValue = 511; // The ESP will crash if minLdrValue and maxLdrValue are equal due to an error in map()
 uint16_t maxLdrValue = 512;
+#endif
 
 // Alarm
 #ifdef BUZZER
@@ -205,23 +207,23 @@ void setup()
 	digitalWrite(PIN_LED, HIGH);
 #endif
 
-#ifdef MODE_BUTTON
-	Serial.println("Setting up Mode-Button.");
-	pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_MODE_BUTTON, buttonModeInterrupt, FALLING);
-#endif
-
-#ifdef ONOFF_BUTTON
-	Serial.println("Setting up Back-Button.");
-	pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_ONOFF_BUTTON, buttonOnOffInterrupt, FALLING);
-#endif
-
-#ifdef TIME_BUTTON
-	Serial.println("Setting up Time-Button.");
-	pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_TIME_BUTTON, buttonTimeInterrupt, FALLING);
-#endif
+//#ifdef MODE_BUTTON
+//	Serial.println("Setting up Mode-Button.");
+//	pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
+//	attachInterrupt(PIN_MODE_BUTTON, buttonModeInterrupt, FALLING);
+//#endif
+//
+//#ifdef ONOFF_BUTTON
+//	Serial.println("Setting up Back-Button.");
+//	pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
+//	attachInterrupt(PIN_ONOFF_BUTTON, buttonOnOffInterrupt, FALLING);
+//#endif
+//
+//#ifdef TIME_BUTTON
+//	Serial.println("Setting up Time-Button.");
+//	pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
+//	attachInterrupt(PIN_TIME_BUTTON, buttonTimeInterrupt, FALLING);
+//#endif
 
 #ifdef BUZZER
 	Serial.println("Setting up Buzzer.");
@@ -507,8 +509,8 @@ void loop()
 
 		if (hour() == randomHour)
 		{
-#ifdef UPDATE_INFOSERVER
 			// Get updateinfo
+#ifdef UPDATE_INFOSERVER
 			if (WiFi.isConnected()) getUpdateInfo();
 #endif
 		}
@@ -687,9 +689,9 @@ void loop()
 		}
 #endif
 
+		// Set brightness from LDR
 #ifdef LDR
-		// Get rated brightness from LDR
-		if (settings.mySettings.useAbc) getBrightnessFromLdr();
+		if (settings.mySettings.useAbc) setBrightnessFromLdr();
 #endif
 
 #ifdef FRONTCOVER_BINARY
@@ -699,13 +701,13 @@ void loop()
 		if ((mode != MODE_TIME) && (mode != MODE_BLANK)) screenBufferNeedsUpdate = true;
 #endif
 
-#ifdef ESP_LED
 		// Flash ESP LED
+#ifdef ESP_LED
 		digitalWrite(PIN_LED, !digitalRead(PIN_LED));
 #endif
 
-#ifdef BUZZER
 		// Countdown timeralarm by one minute in the second it was activated
+#ifdef BUZZER
 		if (alarmTimer && alarmTimerSet && (alarmTimerSecond == second()))
 		{
 			alarmTimer--;
@@ -713,7 +715,6 @@ void loop()
 			if (alarmTimer) Serial.printf("Timeralarm in %u min.\r\n", alarmTimer);
 #endif
 		}
-
 		// Switch on buzzer for timer
 		if (!alarmTimer && alarmTimerSet)
 		{
@@ -757,8 +758,8 @@ void loop()
 			}
 		}
 
-#ifdef EVENT_TIME
 		// Show event in feed
+#ifdef EVENT_TIME
 		if (mode == MODE_TIME)
 		{
 			showEventTimer--;
@@ -816,7 +817,7 @@ void loop()
 			break;
 		}
 		irrecv.resume();
-}
+	}
 #endif
 
 	// Render a new screenbuffer if needed
@@ -1121,13 +1122,13 @@ void loop()
 			break;
 		}
 
-#if defined(IR_LETTER_OFF)
 		// turn off LED behind IR-sensor
+#ifdef IR_LETTER_OFF
 		renderer.unsetPixelInScreenBuffer(IR_LETTER_X, IR_LETTER_Y - 1, matrix);
 #endif
 
-#ifdef DEBUG_MATRIX
 		//debugScreenBuffer(matrixOld);
+#ifdef DEBUG_MATRIX
 		debugScreenBuffer(matrix);
 #endif
 
@@ -1224,8 +1225,8 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
 		if (bitRead(screenBuffer[y], 4)) ledDriver.setPixel(110 + y, color, brightness);
 	}
 
-#ifdef BUZZER
 	// Alarm LED
+#ifdef BUZZER
 	if (bitRead(screenBuffer[4], 4))
 	{
 #ifdef ALARM_LED_COLOR
@@ -1272,8 +1273,8 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 		// Corner LEDs
 		for (uint8_t y = 0; y <= 3; y++) ledDriver.setPixel(110 + y, color, brightnessBuffer[y][11]);
 
-#ifdef BUZZER
 		// Alarm LED
+#ifdef BUZZER
 #ifdef ALARM_LED_COLOR
 #ifdef ABUSE_CORNER_LED_FOR_ALARM
 		if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet) ledDriver.setPixel(111, ALARM_LED_COLOR, brightnessBuffer[4][11]);
@@ -1315,8 +1316,8 @@ void buttonTimePressed()
 	Serial.println("Time pressed.");
 #endif
 
-#ifdef BUZZER
 	// Switch off alarm
+#ifdef BUZZER
 	if (alarmOn)
 	{
 #ifdef DEBUG
@@ -1328,7 +1329,6 @@ void buttonTimePressed()
 #endif
 
 	modeTimeout = 0;
-	//renderer.clearScreenBuffer(matrix);
 	setMode(MODE_TIME);
 }
 
@@ -1342,8 +1342,8 @@ void buttonModePressed()
 	Serial.println("Mode pressed.");
 #endif
 
-#ifdef BUZZER
 	// Switch off alarm
+#ifdef BUZZER
 	if (alarmOn)
 	{
 #ifdef DEBUG
@@ -1407,12 +1407,11 @@ void setMode(Mode newMode)
 	}
 }
 
+//******************************************************************************
+// get brightness from LDR
+//******************************************************************************
 #ifdef LDR
-/******************************************************************************
-  Get brightness from LDR
-******************************************************************************/
-
-void getBrightnessFromLdr()
+void setBrightnessFromLdr()
 {
 #ifdef LDR_IS_INVERSE
 	ldrValue = 1023 - analogRead(PIN_LDR);
@@ -1421,14 +1420,11 @@ void getBrightnessFromLdr()
 #endif
 	if (ldrValue < minLdrValue) minLdrValue = ldrValue;
 	if (ldrValue > maxLdrValue) maxLdrValue = ldrValue;
-	if (settings.mySettings.useAbc && ((ldrValue >= (lastLdrValue + 40)) || (ldrValue <= (lastLdrValue - 40))))
+	if ((ldrValue >= (lastLdrValue + 40)) || (ldrValue <= (lastLdrValue - 40))) // Hysteresis is 40
 	{
 		lastLdrValue = ldrValue;
-		if (minLdrValue != maxLdrValue) // The ESP will crash if minLdrValue and maxLdrValue are equal due to an error in map().
-		{
-			brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, abcBrightness);
-			screenBufferNeedsUpdate = true;
-		}
+		brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, abcBrightness);
+		screenBufferNeedsUpdate = true;
 #ifdef DEBUG
 		Serial.printf("Brightness: %u (min: %u, max: %u)\r\n", brightness, MIN_BRIGHTNESS, abcBrightness);
 		Serial.printf("LDR: %u (min: %u, max: %u)\r\n", ldrValue, minLdrValue, maxLdrValue);
@@ -1437,11 +1433,10 @@ void getBrightnessFromLdr()
 }
 #endif
 
-#ifdef UPDATE_INFOSERVER
 //******************************************************************************
 // get update info from server
 //******************************************************************************
-
+#ifdef UPDATE_INFOSERVER
 void getUpdateInfo()
 {
 	WiFiClient wifiClient;
@@ -1460,11 +1455,10 @@ void getUpdateInfo()
 }
 #endif
 
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 //******************************************************************************
 // Get room conditions
 //******************************************************************************
-
+#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 void getRoomConditions()
 {
 #if defined(RTC_BACKUP) && !defined(SENSOR_DHT22)
@@ -1492,7 +1486,7 @@ void getRoomConditions()
 #ifdef DEBUG
 		Serial.printf("Error (DHT): %u\r\n", errorCounterDHT);
 #endif
-}
+	}
 #endif
 }
 #endif
@@ -1501,38 +1495,38 @@ void getRoomConditions()
 // Misc
 //******************************************************************************
 
-#ifdef MODE_BUTTON
-void buttonModeInterrupt()
-{
-	if (millis() > lastButtonPress + 250)
-	{
-		lastButtonPress = millis();
-		buttonModePressed();
-	}
-}
-#endif
-
-#ifdef ONOFF_BUTTON
-void buttonOnOffInterrupt()
-{
-	if (millis() > lastButtonPress + 250)
-	{
-		lastButtonPress = millis();
-		buttonOnOffPressed();
-	}
-}
-#endif
-
-#ifdef TIME_BUTTON
-void buttonTimeInterrupt()
-{
-	if (millis() > lastButtonPress + 250)
-	{
-		lastButtonPress = millis();
-		buttonTimePressed();
-	}
-}
-#endif
+//#ifdef MODE_BUTTON
+//void buttonModeInterrupt()
+//{
+//	if (millis() > lastButtonPress + 250)
+//	{
+//		lastButtonPress = millis();
+//		buttonModePressed();
+//	}
+//}
+//#endif
+//
+//#ifdef ONOFF_BUTTON
+//void buttonOnOffInterrupt()
+//{
+//	if (millis() > lastButtonPress + 250)
+//	{
+//		lastButtonPress = millis();
+//		buttonOnOffPressed();
+//	}
+//}
+//#endif
+//
+//#ifdef TIME_BUTTON
+//void buttonTimeInterrupt()
+//{
+//	if (millis() > lastButtonPress + 250)
+//	{
+//		lastButtonPress = millis();
+//		buttonTimePressed();
+//	}
+//}
+//#endif
 
 // Switch off LEDs
 void setLedsOff()
@@ -1570,10 +1564,10 @@ int getMoonphase(int y, int m, int d)
 	e = 30.6 * m;
 	jd = c + e + d - 694039.09; // jd is total days elapsed
 	jd /= 29.53;                // divide by the moon cycle (29.53 days)
-	b = jd;		                // int(jd) -> b, take integer part of jd
-	jd -= b;		            // subtract integer part to leave fractional part of original jd
-	b = jd * 8 + 0.5;	        // scale fraction from 0-8 and round by adding 0.5
-	b = b & 7;		            // 0 and 8 are the same so turn 8 into 0
+	b = jd;                     // int(jd) -> b, take integer part of jd
+	jd -= b;                    // subtract integer part to leave fractional part of original jd
+	b = jd * 8 + 0.5;           // scale fraction from 0-8 and round by adding 0.5
+	b = b & 7;                  // 0 and 8 are the same so turn 8 into 0
 	return b;
 }
 #endif
@@ -1638,7 +1632,7 @@ void setupWebServer()
 	webServer.on("/handleButtonOnOff", []() { buttonOnOffPressed(); callRoot(); });
 	webServer.on("/handleButtonSettings", handleButtonSettings);
 	webServer.on("/handleButtonMode", []() { buttonModePressed(); callRoot(); });
-	webServer.on("/handleButtonTime", []() {	buttonTimePressed(); callRoot(); });
+	webServer.on("/handleButtonTime", []() {    buttonTimePressed(); callRoot(); });
 	webServer.on("/commitSettings", handleCommitSettings);
 	webServer.on("/reset", handleReset);
 	webServer.on("/setEvent", handleSetEvent);
@@ -1706,9 +1700,8 @@ void handleRoot()
 #ifdef APIKEY
 	message += "<br><br><i class = \"fa fa-tree\" style=\"font-size:20px;\"></i>"
 		"<br><i class = \"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.temperature) + "&deg;C / " + String(outdoorWeather.temperature * 1.8 + 32.0) + "&deg;F"
-		"<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "%RH"
-		"<br><span class = \"";
-	message += "\" style=\"font-size:20px;\"></span> " + outdoorWeather.description;
+		"<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "%RH";
+	message += "<br>" + outdoorWeather.description;
 #endif
 	message += "<span style=\"font-size:12px;\">"
 		"<br><br><a href=\"http://tmw-it.ch/qlockwork/\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
@@ -1773,11 +1766,11 @@ void handleRoot()
 #else
 	message += "<s>ESP_LED</s> ";
 #endif
-#if defined(ONOFF_BUTTON) || defined(MODE_BUTTON) || defined(TIME_BUTTON)
-	message += "BUTTONS ";
-#else
-	message += "<s>BUTTONS</s> ";
-#endif
+//#if defined(ONOFF_BUTTON) || defined(MODE_BUTTON) || defined(TIME_BUTTON)
+//	message += "BUTTONS ";
+//#else
+//	message += "<s>BUTTONS</s> ";
+//#endif
 #endif
 	message += "</span></body></html>";
 	webServer.send(200, "text/html", message);
@@ -2208,7 +2201,7 @@ void handleCommitSettings()
 	webServer.arg("mc") == "0" ? settings.mySettings.modeChange = false : settings.mySettings.modeChange = true;
 #endif
 	// ------------------------------------------------------------------------
-#if defined(LDR)
+#ifdef LDR
 	if (webServer.arg("ab") == "0")
 	{
 		settings.mySettings.useAbc = false;

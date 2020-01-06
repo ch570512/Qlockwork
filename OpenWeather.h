@@ -10,15 +10,15 @@
 class OpenWeather
 {
 public:
-	OpenWeather();
-	~OpenWeather();
+    OpenWeather();
+    ~OpenWeather();
 
-	String description;
-	double temperature;
-	uint8_t humidity;
-	uint16_t pressure;
+    String description;
+    double temperature;
+    uint8_t humidity;
+    uint16_t pressure;
 
-	uint8_t getOutdoorConditions(String location, String apiKey);
+    uint8_t getOutdoorConditions(String location, String apiKey);
 
 private:
 

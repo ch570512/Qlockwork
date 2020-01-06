@@ -11,10 +11,10 @@
 class Ntp
 {
 public:
-	Ntp();
-	~Ntp();
+    Ntp();
+    ~Ntp();
 
-	time_t getTime(char* server);
+    time_t getTime(char* server);
 
 private:
 
