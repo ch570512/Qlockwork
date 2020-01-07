@@ -235,6 +235,10 @@ Configuration.h - Hardware settings:
 
 #define ESP_LED                     Displays the function using the LED on the ESP. It flashes once a second.
 
+#define ONOFF_BUTTON               Use a hardware on/off-button.
+#define MODE_BUTTON                Use a hardware mode-button.
+#define TIME_BUTTON                Use a hardware time-button. Debug to serial will not work if defined.
+
 #define SENSOR_DHT22                Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
 #define DHT_TEMPERATURE_OFFSET      Sets how many degrees the measured room temperature (+ or -) should be corrected.
 #define DHT_HUMIDITY_OFFSET         Sets how many degrees the measured room humidity (+ or -) should be corrected.
@@ -402,6 +406,9 @@ text=text                           Set text of feed, max. 80 characters
 ******************************************************************************
 Changelog:
 ******************************************************************************
+
+20200107:
+Bugfixes.
 
 20200101:
 Outdoor Weather from OpenWeatherMap.
