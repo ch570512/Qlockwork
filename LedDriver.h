@@ -2,7 +2,8 @@
 // LedDriver.h
 //******************************************************************************
 
-#pragma once
+#ifndef LEDDRIVER_H
+#define LEDDRIVER_H
 
 #include <Adafruit_NeoPixel.h>
 #include "Configuration.h"
@@ -23,3 +24,5 @@ private:
     Adafruit_NeoPixel *strip;
 
 };
+
+#endif

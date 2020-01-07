@@ -2,7 +2,8 @@
 Numbers.h
 ******************************************************************************/
 
-#pragma once
+#ifndef NUMBERS_H
+#define NUMBERS_H
 
 const char numbers[][5] =
 {
@@ -181,3 +182,5 @@ const char numbersBig[][7] =
 		0b00001100
 	}
 };
+
+#endif

@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20200106
+#define FIRMWARE_VERSION 20200107
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -207,23 +207,23 @@ void setup()
 	digitalWrite(PIN_LED, HIGH);
 #endif
 
-//#ifdef MODE_BUTTON
-//	Serial.println("Setting up Mode-Button.");
-//	pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
-//	attachInterrupt(PIN_MODE_BUTTON, buttonModeInterrupt, FALLING);
-//#endif
-//
-//#ifdef ONOFF_BUTTON
-//	Serial.println("Setting up Back-Button.");
-//	pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
-//	attachInterrupt(PIN_ONOFF_BUTTON, buttonOnOffInterrupt, FALLING);
-//#endif
-//
-//#ifdef TIME_BUTTON
-//	Serial.println("Setting up Time-Button.");
-//	pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
-//	attachInterrupt(PIN_TIME_BUTTON, buttonTimeInterrupt, FALLING);
-//#endif
+#ifdef MODE_BUTTON
+	Serial.println("Setting up Mode-Button.");
+	pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
+	attachInterrupt(PIN_MODE_BUTTON, buttonModeInterrupt, FALLING);
+#endif
+
+#ifdef ONOFF_BUTTON
+	Serial.println("Setting up Back-Button.");
+	pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
+	attachInterrupt(PIN_ONOFF_BUTTON, buttonOnOffInterrupt, FALLING);
+#endif
+
+#ifdef TIME_BUTTON
+	Serial.println("Setting up Time-Button.");
+	pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
+	attachInterrupt(PIN_TIME_BUTTON, buttonTimeInterrupt, FALLING);
+#endif
 
 #ifdef BUZZER
 	Serial.println("Setting up Buzzer.");
@@ -328,9 +328,11 @@ void setup()
 
 		// Get weather from OpenWeather
 #ifdef APIKEY
+#ifdef DEBUG
+		Serial.println("Getting outdoor weather:");
+#endif
 		!outdoorWeather.getOutdoorConditions(LOCATION, APIKEY) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-		Serial.println("Outdoor weather:");
 		Serial.println(outdoorWeather.description);
 		Serial.println(outdoorWeather.temperature);
 		Serial.println(outdoorWeather.humidity);
@@ -1495,38 +1497,38 @@ void getRoomConditions()
 // Misc
 //******************************************************************************
 
-//#ifdef MODE_BUTTON
-//void buttonModeInterrupt()
-//{
-//	if (millis() > lastButtonPress + 250)
-//	{
-//		lastButtonPress = millis();
-//		buttonModePressed();
-//	}
-//}
-//#endif
-//
-//#ifdef ONOFF_BUTTON
-//void buttonOnOffInterrupt()
-//{
-//	if (millis() > lastButtonPress + 250)
-//	{
-//		lastButtonPress = millis();
-//		buttonOnOffPressed();
-//	}
-//}
-//#endif
-//
-//#ifdef TIME_BUTTON
-//void buttonTimeInterrupt()
-//{
-//	if (millis() > lastButtonPress + 250)
-//	{
-//		lastButtonPress = millis();
-//		buttonTimePressed();
-//	}
-//}
-//#endif
+#ifdef MODE_BUTTON
+void buttonModeInterrupt()
+{
+	if (millis() > lastButtonPress + 250)
+	{
+		lastButtonPress = millis();
+		buttonModePressed();
+	}
+}
+#endif
+
+#ifdef ONOFF_BUTTON
+void buttonOnOffInterrupt()
+{
+	if (millis() > lastButtonPress + 250)
+	{
+		lastButtonPress = millis();
+		buttonOnOffPressed();
+	}
+}
+#endif
+
+#ifdef TIME_BUTTON
+void buttonTimeInterrupt()
+{
+	if (millis() > lastButtonPress + 250)
+	{
+		lastButtonPress = millis();
+		buttonTimePressed();
+	}
+}
+#endif
 
 // Switch off LEDs
 void setLedsOff()
@@ -1766,11 +1768,11 @@ void handleRoot()
 #else
 	message += "<s>ESP_LED</s> ";
 #endif
-//#if defined(ONOFF_BUTTON) || defined(MODE_BUTTON) || defined(TIME_BUTTON)
-//	message += "BUTTONS ";
-//#else
-//	message += "<s>BUTTONS</s> ";
-//#endif
+#if defined(ONOFF_BUTTON) || defined(MODE_BUTTON) || defined(TIME_BUTTON)
+	message += "BUTTONS ";
+#else
+	message += "<s>BUTTONS</s> ";
+#endif
 #endif
 	message += "</span></body></html>";
 	webServer.send(200, "text/html", message);

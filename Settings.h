@@ -2,7 +2,8 @@
 // Settings.h
 //******************************************************************************
 
-#pragma once
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -49,3 +50,5 @@ private:
     void resetToDefault();
     void loadFromEEPROM();
 };
+
+#endif

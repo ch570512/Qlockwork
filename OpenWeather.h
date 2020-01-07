@@ -2,7 +2,8 @@
 // OpenWeather.h - Get weather data from OpenWeather
 //******************************************************************************
 
-#pragma once
+#ifndef OPENWEATHER_H
+#define OPENWEATHER_H
 
 #include <Arduino_JSON.h>
 #include <ESP8266WiFi.h>
@@ -23,3 +24,5 @@ public:
 private:
 
 };
+
+#endif

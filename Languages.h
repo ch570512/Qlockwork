@@ -2,7 +2,8 @@
 Languages.h
 ******************************************************************************/
 
-#pragma once
+#ifndef LANGUAGES_H
+#define LANGUAGES_H
 
 //enum eLanguage : uint8_t
 //{
@@ -127,4 +128,6 @@ const char sWeekday[][2] =
 	{ 'V', 'R' }, // 06
 	{ 'Z', 'A' }  // 07
 };
+#endif
+
 #endif

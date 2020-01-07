@@ -2,7 +2,8 @@
 Events.h
 ******************************************************************************/
 
-#pragma once
+#ifndef EVENTS_H
+#define EVENTS_H
 
 struct event_t
 {
@@ -21,3 +22,5 @@ event_t events[] =
 	{ 12, 24, "It's Christmas!", 0, RED },
 	{ 3, 12, "Qlockworks birthday!", 2017, MAGENTA }
 };
+
+#endif

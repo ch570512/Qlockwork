@@ -2,7 +2,8 @@
 Colors.h
 ******************************************************************************/
 
-#pragma once
+#ifndef COLORS_H
+#define COLORS_H
 
 enum eColorChange : uint8_t
 {
@@ -90,3 +91,5 @@ const color_s defaultColors[] =
 
 	{ 0xFF, 0x00, 0x7F }  // 24 PINK
 };
+
+#endif

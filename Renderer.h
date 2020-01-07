@@ -2,7 +2,8 @@
 Renderer.h
 ******************************************************************************/
 
-#pragma once
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #include <Arduino.h>
 #include "Configuration.h"
@@ -49,3 +50,5 @@ private:
 	void ES_hours(uint8_t hours, uint16_t matrix[]);
 #endif
 };
+
+#endif

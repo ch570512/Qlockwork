@@ -2,7 +2,8 @@
 // Ntp.h - Get UTC time from NTP
 //******************************************************************************
 
-#pragma once
+#ifndef NTP_H
+#define NTP_H
 
 #include <ESP8266WiFi.h>
 #include <TimeLib.h>
@@ -19,3 +20,5 @@ public:
 private:
 
 };
+
+#endif
