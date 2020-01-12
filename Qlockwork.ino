@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20200107
+#define FIRMWARE_VERSION 20200112
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -185,7 +185,7 @@ void setup()
 	Serial.println("*** QLOCKWORK ***");
 	Serial.println("Firmware: " + String(FIRMWARE_VERSION));
 
-#ifdef SELFTEST
+#ifdef POWERON_SELFTEST
 	renderer.setAllScreenBuffer(matrix);
 	Serial.println("Set all LEDs to red.");
 	writeScreenBuffer(matrix, RED, TEST_BRIGHTNESS);
@@ -1639,6 +1639,7 @@ void setupWebServer()
 	webServer.on("/reset", handleReset);
 	webServer.on("/setEvent", handleSetEvent);
 	webServer.on("/showText", handleShowText);
+	webServer.on("/control", handleControl);
 	webServer.begin();
 }
 
@@ -2301,4 +2302,10 @@ void handleShowText()
 #endif
 
 	setMode(MODE_FEED);
+}
+
+void handleControl()
+{
+	setMode((Mode)webServer.arg("mode").toInt());
+	webServer.send(200, "text/plain", "OK.");
 }

@@ -18,7 +18,6 @@
 #define SHOW_IP
 //#define WIFI_BEEPS
 
-//#define SELFTEST
 //#define NONE_TECHNICAL_ZERO
 #define AUTO_MODECHANGE_TIME 60
 #define FEED_SPEED 120
@@ -27,6 +26,7 @@
 //#define ABUSE_CORNER_LED_FOR_ALARM
 //#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
 
+//#define POWERON_SELFTEST
 #define SHOW_MODE_AMPM
 #define SHOW_MODE_SECONDS
 #define SHOW_MODE_WEEKDAY

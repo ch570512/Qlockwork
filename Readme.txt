@@ -145,7 +145,7 @@ Press "Settings" to configure the clock via web-site.
 Press "Mode" to jump to the next page.
 Press "Time" to always jump back to the time page.
 
-*** Pages: *******************************************************************
+*** Modes: *******************************************************************
 
 Time:                               The default mode of the clock. Shows the actual time. :)
 Display AM/PM:                      Indicates whether it is AM or PM.
@@ -216,7 +216,7 @@ Configuration.h - Software settings:
 #define ABUSE_CORNER_LED_FOR_ALARM  Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
                                     If no alarm or timer is set the LED is used as expected.
 #define DEDICATION                  Show a text on the clocks webpage.
-#define SELFTEST                    Test LEDs at startup. Colors are: white, red, green, blue. In this order.
+#define POWERON_SELFTEST            Test LEDs at startup. Colors are: white, red, green, blue. In this order.
 #define SHOW_MODE_AMPM
 #define SHOW_MODE_SECONDS
 #define SHOW_MODE_WEEKDAY
@@ -403,9 +403,17 @@ color=0                             Color of the textfeed, 0 to 24 (optional)
 text=text                           Set text of feed, max. 80 characters
                                     e.g.: http://your_clocks_ip/showText?buzzer=2&color=1&text=Instant%20text%20on%20Qlockwork!
 
+http://your_clocks_ip/control?
+mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), ...
+                                    mode=17 (off, if all other modes are enabled) -- see modes.h and count.
+                                    e.g.: http://your_clocks_ip/control?mode=6
+
 ******************************************************************************
 Changelog:
 ******************************************************************************
+
+20200112:
+WEB API for Clock On/Off.
 
 20200107:
 Bugfixes.
