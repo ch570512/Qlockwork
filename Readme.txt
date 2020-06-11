@@ -99,13 +99,13 @@ Needed libraries: (recommended versions in brackets)
 
 esp8266 by ESP8266 Community (2.4.2) <<-- THIS IS IMPORTANT!
 Arduino_JSON by Arduino (0.1.0)
-Adafruit NeoPixel by Adafruit (1.3.4)
-Adafruit Unified Sensor by Adafruit (1.1.1)
+Adafruit NeoPixel by Adafruit (1.4.0)
+Adafruit Unified Sensor by Adafruit (1.1.3)
 ArduinoHttpClient by Arduino (0.4.0)
 ArduinoOTA by Juraj Andressy (1.0.3)
-DHT sensor library by Adafruit (1.3.8)
-DS3232RTC by Jack Christensen (1.2.9)
-IRremoteESP8266 by Sebastien Warin (2.7.1)
+DHT sensor library by Adafruit (1.3.10)
+DS3232RTC by Jack Christensen (1.2.12)
+IRremoteESP8266 by Sebastien Warin (2.7.7)
 Time by Michael Margolis (1.6.0)
 
 Also includes the Timezone library from Jack Christensen.
@@ -114,7 +114,7 @@ Also includes the Timezone library from Jack Christensen.
 Compiler-Options: (recommended)
 ******************************************************************************
 
-Arduino IDE for Windows (1.8.10)
+Arduino IDE for Windows (1.8.12)
 Board: "LOLIN(WEMOS) D1 R2 & mini"
 Flash Size: "4M (3M SPIFFS)"
 Debug port: "Disabled"
@@ -173,7 +173,7 @@ Alarm 2:                            Enable (on) or disable (off) alarm 2.
                                     Time for alarm 2.
                                     Weekdays on which alarm 2 is active.
 Hourly beep:                        Short beep every full hour.
-Timer:                              Sets the minute timer. (0: disabled)
+Timer:                              Sets the minute timer. Set to zero to disable a running timer.
 Show temperature:                   Enable (on) or disable (off) showing the temperature in time view.
 ABC:                                Enable (on) or disable (off) adaptive brightness control.
                                     Brightness will adjust itself in the range of MIN_BRIGHTNESS and brightness.
@@ -412,6 +412,11 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
+2020xxxx:
+Turn off timer when it is running.
+Some localization in settings and weather.
+Fixed alarm running 4 times longer than configured.
+
 20200112:
 WEB API for Clock On/Off.
 
@@ -429,7 +434,7 @@ Some housekeeping.
 
 20190520:
 #define WIFI_BEEPS
-Fix rare flickering of fade transition.
+Fixed rare flickering of fade transition.
 
 20190204:
 Maior update of "Readme.txt"
