@@ -1417,6 +1417,8 @@ void setBrightnessFromLdr()
 {
 #ifdef LDR_IS_INVERSE
 	ldrValue = 1023 - analogRead(PIN_LDR);
+	if (ldrValue < 50) ldrValue=50;
+	if (ldrValue > 1023) ldrValue=50;
 #else
 	ldrValue = analogRead(PIN_LDR);
 #endif
