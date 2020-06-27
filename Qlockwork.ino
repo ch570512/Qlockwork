@@ -253,6 +253,7 @@ void setup()
 	writeScreenBuffer(matrix, WHITE, brightness);
 	WiFiManager wifiManager;
 	//wifiManager.resetSettings();
+	WiFi.hostname(HOSTNAME);
 	wifiManager.setTimeout(WIFI_SETUP_TIMEOUT);
 	wifiManager.autoConnect(HOSTNAME, WIFI_AP_PASS);
 	WiFi.setAutoReconnect(true);
