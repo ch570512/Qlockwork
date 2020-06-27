@@ -97,7 +97,7 @@ White
 Needed libraries: (recommended versions in brackets)
 ******************************************************************************
 
-esp8266 by ESP8266 Community (2.4.2) <<-- THIS IS IMPORTANT!
+esp8266 by ESP8266 Community (2.7.1) <<-- THIS IS IMPORTANT!
 Arduino_JSON by Arduino (0.1.0)
 Adafruit NeoPixel by Adafruit (1.4.0)
 Adafruit Unified Sensor by Adafruit (1.1.3)
