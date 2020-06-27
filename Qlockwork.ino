@@ -210,19 +210,19 @@ void setup()
 #ifdef MODE_BUTTON
 	Serial.println("Setting up Mode-Button.");
 	pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_MODE_BUTTON, buttonModeInterrupt, FALLING);
+	attachInterrupt(digitalPinToInterrupt(PIN_MODE_BUTTON), buttonModeInterrupt, FALLING);
 #endif
 
 #ifdef ONOFF_BUTTON
 	Serial.println("Setting up Back-Button.");
 	pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_ONOFF_BUTTON, buttonOnOffInterrupt, FALLING);
+	attachInterrupt(digitalPinToInterrupt(PIN_ONOFF_BUTTON), buttonOnOffInterrupt, FALLING);
 #endif
 
 #ifdef TIME_BUTTON
 	Serial.println("Setting up Time-Button.");
 	pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_TIME_BUTTON, buttonTimeInterrupt, FALLING);
+	attachInterrupt(digitalPinToInterrupt(PIN_TIME_BUTTON), buttonTimeInterrupt, FALLING);
 #endif
 
 #ifdef BUZZER
@@ -1498,7 +1498,7 @@ void getRoomConditions()
 //******************************************************************************
 
 #ifdef MODE_BUTTON
-void buttonModeInterrupt()
+ICACHE_RAM_ATTR void buttonModeInterrupt()
 {
 	if (millis() > lastButtonPress + 250)
 	{
@@ -1509,7 +1509,7 @@ void buttonModeInterrupt()
 #endif
 
 #ifdef ONOFF_BUTTON
-void buttonOnOffInterrupt()
+ICACHE_RAM_ATTR void buttonOnOffInterrupt()
 {
 	if (millis() > lastButtonPress + 250)
 	{
@@ -1520,7 +1520,7 @@ void buttonOnOffInterrupt()
 #endif
 
 #ifdef TIME_BUTTON
-void buttonTimeInterrupt()
+ICACHE_RAM_ATTR void buttonTimeInterrupt()
 {
 	if (millis() > lastButtonPress + 250)
 	{
