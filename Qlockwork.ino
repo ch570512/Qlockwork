@@ -94,7 +94,8 @@ Settings settings;
 
 // NTP
 Ntp ntp;
-char ntpServer[] = NTP_SERVER;
+char ntpServer[50] {};
+bool aktntptime = false;
 uint8_t errorCounterNTP = 0;
 
 // Screenbuffer
@@ -372,6 +373,7 @@ void setup()
 	// Get the time!
 	if (WiFi.isConnected())
 	{
+		strcpy(ntpServer,settings.mySettings.ntphost);
 		// Set ESP (and RTC) time from NTP
 		time_t tempNtpTime = ntp.getTime(ntpServer);
 		if (tempNtpTime)
@@ -583,10 +585,12 @@ void loop()
 		// Run once every random minute (once an hour) or if NTP has an error
 		// ************************************************************************
 
-		if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10)))
+		if ((minute() == randomMinute) || aktntptime || ((errorCounterNTP > 0) && (errorCounterNTP < 10)))
 		{
+			aktntptime = false;
 			if (WiFi.isConnected())
 			{
+				strcpy(ntpServer,settings.mySettings.ntphost);
 				// Set ESP (and RTC) time from NTP
 				time_t tempNtpTime = ntp.getTime(ntpServer);
 				if (tempNtpTime)
@@ -2150,6 +2154,19 @@ void handleButtonSettings()
 		"<input type=\"datetime-local\" name=\"st\">"
 		"</td></tr>";
 	// ------------------------------------------------------------------------
+ 	message += "<tr><td>"
+    	"Zeitserver:"
+    	"</td><td>"
+    	"<input type=\"search\" list=\"ntpserver\" placeholder=\"" + String(settings.mySettings.ntphost) +"\" name=\"ntphost\">"
+    	"<datalist id=\"ntpserver\">"
+    	"<option value=\"fritz.box\">"
+	"<option value=\"192.168.178.1\">"
+    	"<option value=\"pool.ntp.org\">"
+    	"<option value=\"ptbtime1.ptb.de\">"
+    	"<option value=\"ntp.web.de\">"
+  	"</datalist>"
+    	"</td></tr>";
+	// ------------------------------------------------------------------------
 	message += "</table>"
 		"<br><button title=\"Save Settings.\"><i class=\"fa fa-check\"></i></button>"
 		"</form></body></html>";
@@ -2245,6 +2262,13 @@ void handleCommitSettings()
 	settings.mySettings.dayOnTime = webServer.arg("do").substring(0, 2).toInt() * 3600 + webServer.arg("do").substring(3, 5).toInt() * 60;
 	// ------------------------------------------------------------------------
 	webServer.arg("ii") == "0" ? settings.mySettings.itIs = false : settings.mySettings.itIs = true;
+	// ------------------------------------------------------------------------
+ 	 if ( webServer.arg("ntphost").length() && webServer.arg("ntphost") != settings.mySettings.ntphost )
+  	{
+    	webServer.arg("ntphost").toCharArray(settings.mySettings.ntphost,webServer.arg("ntphost").length()+1);
+    	strcpy(ntpServer,settings.mySettings.ntphost);
+    	aktntptime = true;
+  	}
 	// ------------------------------------------------------------------------
 	if (webServer.arg("st").length())
 	{
