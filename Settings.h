@@ -42,6 +42,7 @@ public:
         time_t  nightOffTime;
         time_t  dayOnTime;
         boolean hourBeep;
+        char ntphost[50] = {};
     } mySettings;
 
     void saveToEEPROM();
