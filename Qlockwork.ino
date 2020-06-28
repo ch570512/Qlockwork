@@ -170,6 +170,8 @@ IPAddress myIP = { 0,0,0,0 };
 uint32_t lastButtonPress = 0;
 boolean transitionInProgress = false;
 
+int WLAN_reconnect = 0;
+
 //******************************************************************************
 // Setup()
 //******************************************************************************
@@ -475,6 +477,7 @@ void loop()
 			Serial.printf("Color changed to: %u\r\n", settings.mySettings.color);
 #endif
 		}
+		WLAN_reconnect = 0;
 	}
 
 	// ************************************************************************
@@ -530,6 +533,10 @@ void loop()
 	{
 		lastMinute = minute();
 		screenBufferNeedsUpdate = true;
+		if (WiFi.status() != WL_CONNECTED || WiFi.localIP() == IPAddress(0,0,0,0)) {
+      		WiFi.reconnect();
+      		WLAN_reconnect++;
+    		}
 
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 		// Update room conditions
