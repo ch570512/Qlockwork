@@ -99,13 +99,13 @@ Needed libraries: (recommended versions in brackets)
 
 esp8266 by ESP8266 Community (2.4.2) <<-- THIS IS IMPORTANT!
 Arduino_JSON by Arduino (0.1.0)
-Adafruit NeoPixel by Adafruit (1.4.0)
-Adafruit Unified Sensor by Adafruit (1.1.3)
+Adafruit NeoPixel by Adafruit (1.5.0)
+Adafruit Unified Sensor by Adafruit (1.1.4)
 ArduinoHttpClient by Arduino (0.4.0)
-ArduinoOTA by Juraj Andressy (1.0.3)
+ArduinoOTA by Juraj Andressy (1.0.4)
 DHT sensor library by Adafruit (1.3.10)
 DS3232RTC by Jack Christensen (1.2.12)
-IRremoteESP8266 by Sebastien Warin (2.7.7)
+IRremoteESP8266 by Sebastien Warin (2.7.8)
 Time by Michael Margolis (1.6.0)
 
 Also includes the Timezone library from Jack Christensen.
