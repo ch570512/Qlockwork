@@ -1439,7 +1439,7 @@ void setMode(Mode newMode)
 void setBrightnessFromLdr()
 {
 #ifdef LDR_IS_INVERSE
-	ldrValue = 1023 - analogRead(PIN_LDR);
+	ldrValue = 1024 - analogRead(PIN_LDR);
 #else
 	ldrValue = analogRead(PIN_LDR);
 #endif
