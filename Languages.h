@@ -5,47 +5,6 @@ Languages.h
 #ifndef LANGUAGES_H
 #define LANGUAGES_H
 
-//enum eLanguage : uint8_t
-//{
-//	LANGUAGE_DE_DE,
-//	LANGUAGE_DE_SW,
-//	LANGUAGE_DE_BA,
-//	LANGUAGE_DE_SA,
-//	LANGUAGE_DE_MKF_DE,
-//	LANGUAGE_DE_MKF_SW,
-//	LANGUAGE_DE_MKF_BA,
-//	LANGUAGE_DE_MKF_SA,
-//	LANGUAGE_D3,
-//	LANGUAGE_CH,
-//	LANGUAGE_CH_GS,
-//	LANGUAGE_EN,
-//	LANGUAGE_ES,
-//	LANGUAGE_FR,
-//	LANGUAGE_IT,
-//	LANGUAGE_NL,
-//	LANGUAGE_COUNT = LANGUAGE_NL
-//};
-
-//const char sLanguage[][4] =
-//{
-//	{ 'D', 'E', ' ', ' ' }, // 00
-//	{ 'D', 'E', 'S', 'W' }, // 01
-//	{ 'D', 'E', 'B', 'A' }, // 02
-//	{ 'D', 'E', 'S', 'A' }, // 03
-//	{ 'M', 'K', 'D', 'E' }, // 04
-//	{ 'M', 'K', 'S', 'W' }, // 05
-//	{ 'M', 'K', 'B', 'A' }, // 06
-//	{ 'M', 'K', 'S', 'A' }, // 07
-//	{ 'D', '3', ' ', ' ' }, // 08
-//	{ 'C', 'H', ' ', ' ' }, // 09
-//	{ 'C', 'H', 'G', 'S' }, // 10
-//	{ 'E', 'N', ' ', ' ' }, // 11
-//	{ 'E', 'S', ' ', ' ' }, // 12
-//	{ 'F', 'R', ' ', ' ' }, // 13
-//	{ 'I', 'T', ' ', ' ' }, // 14
-//	{ 'N', 'L', ' ', ' ' }  // 15
-//};
-
 #if defined(FRONTCOVER_EN) || defined(FRONTCOVER_BINARY)
 const char sWeekday[][2] =
 {
@@ -58,6 +17,14 @@ const char sWeekday[][2] =
 	{ 'F', 'R' }, // 06
 	{ 'S', 'A' }  // 07
 };
+#define LANGSTR "en"
+#define TXT_SETTINGS "Settings"
+#define TXT_ALARM "Alarm"
+#define TXT_ON "on"
+#define TXT_OFF "off"
+#define TXT_HOURBEEP "Hourly beep"
+#define TXT_TIMER "Timer"
+#define TXT_MINUTES "minutes"
 #endif
 
 #if defined(FRONTCOVER_DE_DE) || defined(FRONTCOVER_DE_SW) || defined(FRONTCOVER_DE_BA) || defined(FRONTCOVER_DE_SA) || defined(FRONTCOVER_D3) || defined(FRONTCOVER_DE_MKF_DE) || defined(FRONTCOVER_DE_MKF_SW) || defined(FRONTCOVER_DE_MKF_BA) || defined(FRONTCOVER_DE_MKF_SA) || defined(FRONTCOVER_CH) || defined(FRONTCOVER_CH_GS)
@@ -72,20 +39,14 @@ const char sWeekday[][2] =
 	{ 'F', 'R' }, // 06
 	{ 'S', 'A' }  // 07
 };
-#endif
-
-#if defined(FRONTCOVER_ES)
-const char sWeekday[][2] =
-{
-	{ ' ', ' ' }, // 00
-	{ 'D', 'O' }, // 01
-	{ 'L', 'U' }, // 02
-	{ 'M', 'A' }, // 03
-	{ 'M', 'I' }, // 04
-	{ 'J', 'U' }, // 05
-	{ 'V', 'I' }, // 06
-	{ 'S', 'A' }  // 07
-};
+#define LANGSTR "de"
+#define TXT_SETTINGS "Einstellungen"
+#define TXT_ALARM "Wecker"
+#define TXT_ON "ein"
+#define TXT_OFF "aus"
+#define TXT_HOURBEEP "Stundenalarm"
+#define TXT_TIMER "Timer"
+#define TXT_MINUTES "Minuten"
 #endif
 
 #if defined(FRONTCOVER_FR)
@@ -100,6 +61,14 @@ const char sWeekday[][2] =
 	{ 'V', 'E' }, // 06
 	{ 'S', 'A' }  // 07
 };
+#define LANGSTR "fr"
+#define TXT_SETTINGS "Paramètres"
+#define TXT_ALARM "Réveil"
+#define TXT_ON "on"
+#define TXT_OFF "off"
+#define TXT_HOURBEEP "Alarme heure"
+#define TXT_TIMER "Minuteur"
+#define TXT_MINUTES "Minutes"
 #endif
 
 #if defined(FRONTCOVER_IT)
@@ -114,6 +83,36 @@ const char sWeekday[][2] =
 	{ 'V', 'E' }, // 06
 	{ 'S', 'A' }  // 07
 };
+#define LANGSTR "it"
+#define TXT_SETTINGS "Settings"
+#define TXT_ALARM "Alarm"
+#define TXT_ON "on"
+#define TXT_OFF "off"
+#define TXT_HOURBEEP "Hourly beep"
+#define TXT_TIMER "Timer"
+#define TXT_MINUTES "minutes"
+#endif
+
+#if defined(FRONTCOVER_ES)
+const char sWeekday[][2] =
+{
+	{ ' ', ' ' }, // 00
+	{ 'D', 'O' }, // 01
+	{ 'L', 'U' }, // 02
+	{ 'M', 'A' }, // 03
+	{ 'M', 'I' }, // 04
+	{ 'J', 'U' }, // 05
+	{ 'V', 'I' }, // 06
+	{ 'S', 'A' }  // 07
+};
+#define LANGSTR "es"
+#define TXT_SETTINGS "Settings"
+#define TXT_ALARM "Alarm"
+#define TXT_ON "on"
+#define TXT_OFF "off"
+#define TXT_HOURBEEP "Hourly beep"
+#define TXT_TIMER "Timer"
+#define TXT_MINUTES "minutes"
 #endif
 
 #if defined(FRONTCOVER_NL)
@@ -128,6 +127,14 @@ const char sWeekday[][2] =
 	{ 'V', 'R' }, // 06
 	{ 'Z', 'A' }  // 07
 };
+#define LANGSTR "nl"
+#define TXT_SETTINGS "Settings"
+#define TXT_ALARM "Alarm"
+#define TXT_ON "on"
+#define TXT_OFF "off"
+#define TXT_HOURBEEP "Hourly beep"
+#define TXT_TIMER "Timer"
+#define TXT_MINUTES "minutes"
 #endif
 
 #endif

@@ -19,7 +19,7 @@ public:
     uint8_t humidity;
     uint16_t pressure;
 
-    uint8_t getOutdoorConditions(String location, String apiKey);
+    uint8_t getOutdoorConditions(String location, String apiKey, String langStr);
 
 private:
 

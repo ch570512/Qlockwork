@@ -97,7 +97,7 @@ White
 Needed libraries: (recommended versions in brackets)
 ******************************************************************************
 
-esp8266 by ESP8266 Community (2.4.2) <<-- THIS IS IMPORTANT!
+esp8266 by ESP8266 Community (2.7.2)
 Arduino_JSON by Arduino (0.1.0)
 Adafruit NeoPixel by Adafruit (1.5.0)
 Adafruit Unified Sensor by Adafruit (1.1.4)
@@ -108,7 +108,8 @@ DS3232RTC by Jack Christensen (1.2.12)
 IRremoteESP8266 by Sebastien Warin (2.7.8)
 Time by Michael Margolis (1.6.0)
 
-Also includes the Timezone library from Jack Christensen.
+Also includes the Timezone library from Jack Christensen
+and WiFiManager by AlexT.
 
 ******************************************************************************
 Compiler-Options: (recommended)
@@ -412,10 +413,13 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
-2020xxxx:
+20200709:
 Turn off timer when it is running.
 Some localization in settings and weather.
 Fixed alarm running 4 times longer than configured.
+Set Hostname (Thanks to toto79).
+Fixes to Buttons for esp8266 2.7.x (Thanks to toto79).
+Fixes to WiFiManager for esp8266 2.7.x (Thanks to toto79).
 
 20200112:
 WEB API for Clock On/Off.

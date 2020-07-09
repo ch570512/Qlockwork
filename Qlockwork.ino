@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20200112
+#define FIRMWARE_VERSION 20200709
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -83,7 +83,6 @@ DS3232RTC RTC(true);
 #endif
 
 // LED driver 
-//LedDriver_NeoPixel ledDriver;
 LedDriver ledDriver;
 
 // Renderer
@@ -140,8 +139,8 @@ float roomHumidity = 0;
 uint8_t errorCounterDHT = 0;
 
 // Brightness and LDR
-uint8_t brightness = map(settings.mySettings.brightness, 10, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-uint8_t abcBrightness = brightness;
+uint8_t maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+uint8_t brightness = maxBrightness;
 uint16_t ldrValue = 0;
 #ifdef LDR
 uint16_t lastLdrValue = 0;
@@ -210,19 +209,19 @@ void setup()
 #ifdef MODE_BUTTON
 	Serial.println("Setting up Mode-Button.");
 	pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_MODE_BUTTON, buttonModeInterrupt, FALLING);
+	attachInterrupt(digitalPinToInterrupt(PIN_MODE_BUTTON), buttonModeInterrupt, FALLING);
 #endif
 
 #ifdef ONOFF_BUTTON
 	Serial.println("Setting up Back-Button.");
 	pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_ONOFF_BUTTON, buttonOnOffInterrupt, FALLING);
+	attachInterrupt(digitalPinToInterrupt(PIN_ONOFF_BUTTON), buttonOnOffInterrupt, FALLING);
 #endif
 
 #ifdef TIME_BUTTON
 	Serial.println("Setting up Time-Button.");
 	pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
-	attachInterrupt(PIN_TIME_BUTTON, buttonTimeInterrupt, FALLING);
+	attachInterrupt(digitalPinToInterrupt(PIN_TIME_BUTTON), buttonTimeInterrupt, FALLING);
 #endif
 
 #ifdef BUZZER
@@ -255,6 +254,7 @@ void setup()
 	//wifiManager.resetSettings();
 	wifiManager.setTimeout(WIFI_SETUP_TIMEOUT);
 	wifiManager.autoConnect(HOSTNAME, WIFI_AP_PASS);
+	WiFi.hostname(HOSTNAME);
 	WiFi.setAutoReconnect(true);
 	if (!WiFi.isConnected())
 	{
@@ -331,7 +331,7 @@ void setup()
 #ifdef DEBUG
 		Serial.println("Getting outdoor weather:");
 #endif
-		!outdoorWeather.getOutdoorConditions(LOCATION, APIKEY) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
+		!outdoorWeather.getOutdoorConditions(LOCATION, APIKEY, LANGSTR) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
 		Serial.println(outdoorWeather.description);
 		Serial.println(outdoorWeather.temperature);
@@ -390,7 +390,8 @@ void setup()
 		}
 		else
 		{
-			if (errorCounterNTP < 255) errorCounterNTP++;
+			if (errorCounterNTP < 255)
+				errorCounterNTP++;
 #ifdef DEBUG
 			Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
 #endif
@@ -513,7 +514,8 @@ void loop()
 		{
 			// Get updateinfo
 #ifdef UPDATE_INFOSERVER
-			if (WiFi.isConnected()) getUpdateInfo();
+			if (WiFi.isConnected())
+				getUpdateInfo();
 #endif
 		}
 
@@ -537,7 +539,7 @@ void loop()
 		// Switch on buzzer for alarm 1
 		if (settings.mySettings.alarm1 && (hour() == hour(settings.mySettings.alarm1Time)) && (minute() == minute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, weekday()))
 		{
-			alarmOn = BUZZTIME_ALARM_1 * 4;
+			alarmOn = BUZZTIME_ALARM_1;
 #ifdef DEBUG
 			Serial.println("Alarm1 on.");
 #endif
@@ -546,7 +548,7 @@ void loop()
 		// Switch on buzzer for alarm 2
 		if (settings.mySettings.alarm2 && (hour() == hour(settings.mySettings.alarm2Time)) && (minute() == minute(settings.mySettings.alarm2Time)) && bitRead(settings.mySettings.alarm2Weekdays, weekday()))
 		{
-			alarmOn = BUZZTIME_ALARM_2 * 4;
+			alarmOn = BUZZTIME_ALARM_2;
 #ifdef DEBUG
 			Serial.println("Alarm2 on.");
 #endif
@@ -605,7 +607,8 @@ void loop()
 				}
 				else
 				{
-					if (errorCounterNTP < 255) errorCounterNTP++;
+					if (errorCounterNTP < 255)
+						errorCounterNTP++;
 #ifdef DEBUG
 					Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
 #endif
@@ -619,7 +622,7 @@ void loop()
 			{
 				// Get weather from OpenWeather
 #ifdef APIKEY
-				!outdoorWeather.getOutdoorConditions(LOCATION, APIKEY) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
+				!outdoorWeather.getOutdoorConditions(LOCATION, APIKEY, LANGSTR) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
 				Serial.println(outdoorWeather.description);
 				Serial.println(outdoorWeather.temperature);
@@ -679,7 +682,7 @@ void loop()
 		if (alarmOn)
 		{
 			alarmOn--;
-			digitalRead(PIN_BUZZER) == LOW ? digitalWrite(PIN_BUZZER, HIGH) : digitalWrite(PIN_BUZZER, LOW);
+			digitalRead(PIN_BUZZER) ? digitalWrite(PIN_BUZZER, LOW) : digitalWrite(PIN_BUZZER, HIGH);
 			if (!alarmOn)
 			{
 #ifdef DEBUG
@@ -693,14 +696,17 @@ void loop()
 
 		// Set brightness from LDR
 #ifdef LDR
-		if (settings.mySettings.useAbc) setBrightnessFromLdr();
+		if (settings.mySettings.useAbc)
+			setBrightnessFromLdr();
 #endif
 
 #ifdef FRONTCOVER_BINARY
-		if (mode != MODE_BLANK) screenBufferNeedsUpdate = true;
+		if (mode != MODE_BLANK)
+			screenBufferNeedsUpdate = true;
 #else
 		// Running displayupdate in MODE_TIME or MODE_BLANK every second will lock the ESP due to TRANSITION_FADE
-		if ((mode != MODE_TIME) && (mode != MODE_BLANK)) screenBufferNeedsUpdate = true;
+		if ((mode != MODE_TIME) && (mode != MODE_BLANK))
+			screenBufferNeedsUpdate = true;
 #endif
 
 		// Flash ESP LED
@@ -721,7 +727,7 @@ void loop()
 		if (!alarmTimer && alarmTimerSet)
 		{
 			alarmTimerSet = false;
-			alarmOn = BUZZTIME_TIMER * 4;
+			alarmOn = BUZZTIME_TIMER;
 #ifdef DEBUG
 			Serial.println("Timeralarm: on");
 #endif
@@ -742,7 +748,8 @@ void loop()
 				{
 				case 0:
 #ifdef APIKEY
-					if (WiFi.isConnected()) setMode(MODE_EXT_TEMP);
+					if (WiFi.isConnected())
+						setMode(MODE_EXT_TEMP);
 #endif
 					autoMode = 1;
 					break;
@@ -751,7 +758,8 @@ void loop()
 					setMode(MODE_TEMP);
 #else
 #ifdef APIKEY
-					if (WiFi.isConnected()) setMode(MODE_EXT_TEMP);
+					if (WiFi.isConnected())
+						setMode(MODE_EXT_TEMP);
 #endif
 #endif
 					autoMode = 0;
@@ -772,8 +780,10 @@ void loop()
 				{
 					if ((day() == events[i].day) && (month() == events[i].month))
 					{
-						if (events[i].year) feedText = "  " + events[i].text + " (" + String(year() - events[i].year) + ")   ";
-						else feedText = "  " + events[i].text + "   ";
+						if (events[i].year)
+							feedText = "  " + events[i].text + " (" + String(year() - events[i].year) + ")   ";
+						else
+							feedText = "  " + events[i].text + "   ";
 						feedPosition = 0;
 						feedColor = events[i].color;
 #ifdef DEBUG
@@ -791,7 +801,8 @@ void loop()
 	// Run always
 	// ************************************************************************
 
-	if (mode == MODE_FEED) screenBufferNeedsUpdate = true;
+	if (mode == MODE_FEED)
+		screenBufferNeedsUpdate = true;
 
 	// Call HTTP- and OTA-handle
 	webServer.handleClient();
@@ -1202,7 +1213,8 @@ void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], 
 {
 	for (uint8_t z = 0; z <= 9; z++)
 	{
-		for (uint8_t i = 0; i <= 8; i++) screenBufferOld[i] = screenBufferOld[i + 1];
+		for (uint8_t i = 0; i <= 8; i++)
+			screenBufferOld[i] = screenBufferOld[i + 1];
 		screenBufferOld[9] = screenBufferNew[z];
 		writeScreenBuffer(screenBufferOld, color, brightness);
 		webServer.handleClient();
@@ -1217,14 +1229,16 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
 	{
 		for (uint8_t x = 0; x <= 10; x++)
 		{
-			if (bitRead(screenBuffer[y], 15 - x)) ledDriver.setPixel(x, y, color, brightness);
+			if (bitRead(screenBuffer[y], 15 - x))
+				ledDriver.setPixel(x, y, color, brightness);
 		}
 	}
 
 	// Corner LEDs
 	for (uint8_t y = 0; y <= 3; y++)
 	{
-		if (bitRead(screenBuffer[y], 4)) ledDriver.setPixel(110 + y, color, brightness);
+		if (bitRead(screenBuffer[y], 4))
+			ledDriver.setPixel(110 + y, color, brightness);
 	}
 
 	// Alarm LED
@@ -1233,8 +1247,11 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
 	{
 #ifdef ALARM_LED_COLOR
 #ifdef ABUSE_CORNER_LED_FOR_ALARM
-		if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet) ledDriver.setPixel(111, ALARM_LED_COLOR, brightness);
-		else if (bitRead(screenBuffer[1], 4)) ledDriver.setPixel(111, color, brightness);
+		if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet)
+			ledDriver.setPixel(111, ALARM_LED_COLOR, brightness);
+		else
+			if (bitRead(screenBuffer[1], 4))
+				ledDriver.setPixel(111, color, brightness);
 #else
 		ledDriver.setPixel(114, ALARM_LED_COLOR, brightness);
 #endif
@@ -1257,7 +1274,8 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 	{
 		for (uint8_t x = 0; x <= 11; x++)
 		{
-			if (bitRead(screenBufferOld[y], 15 - x)) brightnessBuffer[y][x] = brightness;
+			if (bitRead(screenBufferOld[y], 15 - x))
+				brightnessBuffer[y][x] = brightness;
 		}
 	}
 	for (uint8_t i = 0; i < brightness; i++)
@@ -1266,21 +1284,26 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 		{
 			for (uint8_t x = 0; x <= 11; x++)
 			{
-				if (!(bitRead(screenBufferOld[y], 15 - x)) && (bitRead(screenBufferNew[y], 15 - x))) brightnessBuffer[y][x]++;
-				if ((bitRead(screenBufferOld[y], 15 - x)) && !(bitRead(screenBufferNew[y], 15 - x))) brightnessBuffer[y][x]--;
+				if (!(bitRead(screenBufferOld[y], 15 - x)) && (bitRead(screenBufferNew[y], 15 - x)))
+					brightnessBuffer[y][x]++;
+				if ((bitRead(screenBufferOld[y], 15 - x)) && !(bitRead(screenBufferNew[y], 15 - x)))
+					brightnessBuffer[y][x]--;
 				ledDriver.setPixel(x, y, color, brightnessBuffer[y][x]);
 			}
 		}
 
 		// Corner LEDs
-		for (uint8_t y = 0; y <= 3; y++) ledDriver.setPixel(110 + y, color, brightnessBuffer[y][11]);
+		for (uint8_t y = 0; y <= 3; y++)
+			ledDriver.setPixel(110 + y, color, brightnessBuffer[y][11]);
 
 		// Alarm LED
 #ifdef BUZZER
 #ifdef ALARM_LED_COLOR
 #ifdef ABUSE_CORNER_LED_FOR_ALARM
-		if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet) ledDriver.setPixel(111, ALARM_LED_COLOR, brightnessBuffer[4][11]);
-		else ledDriver.setPixel(111, color, brightnessBuffer[1][11]);
+		if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet)
+			ledDriver.setPixel(111, ALARM_LED_COLOR, brightnessBuffer[4][11]);
+		else
+			ledDriver.setPixel(111, color, brightnessBuffer[1][11]);
 #else
 		ledDriver.setPixel(114, ALARM_LED_COLOR, brightnessBuffer[4][11]);
 #endif
@@ -1420,15 +1443,17 @@ void setBrightnessFromLdr()
 #else
 	ldrValue = analogRead(PIN_LDR);
 #endif
-	if (ldrValue < minLdrValue) minLdrValue = ldrValue;
-	if (ldrValue > maxLdrValue) maxLdrValue = ldrValue;
+	if (ldrValue < minLdrValue)
+		minLdrValue = ldrValue;
+	if (ldrValue > maxLdrValue)
+		maxLdrValue = ldrValue;
 	if ((ldrValue >= (lastLdrValue + 40)) || (ldrValue <= (lastLdrValue - 40))) // Hysteresis is 40
 	{
 		lastLdrValue = ldrValue;
-		brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, abcBrightness);
+		brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
 		screenBufferNeedsUpdate = true;
 #ifdef DEBUG
-		Serial.printf("Brightness: %u (min: %u, max: %u)\r\n", brightness, MIN_BRIGHTNESS, abcBrightness);
+		Serial.printf("Brightness: %u (min: %u, max: %u)\r\n", brightness, MIN_BRIGHTNESS, maxBrightness);
 		Serial.printf("LDR: %u (min: %u, max: %u)\r\n", ldrValue, minLdrValue, maxLdrValue);
 #endif
 	}
@@ -1484,7 +1509,8 @@ void getRoomConditions()
 	}
 	else
 	{
-		if (errorCounterDHT < 255) errorCounterDHT++;
+		if (errorCounterDHT < 255)
+			errorCounterDHT++;
 #ifdef DEBUG
 		Serial.printf("Error (DHT): %u\r\n", errorCounterDHT);
 #endif
@@ -1498,7 +1524,7 @@ void getRoomConditions()
 //******************************************************************************
 
 #ifdef MODE_BUTTON
-void buttonModeInterrupt()
+ICACHE_RAM_ATTR void buttonModeInterrupt()
 {
 	if (millis() > lastButtonPress + 250)
 	{
@@ -1509,7 +1535,7 @@ void buttonModeInterrupt()
 #endif
 
 #ifdef ONOFF_BUTTON
-void buttonOnOffInterrupt()
+ICACHE_RAM_ATTR void buttonOnOffInterrupt()
 {
 	if (millis() > lastButtonPress + 250)
 	{
@@ -1520,7 +1546,7 @@ void buttonOnOffInterrupt()
 #endif
 
 #ifdef TIME_BUTTON
-void buttonTimeInterrupt()
+ICACHE_RAM_ATTR void buttonTimeInterrupt()
 {
 	if (millis() > lastButtonPress + 250)
 	{
@@ -1675,8 +1701,10 @@ void handleRoot()
 	message += DEDICATION;
 	message += "<br><br>";
 #endif
-	if (mode == MODE_BLANK) message += "<button title=\"Switch LEDs on\" onclick=\"window.location.href='/handleButtonOnOff'\"><i class=\"fa fa-toggle-off\"></i></button>";
-	else message += "<button title=\"Switch LEDs off\" onclick=\"window.location.href='/handleButtonOnOff'\"><i class=\"fa fa-toggle-on\"></i></button>";
+	if (mode == MODE_BLANK)
+		message += "<button title=\"Switch LEDs on\" onclick=\"window.location.href='/handleButtonOnOff'\"><i class=\"fa fa-toggle-off\"></i></button>";
+	else
+		message += "<button title=\"Switch LEDs off\" onclick=\"window.location.href='/handleButtonOnOff'\"><i class=\"fa fa-toggle-on\"></i></button>";
 	message += "<button title=\"Settings\" onclick=\"window.location.href='/handleButtonSettings'\"><i class=\"fa fa-gear\"></i></button>"
 		"<br><br>"
 		"<button title=\"Switch modes\" onclick=\"window.location.href='/handleButtonMode'\"><i class=\"fa fa-bars\"></i></button>"
@@ -1688,16 +1716,26 @@ void handleRoot()
 #ifdef SENSOR_DHT22
 	message += "<br><i class=\"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(roomHumidity) + "%RH"
 		"<br><span style=\"font-size:20px;\">";
-	if (roomHumidity < 30) message += "<i style=\"color:Red;\" class=\"fa fa-square\"\"></i>";
-	else message += "<i style=\"color:Red;\" class=\"fa fa-square-o\"></i>";
-	if ((roomHumidity >= 30) && (roomHumidity < 40)) message += "&nbsp;<i style=\"color:Orange;\" class=\"fa fa-square\"></i>";
-	else message += "&nbsp;<i style=\"color:Orange;\" class=\"fa fa-square-o\"></i>";
-	if ((roomHumidity >= 40) && (roomHumidity <= 50)) message += "&nbsp;<i style=\"color:MediumSeaGreen;\" class=\"fa fa-square\"></i>";
-	else message += "&nbsp;<i style=\"color:MediumSeaGreen;\" class=\"fa fa-square-o\"></i>";
-	if ((roomHumidity > 50) && (roomHumidity < 60)) message += "&nbsp;<i style=\"color:Lightblue;\" class=\"fa fa-square\"></i>";
-	else message += "&nbsp;<i style=\"color:Lightblue;\" class=\"fa fa-square-o\"></i>";
-	if (roomHumidity >= 60) message += "&nbsp;<i style=\"color:Blue;\" class=\"fa fa-square\"></i>";
-	else message += "&nbsp;<i style=\"color:Blue;\" class=\"fa fa-square-o\"></i>";
+	if (roomHumidity < 30)
+		message += "<i style=\"color:Red;\" class=\"fa fa-square\"\"></i>";
+	else
+		message += "<i style=\"color:Red;\" class=\"fa fa-square-o\"></i>";
+	if ((roomHumidity >= 30) && (roomHumidity < 40))
+		message += "&nbsp;<i style=\"color:Orange;\" class=\"fa fa-square\"></i>";
+	else
+		message += "&nbsp;<i style=\"color:Orange;\" class=\"fa fa-square-o\"></i>";
+	if ((roomHumidity >= 40) && (roomHumidity <= 50))
+		message += "&nbsp;<i style=\"color:MediumSeaGreen;\" class=\"fa fa-square\"></i>";
+	else
+		message += "&nbsp;<i style=\"color:MediumSeaGreen;\" class=\"fa fa-square-o\"></i>";
+	if ((roomHumidity > 50) && (roomHumidity < 60))
+		message += "&nbsp;<i style=\"color:Lightblue;\" class=\"fa fa-square\"></i>";
+	else
+		message += "&nbsp;<i style=\"color:Lightblue;\" class=\"fa fa-square-o\"></i>";
+	if (roomHumidity >= 60)
+		message += "&nbsp;<i style=\"color:Blue;\" class=\"fa fa-square\"></i>";
+	else
+		message += "&nbsp;<i style=\"color:Blue;\" class=\"fa fa-square-o\"></i>";
 	message += "</span>";
 #endif
 #ifdef APIKEY
@@ -1710,16 +1748,20 @@ void handleRoot()
 		"<br><br><a href=\"http://tmw-it.ch/qlockwork/\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
 		"<br>Firmware: " + String(FIRMWARE_VERSION);
 #ifdef UPDATE_INFOSERVER
-	if (updateInfo > int(FIRMWARE_VERSION)) message += "<br><span style=\"color:red;\">Firmwareupdate available! (" + String(updateInfo) + ")</span>";
+	if (updateInfo > int(FIRMWARE_VERSION))
+		message += "<br><span style=\"color:red;\">Firmwareupdate available! (" + String(updateInfo) + ")</span>";
 #endif
 #ifdef DEBUG_WEB
 	time_t tempEspTime = now();
 	message += "<br><br>Time: " + String(hour(tempEspTime)) + ":";
-	if (minute(tempEspTime) < 10) message += "0";
+	if (minute(tempEspTime) < 10)
+		message += "0";
 	message += String(minute(tempEspTime));
-	if (timeZone.locIsDST(now())) message += " (DST)";
+	if (timeZone.locIsDST(now()))
+		message += " (DST)";
 	message += " up " + String(int(upTime / 86400)) + " days, " + String(hour(upTime)) + ":";
-	if (minute(upTime) < 10) message += "0";
+	if (minute(upTime) < 10)
+		message += "0";
 	message += String(minute(upTime));
 	message += "<br>" + String(dayStr(weekday(tempEspTime))) + ", " + String(monthStr(month(tempEspTime))) + " " + String(day(tempEspTime)) + ". " + String(year(tempEspTime));
 	message += "<br>Moonphase: " + String(moonphase);
@@ -1727,7 +1769,7 @@ void handleRoot()
 #ifdef LDR
 	message += "<br>Brightness: " + String(brightness) + " (ABC: ";
 	settings.mySettings.useAbc ? message += "enabled" : message += "disabled";
-	message += ", min: " + String(MIN_BRIGHTNESS) + ", max : " + String(abcBrightness) + ")";
+	message += ", min: " + String(MIN_BRIGHTNESS) + ", max : " + String(maxBrightness) + ")";
 	message += "<br>LDR: " + String(ldrValue) + " (min: " + String(minLdrValue) + ", max: " + String(maxLdrValue) + ")";
 #endif
 	message += "<br>Error (NTP): " + String(errorCounterNTP);
@@ -1788,7 +1830,7 @@ void handleButtonSettings()
 	String message = "<!doctype html>"
 		"<html>"
 		"<head>"
-		"<title>" + String(HOSTNAME) + " Settings</title>"
+		"<title>" + String(HOSTNAME) + " " TXT_SETTINGS "</title>"
 		"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
 		"<meta charset=\"UTF-8\">"
 		"<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">"
@@ -1801,95 +1843,118 @@ void handleButtonSettings()
 		"</style>"
 		"</head>"
 		"<body>"
-		"<h1>" + String(HOSTNAME) + " Settings</h1>"
+		"<h1>" + String(HOSTNAME) + " " TXT_SETTINGS "</h1>"
 		"<form action=\"/commitSettings\">"
 		"<table>";
 	// ------------------------------------------------------------------------
 #ifdef BUZZER
 	message += "<tr><td>"
-		"Alarm 1:"
-		"</td><td>"
+		TXT_ALARM
+		" 1</td><td>"
 		"<input type=\"radio\" name=\"a1\" value=\"1\"";
-	if (settings.mySettings.alarm1) message += " checked";
-	message += "> on "
+	if (settings.mySettings.alarm1)
+		message += " checked";
+	message += "> " TXT_ON
 		"<input type=\"radio\" name=\"a1\" value=\"0\"";
-	if (!settings.mySettings.alarm1) message += " checked";
-	message += "> off&nbsp;&nbsp;&nbsp;"
+	if (!settings.mySettings.alarm1)
+		message += " checked";
+	message += "> " TXT_OFF "&nbsp;&nbsp;&nbsp;"
 		"<input type=\"time\" name=\"a1t\" value=\"";
-	if (hour(settings.mySettings.alarm1Time) < 10) message += "0";
+	if (hour(settings.mySettings.alarm1Time) < 10)
+		message += "0";
 	message += String(hour(settings.mySettings.alarm1Time)) + ":";
-	if (minute(settings.mySettings.alarm1Time) < 10) message += "0";
+	if (minute(settings.mySettings.alarm1Time) < 10)
+		message += "0";
 	message += String(minute(settings.mySettings.alarm1Time)) + "\">"
 		" h<br><br>"
 		"<input type=\"checkbox\" name=\"a1w2\" value=\"4\"";
-	if (bitRead(settings.mySettings.alarm1Weekdays, 2)) message += " checked";
+	if (bitRead(settings.mySettings.alarm1Weekdays, 2))
+		message += " checked";
 	message += "> Mo. "
 		"<input type=\"checkbox\" name=\"a1w3\" value=\"8\"";
-	if (bitRead(settings.mySettings.alarm1Weekdays, 3)) message += " checked";
+	if (bitRead(settings.mySettings.alarm1Weekdays, 3))
+		message += " checked";
 	message += "> Tu. "
 		"<input type=\"checkbox\" name=\"a1w4\" value=\"16\"";
-	if (bitRead(settings.mySettings.alarm1Weekdays, 4)) message += " checked";
+	if (bitRead(settings.mySettings.alarm1Weekdays, 4))
+		message += " checked";
 	message += "> We. "
 		"<input type=\"checkbox\" name=\"a1w5\" value=\"32\"";
-	if (bitRead(settings.mySettings.alarm1Weekdays, 5)) message += " checked";
+	if (bitRead(settings.mySettings.alarm1Weekdays, 5))
+		message += " checked";
 	message += "> Th. "
 		"<input type=\"checkbox\" name=\"a1w6\" value=\"64\"";
-	if (bitRead(settings.mySettings.alarm1Weekdays, 6)) message += " checked";
+	if (bitRead(settings.mySettings.alarm1Weekdays, 6))
+		message += " checked";
 	message += "> Fr. "
 		"<input type=\"checkbox\" name=\"a1w7\" value=\"128\"";
-	if (bitRead(settings.mySettings.alarm1Weekdays, 7)) message += " checked";
+	if (bitRead(settings.mySettings.alarm1Weekdays, 7))
+		message += " checked";
 	message += "> Sa. "
 		"<input type=\"checkbox\" name=\"a1w1\" value=\"2\"";
-	if (bitRead(settings.mySettings.alarm1Weekdays, 1)) message += " checked";
+	if (bitRead(settings.mySettings.alarm1Weekdays, 1))
+		message += " checked";
 	message += "> Su. "
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Alarm 2:"
-		"</td><td>"
+		TXT_ALARM
+		" 2</td><td>"
 		"<input type=\"radio\" name=\"a2\" value=\"1\"";
-	if (settings.mySettings.alarm2) message += " checked";
-	message += "> on "
+	if (settings.mySettings.alarm2)
+		message += " checked";
+	message += "> " TXT_ON
 		"<input type=\"radio\" name=\"a2\" value=\"0\"";
-	if (!settings.mySettings.alarm2) message += " checked";
-	message += "> off&nbsp;&nbsp;&nbsp;"
+	if (!settings.mySettings.alarm2)
+		message += " checked";
+	message += "> " TXT_OFF "&nbsp;&nbsp;&nbsp;"
 		"<input type=\"time\" name=\"a2t\" value=\"";
-	if (hour(settings.mySettings.alarm2Time) < 10) message += "0";
+	if (hour(settings.mySettings.alarm2Time) < 10)
+		message += "0";
 	message += String(hour(settings.mySettings.alarm2Time)) + ":";
-	if (minute(settings.mySettings.alarm2Time) < 10) message += "0";
+	if (minute(settings.mySettings.alarm2Time) < 10)
+		message += "0";
 	message += String(minute(settings.mySettings.alarm2Time)) + "\">"
 		" h<br><br>"
 		"<input type=\"checkbox\" name=\"a2w2\" value=\"4\"";
-	if (bitRead(settings.mySettings.alarm2Weekdays, 2)) message += " checked";
+	if (bitRead(settings.mySettings.alarm2Weekdays, 2))
+		message += " checked";
 	message += "> Mo. "
 		"<input type=\"checkbox\" name=\"a2w3\" value=\"8\"";
-	if (bitRead(settings.mySettings.alarm2Weekdays, 3)) message += " checked";
+	if (bitRead(settings.mySettings.alarm2Weekdays, 3))
+		message += " checked";
 	message += "> Tu. "
 		"<input type=\"checkbox\" name=\"a2w4\" value=\"16\"";
-	if (bitRead(settings.mySettings.alarm2Weekdays, 4)) message += " checked";
+	if (bitRead(settings.mySettings.alarm2Weekdays, 4))
+		message += " checked";
 	message += "> We. "
 		"<input type=\"checkbox\" name=\"a2w5\" value=\"32\"";
-	if (bitRead(settings.mySettings.alarm2Weekdays, 5)) message += " checked";
+	if (bitRead(settings.mySettings.alarm2Weekdays, 5))
+		message += " checked";
 	message += "> Th. "
 		"<input type=\"checkbox\" name=\"a2w6\" value=\"64\"";
-	if (bitRead(settings.mySettings.alarm2Weekdays, 6)) message += " checked";
+	if (bitRead(settings.mySettings.alarm2Weekdays, 6))
+		message += " checked";
 	message += "> Fr. "
 		"<input type=\"checkbox\" name=\"a2w7\" value=\"128\"";
-	if (bitRead(settings.mySettings.alarm2Weekdays, 7)) message += " checked";
+	if (bitRead(settings.mySettings.alarm2Weekdays, 7))
+		message += " checked";
 	message += "> Sa. "
 		"<input type=\"checkbox\" name=\"a2w1\" value=\"2\"";
-	if (bitRead(settings.mySettings.alarm2Weekdays, 1)) message += " checked";
+	if (bitRead(settings.mySettings.alarm2Weekdays, 1))
+		message += " checked";
 	message += "> Su. "
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Timer:"
+		TXT_TIMER
 		"</td><td>"
 		"<select name=\"ti\">";
 	for (int i = 0; i <= 10; i++)
 	{
 		message += "<option value=\"" + String(i) + "\">";
-		if (i < 10) message += "0";
+		if (i < 10)
+			message += "0";
 		message += String(i) + "</option>";
 	}
 	message += "<option value=\"15\">15</option>"
@@ -1898,55 +1963,62 @@ void handleButtonSettings()
 		"<option value=\"30\">30</option>"
 		"<option value=\"45\">45</option>"
 		"<option value=\"60\">60</option>"
-		"</select> minutes"
+		"</select> " TXT_MINUTES
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Hourly beep:"
+		TXT_HOURBEEP
 		"</td><td>"
 		"<input type=\"radio\" name=\"hb\" value=\"1\"";
-	if (settings.mySettings.hourBeep) message += " checked";
-	message += "> on "
+	if (settings.mySettings.hourBeep)
+		message += " checked";
+	message += "> " TXT_ON
 		"<input type=\"radio\" name=\"hb\" value=\"0\"";
-	if (!settings.mySettings.hourBeep) message += " checked";
-	message += "> off"
+	if (!settings.mySettings.hourBeep)
+		message += " checked";
+	message += "> " TXT_OFF
 		"</td></tr>";
 #endif
 	// ------------------------------------------------------------------------
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 	message += "<tr><td>"
-		"Show temperature:"
+		"Show temperature"
 		"</td><td>"
 		"<input type=\"radio\" name=\"mc\" value=\"1\"";
-	if (settings.mySettings.modeChange) message += " checked";
-	message += "> on "
+	if (settings.mySettings.modeChange)
+		message += " checked";
+	message += "> " TXT_ON
 		"<input type=\"radio\" name=\"mc\" value=\"0\"";
-	if (!settings.mySettings.modeChange) message += " checked";
-	message += "> off"
+	if (!settings.mySettings.modeChange)
+		message += " checked";
+	message += "> " TXT_OFF 
 		"</td></tr>";
 #endif
 	// ------------------------------------------------------------------------
 #ifdef LDR
 	message += "<tr><td>"
-		"ABC:"
+		"ABC"
 		"</td><td>"
 		"<input type=\"radio\" name=\"ab\" value=\"1\"";
-	if (settings.mySettings.useAbc) message += " checked";
-	message += "> on "
+	if (settings.mySettings.useAbc)
+		message += " checked";
+	message += "> " TXT_ON
 		"<input type=\"radio\" name=\"ab\" value=\"0\"";
-	if (!settings.mySettings.useAbc) message += " checked";
-	message += "> off"
+	if (!settings.mySettings.useAbc)
+		message += " checked";
+	message += "> " TXT_OFF
 		"</td></tr>";
 #endif
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Brightness:"
+		"Brightness"
 		"</td><td>"
 		"<select name=\"br\">";
 	for (int i = 10; i <= 100; i += 10)
 	{
 		message += "<option value=\"" + String(i) + "\"";
-		if (i == settings.mySettings.brightness) message += " selected";
+		if (i == settings.mySettings.brightness)
+			message += " selected";
 		message += ">";
 		message += String(i) + "</option>";
 	}
@@ -1954,7 +2026,7 @@ void handleButtonSettings()
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Color:"
+		"Color"
 		"</td><td>"
 		"<select name=\"co\">"
 		"<option value=\"0\"";
@@ -2061,88 +2133,103 @@ void handleButtonSettings()
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Colorchange:"
+		"Colorchange"
 		"</td><td>"
 		"<input type=\"radio\" name=\"cc\" value=\"3\"";
-	if (settings.mySettings.colorChange == 3) message += " checked";
+	if (settings.mySettings.colorChange == 3)
+		message += " checked";
 	message += "> day "
 		"<input type=\"radio\" name=\"cc\" value=\"2\"";
-	if (settings.mySettings.colorChange == 2) message += " checked";
+	if (settings.mySettings.colorChange == 2)
+		message += " checked";
 	message += "> hour "
 		"<input type=\"radio\" name=\"cc\" value=\"1\"";
-	if (settings.mySettings.colorChange == 1) message += " checked";
+	if (settings.mySettings.colorChange == 1)
+		message += " checked";
 	message += "> five "
 		"<input type=\"radio\" name=\"cc\" value=\"0\"";
-	if (settings.mySettings.colorChange == 0) message += " checked";
+	if (settings.mySettings.colorChange == 0)
+		message += " checked";
 	message += "> off"
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 #ifndef FRONTCOVER_BINARY
 	message += "<tr><td>"
-		"Transition:"
+		"Transition"
 		"</td><td>"
 		"<input type=\"radio\" name=\"tr\" value=\"2\"";
-	if (settings.mySettings.transition == 2) message += " checked";
+	if (settings.mySettings.transition == 2)
+		message += " checked";
 	message += "> fade "
 		"<input type=\"radio\" name=\"tr\" value=\"1\"";
-	if (settings.mySettings.transition == 1) message += " checked";
+	if (settings.mySettings.transition == 1)
+		message += " checked";
 	message += "> move "
 		"<input type=\"radio\" name=\"tr\" value=\"0\"";
-	if (settings.mySettings.transition == 0) message += " checked";
+	if (settings.mySettings.transition == 0)
+		message += " checked";
 	message += "> none"
 		"</td></tr>";
 #endif
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Timeout:"
+		"Timeout"
 		"</td><td>"
 		"<select name=\"to\">";
 	for (int i = 0; i <= 60; i += 5)
 	{
 		message += "<option value=\"" + String(i) + "\"";
-		if (i == settings.mySettings.timeout) message += " selected";
+		if (i == settings.mySettings.timeout)
+			message += " selected";
 		message += ">";
-		if (i < 10) message += "0";
+		if (i < 10)
+			message += "0";
 		message += String(i) + "</option>";
 	}
 	message += "</select> sec."
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Night off:"
+		"Night off"
 		"</td><td>"
 		"<input type=\"time\" name=\"no\" value=\"";
-	if (hour(settings.mySettings.nightOffTime) < 10) message += "0";
+	if (hour(settings.mySettings.nightOffTime) < 10)
+		message += "0";
 	message += String(hour(settings.mySettings.nightOffTime)) + ":";
-	if (minute(settings.mySettings.nightOffTime) < 10) message += "0";
+	if (minute(settings.mySettings.nightOffTime) < 10)
+		message += "0";
 	message += String(minute(settings.mySettings.nightOffTime)) + "\">"
 		" h"
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Day on:"
+		"Day on"
 		"</td><td>"
 		"<input type=\"time\" name=\"do\" value=\"";
-	if (hour(settings.mySettings.dayOnTime) < 10) message += "0";
+	if (hour(settings.mySettings.dayOnTime) < 10)
+		message += "0";
 	message += String(hour(settings.mySettings.dayOnTime)) + ":";
-	if (minute(settings.mySettings.dayOnTime) < 10) message += "0";
+	if (minute(settings.mySettings.dayOnTime) < 10)
+		message += "0";
 	message += String(minute(settings.mySettings.dayOnTime)) + "\">"
 		" h"
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Show \"It is\":"
+		"Show \"It is\""
 		"</td><td>"
 		"<input type=\"radio\" name=\"ii\" value=\"1\"";
-	if (settings.mySettings.itIs) message += " checked";
-	message += "> on "
+	if (settings.mySettings.itIs)
+		message += " checked";
+	message += "> " TXT_ON
 		"<input type=\"radio\" name=\"ii\" value=\"0\"";
-	if (!settings.mySettings.itIs) message += " checked";
-	message += "> off"
+	if (!settings.mySettings.itIs)
+		message += " checked";
+	message += "> " TXT_OFF
 		"</td></tr>";
 	// ------------------------------------------------------------------------
 	message += "<tr><td>"
-		"Set date/time:"
+		"Set date/time"
 		"</td><td>"
 		"<input type=\"datetime-local\" name=\"st\">"
 		"</td></tr>";
@@ -2197,6 +2284,22 @@ void handleCommitSettings()
 		alarmTimerSecond = second();
 		alarmTimerSet = true;
 		setMode(MODE_TIMER);
+#ifdef DEBUG
+		Serial.println("Timer started.");
+#endif
+	}
+	else
+	{
+		if (alarmTimerSet)
+		{
+			alarmTimer = 0;
+			alarmTimerSecond = 0;
+			alarmTimerSet = false;
+			setMode(MODE_TIME);
+#ifdef DEBUG
+			Serial.println("Timer stopped.");
+#endif
+		}
 	}
 #endif
 	// ------------------------------------------------------------------------
@@ -2208,31 +2311,45 @@ void handleCommitSettings()
 	if (webServer.arg("ab") == "0")
 	{
 		settings.mySettings.useAbc = false;
-		brightness = abcBrightness;
+		brightness = maxBrightness;
 	}
 	else
 		settings.mySettings.useAbc = true;
 #endif
 	// ------------------------------------------------------------------------
 	settings.mySettings.brightness = webServer.arg("br").toInt();
-	abcBrightness = map(settings.mySettings.brightness, 10, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-	brightness = abcBrightness;
+	maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+	brightness = maxBrightness;
 	// ------------------------------------------------------------------------
 	settings.mySettings.color = webServer.arg("co").toInt();
 	// ------------------------------------------------------------------------
 	switch (webServer.arg("cc").toInt())
 	{
-	case 0: settings.mySettings.colorChange = COLORCHANGE_NO;   break;
-	case 1: settings.mySettings.colorChange = COLORCHANGE_FIVE; break;
-	case 2: settings.mySettings.colorChange = COLORCHANGE_HOUR; break;
-	case 3: settings.mySettings.colorChange = COLORCHANGE_DAY;  break;
+		case 0:
+			settings.mySettings.colorChange = COLORCHANGE_NO;
+			break;
+		case 1:
+			settings.mySettings.colorChange = COLORCHANGE_FIVE;
+			break;
+		case 2:
+			settings.mySettings.colorChange = COLORCHANGE_HOUR;
+			break;
+		case 3:
+			settings.mySettings.colorChange = COLORCHANGE_DAY;
+			break;
 	}
 	// ------------------------------------------------------------------------
 	switch (webServer.arg("tr").toInt())
 	{
-	case 0: settings.mySettings.transition = TRANSITION_NORMAL; break;
-	case 1: settings.mySettings.transition = TRANSITION_MOVEUP; break;
-	case 2: settings.mySettings.transition = TRANSITION_FADE;   break;
+		case 0:
+			settings.mySettings.transition = TRANSITION_NORMAL;
+			break;
+		case 1:
+			settings.mySettings.transition = TRANSITION_MOVEUP;
+			break;
+		case 2:
+			settings.mySettings.transition = TRANSITION_FADE;
+			break;
 	}
 	// ------------------------------------------------------------------------
 	settings.mySettings.timeout = webServer.arg("to").toInt();
