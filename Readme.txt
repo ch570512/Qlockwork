@@ -94,9 +94,10 @@ Blue
 White
 
 ******************************************************************************
-Needed libraries: (recommended versions in brackets)
+Needed libraries: (recommended/tested versions in brackets)
 ******************************************************************************
 
+Arduino IDE for Windows (1.8.12)
 esp8266 by ESP8266 Community (2.7.2)
 Arduino_JSON by Arduino (0.1.0)
 Adafruit NeoPixel by Adafruit (1.5.0)
@@ -108,23 +109,23 @@ DS3232RTC by Jack Christensen (1.2.12)
 IRremoteESP8266 by Sebastien Warin (2.7.8)
 Time by Michael Margolis (1.6.0)
 
-Also includes the Timezone library from Jack Christensen
+Included in source is the Timezone library from Jack Christensen
 and WiFiManager by AlexT.
 
 ******************************************************************************
-Compiler-Options: (recommended)
+Compiler-Options: (recommended/tested)
 ******************************************************************************
 
-Arduino IDE for Windows (1.8.12)
 Board: "LOLIN(WEMOS) D1 R2 & mini"
+CPU Frequency: "80 MHz"
 Flash Size: "4M (3M SPIFFS)"
 Debug port: "Disabled"
 Debug Level: "None"
 IwIP Variant: "v2 Lower Memory"
 VTables: "Flash"
-CPU Frequency: "80 MHz"
-Upload Speed: "512000"
+Exceptions: "Disabled"
 Erase Flash: "Only Sketch"
+SSL Support: "All SSL ciphers"
 
 ******************************************************************************
 Misc:
