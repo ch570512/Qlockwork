@@ -97,7 +97,7 @@ White
 Needed libraries: (recommended/tested versions in brackets)
 ******************************************************************************
 
-Arduino IDE for Windows (1.8.12)
+Arduino IDE for Windows (1.8.13)
 esp8266 by ESP8266 Community (2.7.2)
 Arduino_JSON by Arduino (0.1.0)
 Adafruit NeoPixel by Adafruit (1.5.0)
