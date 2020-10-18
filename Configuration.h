@@ -11,6 +11,7 @@
 //******************************************************************************
 
 #define HOSTNAME "QLOCKWORK"
+#define WEBSITE_TITLE "QLOCKWORK's configuration page"
 #define WIFI_SETUP_TIMEOUT 120
 #define WIFI_AP_PASS "12345678"
 #define OTA_PASS "1234"

@@ -1696,7 +1696,7 @@ void handleRoot()
 		"</style>"
 		"</head>"
 		"<body>"
-		"<h1>" + String(HOSTNAME) + "</h1>";
+		"<h1>" + String(WEBSITE_TITLE) + "</h1>";
 #ifdef DEDICATION
 	message += DEDICATION;
 	message += "<br><br>";
