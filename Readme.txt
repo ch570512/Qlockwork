@@ -98,15 +98,15 @@ Needed libraries: (recommended/tested versions in brackets)
 ******************************************************************************
 
 Arduino IDE for Windows (1.8.13)
-esp8266 by ESP8266 Community (2.7.2)
+esp8266 by ESP8266 Community (2.7.4)
 Arduino_JSON by Arduino (0.1.0)
-Adafruit NeoPixel by Adafruit (1.5.0)
+Adafruit NeoPixel by Adafruit (1.7.0)
 Adafruit Unified Sensor by Adafruit (1.1.4)
 ArduinoHttpClient by Arduino (0.4.0)
 ArduinoOTA by Juraj Andressy (1.0.4)
-DHT sensor library by Adafruit (1.3.10)
+DHT sensor library by Adafruit (1.4.1)
 DS3232RTC by Jack Christensen (1.2.12)
-IRremoteESP8266 by Sebastien Warin (2.7.8)
+IRremoteESP8266 by Sebastien Warin (2.7.13)
 Time by Michael Margolis (1.6.0)
 
 Included in source is the Timezone library from Jack Christensen
