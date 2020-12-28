@@ -273,7 +273,7 @@ Configuration.h - Hardware settings:
 
 #define NEOPIXEL_TYPE               Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW and RGBW.
 
-#define LED_LAYOUT_HORIZONTAL_1     Horizontal and corner LEDs at the end of the strip. (As seen from the front.)
+#define LED_LAYOUT_HORIZONTAL_1     Horizontal and corner and alarm LEDs at the end of the strip. (As seen from the front.)
 
 111                    114                    112
    000 001 002 003 004 005 006 007 008 009 010
@@ -288,7 +288,7 @@ Configuration.h - Hardware settings:
    109 108 107 106 105 104 103 102 101 100 099
 110                                            113
 
-#define LED_LAYOUT_VERTICAL_1       Vertical and corner LEDs within the strip. (As seen from the front.)
+#define LED_LAYOUT_VERTICAL_1       Vertical and corner and alarm LEDs (almost) within the strip. (As seen from the front.)
 
 000                    114                    102
    001 021 022 041 042 061 062 081 082 101 103
@@ -303,7 +303,7 @@ Configuration.h - Hardware settings:
    010 012 031 032 051 052 071 072 091 092 112
 011                                           113
 
-#define LED_LAYOUT_VERTICAL_2       Vertical and corner LEDs at the end of the strip. (As seen from the front.)
+#define LED_LAYOUT_VERTICAL_2       Vertical and corner and alarm LEDs at the end of the strip. (As seen from the front.)
 
 112                    111                    110
    009 010 029 030 049 050 069 070 089 090 109
