@@ -272,6 +272,7 @@ Configuration.h - Hardware settings:
                                     DEBUG has to be defined to show you the code.
 
 #define NEOPIXEL_TYPE               Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW and RGBW.
+#define NUMPIXELS 114               Number of pixels on the Clock. When using Alarm LED or LED_LAYOUT_VERTICAL_2, change accordingly
 
 #define LED_LAYOUT_HORIZONTAL_1     Horizontal and corner and alarm LEDs at the end of the strip. (As seen from the front.)
 
