@@ -103,7 +103,7 @@
 //#define MODE_BUTTON
 //#define TIME_BUTTON
 
-#define NUMPIXELS 114
+#define NUMPIXELS 114 // change to 115 for using alarm LED or LED_LAYOUT_VERTICAL_2
 #define ESP_LED
 
 #define MIN_BRIGHTNESS 20
