@@ -103,7 +103,6 @@
 //#define MODE_BUTTON
 //#define TIME_BUTTON
 
-#define NUMPIXELS 114
 #define ESP_LED
 
 #define MIN_BRIGHTNESS 20

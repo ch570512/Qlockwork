@@ -106,7 +106,7 @@ ArduinoHttpClient by Arduino (0.4.0)
 ArduinoOTA by Juraj Andressy (1.0.4)
 DHT sensor library by Adafruit (1.4.1)
 DS3232RTC by Jack Christensen (1.2.12)
-IRremoteESP8266 by Sebastien Warin (2.7.13)
+IRremoteESP8266 by Sebastien Warin (2.7.14)
 Time by Michael Margolis (1.6.0)
 
 Included in source is the Timezone library from Jack Christensen
@@ -237,9 +237,9 @@ Configuration.h - Hardware settings:
 
 #define ESP_LED                     Displays the function using the LED on the ESP. It flashes once a second.
 
-#define ONOFF_BUTTON               Use a hardware on/off-button.
-#define MODE_BUTTON                Use a hardware mode-button.
-#define TIME_BUTTON                Use a hardware time-button. Debug to serial will not work if defined.
+#define ONOFF_BUTTON                Use a hardware on/off-button.
+#define MODE_BUTTON                 Use a hardware mode-button.
+#define TIME_BUTTON                 Use a hardware time-button. Debug to serial will not work if defined.
 
 #define SENSOR_DHT22                Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
 #define DHT_TEMPERATURE_OFFSET      Sets how many degrees the measured room temperature (+ or -) should be corrected.
