@@ -11,6 +11,8 @@
 //******************************************************************************
 
 #define HOSTNAME "QLOCKWORK"
+#define WEBSITE_TITLE "QLOCKWORKs configuration page"
+//#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
 #define WIFI_SETUP_TIMEOUT 120
 #define WIFI_AP_PASS "12345678"
 #define OTA_PASS "1234"
@@ -24,7 +26,6 @@
 #define EVENT_TIME 300
 #define ALARM_LED_COLOR RED
 //#define ABUSE_CORNER_LED_FOR_ALARM
-//#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
 
 //#define POWERON_SELFTEST
 #define SHOW_MODE_AMPM

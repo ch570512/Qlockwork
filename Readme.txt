@@ -414,6 +414,11 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
+20210218:
+Outdoor pressure on WEB page.
+Replaced WEB page title HOSTNAME with WEBSITE_TITLE in configuration (Thanks to GenosseFlosse).
+Removed NUMPIXELS from configuration. Defaults to 115 even if you use less.
+
 20200709:
 Turn off timer when it is running.
 Some localization in settings and weather.
@@ -429,7 +434,7 @@ WEB API for Clock On/Off.
 Bugfixes.
 
 20200101:
-Outdoor Weather from OpenWeatherMap.
+Outdoor weather from OpenWeatherMap.
 New LED driver with LED array mapping.
 Reworked Configuration.h
 Switched to lean Arduino_Json.h
@@ -439,7 +444,7 @@ Some housekeeping.
 
 20190520:
 #define WIFI_BEEPS
-Fixed rare flickering of fade transition.
+Fixed rare flickering in fade transition.
 
 20190204:
 Maior update of "Readme.txt"

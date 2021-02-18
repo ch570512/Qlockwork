@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20200709
+#define FIRMWARE_VERSION 20210218
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -166,7 +166,6 @@ uint8_t testColumn = 0;
 int updateInfo = 0;
 IPAddress myIP = { 0,0,0,0 };
 uint32_t lastButtonPress = 0;
-boolean transitionInProgress = false;
 
 //******************************************************************************
 // Setup()
@@ -1205,9 +1204,9 @@ void loop()
 #endif
 } // loop()
 
-/******************************************************************************
-  Transitions
-******************************************************************************/
+//******************************************************************************
+// Transitions
+//******************************************************************************
 
 void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness)
 {
@@ -1266,10 +1265,10 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
 
 void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness)
 {
-	transitionInProgress = true;
 	ledDriver.clear();
 	uint8_t brightnessBuffer[10][12] = {};
 
+    // Copy old matrix to buffer
 	for (uint8_t y = 0; y <= 9; y++)
 	{
 		for (uint8_t x = 0; x <= 11; x++)
@@ -1278,6 +1277,8 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 				brightnessBuffer[y][x] = brightness;
 		}
 	}
+
+	// Fade old to new matrix
 	for (uint8_t i = 0; i < brightness; i++)
 	{
 		for (uint8_t y = 0; y <= 9; y++)
@@ -1312,15 +1313,13 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 #endif
 #endif
 		webServer.handleClient();
-		delay(1500 / brightness);
 		ledDriver.show();
 	}
-	transitionInProgress = false;
 }
 
-/******************************************************************************
-  "On/off" pressed
-******************************************************************************/
+//******************************************************************************
+// "On/off" pressed
+//******************************************************************************
 
 void buttonOnOffPressed()
 {
@@ -1331,9 +1330,9 @@ void buttonOnOffPressed()
 	mode == MODE_BLANK ? setLedsOn() : setLedsOff();
 }
 
-/******************************************************************************
-  "Time" pressed
-******************************************************************************/
+//******************************************************************************
+// "Time" pressed
+//******************************************************************************
 
 void buttonTimePressed()
 {
@@ -1357,9 +1356,9 @@ void buttonTimePressed()
 	setMode(MODE_TIME);
 }
 
-/******************************************************************************
-  "Mode" pressed
-******************************************************************************/
+//******************************************************************************
+// "Mode" pressed
+//******************************************************************************
 
 void buttonModePressed()
 {
@@ -1384,9 +1383,9 @@ void buttonModePressed()
 	setMode(mode++);
 }
 
-/******************************************************************************
-  Set mode
-******************************************************************************/
+//******************************************************************************
+// Set mode
+//******************************************************************************
 
 void setMode(Mode newMode)
 {
@@ -1433,8 +1432,9 @@ void setMode(Mode newMode)
 }
 
 //******************************************************************************
-// get brightness from LDR
+// Get brightness from LDR
 //******************************************************************************
+
 #ifdef LDR
 void setBrightnessFromLdr()
 {
@@ -1461,8 +1461,9 @@ void setBrightnessFromLdr()
 #endif
 
 //******************************************************************************
-// get update info from server
+// Get update info from server
 //******************************************************************************
+
 #ifdef UPDATE_INFOSERVER
 void getUpdateInfo()
 {
@@ -1485,6 +1486,7 @@ void getUpdateInfo()
 //******************************************************************************
 // Get room conditions
 //******************************************************************************
+
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 void getRoomConditions()
 {
@@ -1649,9 +1651,9 @@ void debugFps()
 }
 #endif
 
-/******************************************************************************
-  Webserver
-******************************************************************************/
+//******************************************************************************
+// Webserver
+//******************************************************************************
 
 void setupWebServer()
 {
@@ -1686,7 +1688,7 @@ void handleRoot()
 	String message = "<!doctype html>"
 		"<html>"
 		"<head>"
-		"<title>" + String(HOSTNAME) + "</title>"
+		"<title>" + String(WEBSITE_TITLE) + "</title>"
 		"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
 		"<meta http-equiv=\"refresh\" content=\"60\" charset=\"UTF-8\">"
 		"<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">"
@@ -1696,7 +1698,7 @@ void handleRoot()
 		"</style>"
 		"</head>"
 		"<body>"
-		"<h1>" + String(HOSTNAME) + "</h1>";
+		"<h1>" + String(WEBSITE_TITLE) + "</h1>";
 #ifdef DEDICATION
 	message += DEDICATION;
 	message += "<br><br>";
@@ -1714,7 +1716,7 @@ void handleRoot()
 	message += "<br><i class=\"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(roomTemperature) + "&deg;C / " + String(roomTemperature * 1.8 + 32.0) + "&deg;F";
 #endif
 #ifdef SENSOR_DHT22
-	message += "<br><i class=\"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(roomHumidity) + "%RH"
+	message += "<br><i class=\"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(roomHumidity) + "% RH"
 		"<br><span style=\"font-size:20px;\">";
 	if (roomHumidity < 30)
 		message += "<i style=\"color:Red;\" class=\"fa fa-square\"\"></i>";
@@ -1741,8 +1743,9 @@ void handleRoot()
 #ifdef APIKEY
 	message += "<br><br><i class = \"fa fa-tree\" style=\"font-size:20px;\"></i>"
 		"<br><i class = \"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.temperature) + "&deg;C / " + String(outdoorWeather.temperature * 1.8 + 32.0) + "&deg;F"
-		"<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "%RH";
-	message += "<br>" + outdoorWeather.description;
+		"<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "% RH"
+		"<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg"
+		"<br>" + outdoorWeather.description;
 #endif
 	message += "<span style=\"font-size:12px;\">"
 		"<br><br><a href=\"http://tmw-it.ch/qlockwork/\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
