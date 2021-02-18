@@ -196,6 +196,7 @@ Configuration.h - Software settings:
 ******************************************************************************
 
 #define HOSTNAME                    The name of the clock.
+#define WEBSITE_TITLE               Title on top of the clocks webpage.
 #define WIFI_SETUP_TIMEOUT          Time in seconds set up the WiFiManager or search for a WLAN.
                                     If no WLAN is connected the clock enters AP mode.
                                     You can control the clock if you connect your phone or tablet to this accesspoint.
