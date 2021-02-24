@@ -415,6 +415,9 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
+20210224:
+WLAN RSSI on WEB page in Debug.
+
 20210218:
 Outdoor pressure on WEB page.
 Replaced WEB page title HOSTNAME with WEBSITE_TITLE in configuration (Thanks to GenosseFlosse).

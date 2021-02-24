@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20210218
+#define FIRMWARE_VERSION 20210224
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -272,6 +272,7 @@ void setup()
 	{
 		WiFi.mode(WIFI_STA);
 		Serial.println("WLAN connected. Switching to STA mode.");
+		Serial.println("RSSI: " + String(WiFi.RSSI()));
 		writeScreenBuffer(matrix, GREEN, brightness);
 #if defined(BUZZER) && defined(WIFI_BEEPS)
 		for (uint8_t i = 0; i <= 2; i++)
@@ -1769,6 +1770,7 @@ void handleRoot()
 	message += "<br>" + String(dayStr(weekday(tempEspTime))) + ", " + String(monthStr(month(tempEspTime))) + " " + String(day(tempEspTime)) + ". " + String(year(tempEspTime));
 	message += "<br>Moonphase: " + String(moonphase);
 	message += "<br>Free RAM: " + String(ESP.getFreeHeap()) + " bytes";
+	message += "<br>RSSI: " + String(WiFi.RSSI());
 #ifdef LDR
 	message += "<br>Brightness: " + String(brightness) + " (ABC: ";
 	settings.mySettings.useAbc ? message += "enabled" : message += "disabled";
