@@ -417,6 +417,14 @@ Changelog:
 
 20210224:
 WLAN RSSI on WEB page in Debug.
+// -30 dBm Ausgezeichnet Dies ist die maximal erreichbare und für jedes Einsatzszenario geeignete Signalstärke.
+// -50 dBm Ausgezeichnet Dieser ausgezeichnete Signalpegel ist für alle Netzwerkanwendungen geeignet.
+// -65 dBm Sehr gut Empfohlen für die Unterstützung von Smartphones und Tablets.
+// -67 dBm Sehr gut Diese Signalstärke reicht für Voice-over-IP und Video-Streaming aus.
+// -70 dBm Akzeptabel Diese Stufe ist die minimale Signalstärke um eine zuverlässige Paket-Zustellung zu gewährleisten.
+// -80 dBm Schlecht Ermöglicht grundlegende Konnektivität, die Paket-Zustellung ist jedoch unzuverlässig.
+// -90 dBm Sehr schlecht Meistens Rauschen, das die meisten Funktionen behindert.
+//-100 dBm Am schlechtesten Nur Rauschen.
 
 20210218:
 Outdoor pressure on WEB page.
