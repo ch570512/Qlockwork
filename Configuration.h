@@ -100,6 +100,8 @@
 
 #define SERIAL_SPEED 115200
 
+#define NUMPIXELS 115
+
 //#define ONOFF_BUTTON
 //#define MODE_BUTTON
 //#define TIME_BUTTON

@@ -6,7 +6,7 @@
 
 LedDriver::LedDriver()
 {
-    strip = new Adafruit_NeoPixel(115, PIN_LEDS_DATA, NEOPIXEL_TYPE);
+    strip = new Adafruit_NeoPixel(NUMPIXELS, PIN_LEDS_DATA, NEOPIXEL_TYPE);
     strip->begin();
 }
 
