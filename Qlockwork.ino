@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20210224
+#define FIRMWARE_VERSION 20210321
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -166,6 +166,7 @@ uint8_t testColumn = 0;
 int updateInfo = 0;
 IPAddress myIP = { 0,0,0,0 };
 uint32_t lastButtonPress = 0;
+bool testFlag = false;
 
 //******************************************************************************
 // Setup()
@@ -838,8 +839,14 @@ void loop()
 	{
 		screenBufferNeedsUpdate = false;
 
-		// Save old screenbuffer
-		for (uint8_t i = 0; i <= 9; i++) matrixOld[i] = matrix[i];
+		// Save old screenbuffer (or not if it's the test pattern)
+		if (testFlag)
+		{
+			for (uint8_t i = 0; i <= 9; i++) matrixOld[i] = 0;
+			testFlag = false;
+		}
+		else
+			for (uint8_t i = 0; i <= 9; i++) matrixOld[i] = matrix[i];
 
 		switch (mode)
 		{
@@ -1108,6 +1115,7 @@ void loop()
 		case MODE_BLUE:
 		case MODE_WHITE:
 			renderer.setAllScreenBuffer(matrix);
+			testFlag = true;
 			break;
 #endif
 		case MODE_BLANK:
@@ -1269,7 +1277,7 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 	ledDriver.clear();
 	uint8_t brightnessBuffer[10][12] = {};
 
-    // Copy old matrix to buffer
+	// Copy old matrix to buffer
 	for (uint8_t y = 0; y <= 9; y++)
 	{
 		for (uint8_t x = 0; x <= 11; x++)
@@ -1835,7 +1843,7 @@ void handleButtonSettings()
 	String message = "<!doctype html>"
 		"<html>"
 		"<head>"
-		"<title>" + String(HOSTNAME) + " " TXT_SETTINGS "</title>"
+		"<title>" + String(WEBSITE_TITLE) + " " TXT_SETTINGS "</title>"
 		"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
 		"<meta charset=\"UTF-8\">"
 		"<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">"
@@ -1848,7 +1856,7 @@ void handleButtonSettings()
 		"</style>"
 		"</head>"
 		"<body>"
-		"<h1>" + String(HOSTNAME) + " " TXT_SETTINGS "</h1>"
+		"<h1>" + String(WEBSITE_TITLE) + " " TXT_SETTINGS "</h1>"
 		"<form action=\"/commitSettings\">"
 		"<table>";
 	// ------------------------------------------------------------------------
@@ -1996,7 +2004,7 @@ void handleButtonSettings()
 		"<input type=\"radio\" name=\"mc\" value=\"0\"";
 	if (!settings.mySettings.modeChange)
 		message += " checked";
-	message += "> " TXT_OFF 
+	message += "> " TXT_OFF
 		"</td></tr>";
 #endif
 	// ------------------------------------------------------------------------
@@ -2330,31 +2338,31 @@ void handleCommitSettings()
 	// ------------------------------------------------------------------------
 	switch (webServer.arg("cc").toInt())
 	{
-		case 0:
-			settings.mySettings.colorChange = COLORCHANGE_NO;
-			break;
-		case 1:
-			settings.mySettings.colorChange = COLORCHANGE_FIVE;
-			break;
-		case 2:
-			settings.mySettings.colorChange = COLORCHANGE_HOUR;
-			break;
-		case 3:
-			settings.mySettings.colorChange = COLORCHANGE_DAY;
-			break;
+	case 0:
+		settings.mySettings.colorChange = COLORCHANGE_NO;
+		break;
+	case 1:
+		settings.mySettings.colorChange = COLORCHANGE_FIVE;
+		break;
+	case 2:
+		settings.mySettings.colorChange = COLORCHANGE_HOUR;
+		break;
+	case 3:
+		settings.mySettings.colorChange = COLORCHANGE_DAY;
+		break;
 	}
 	// ------------------------------------------------------------------------
 	switch (webServer.arg("tr").toInt())
 	{
-		case 0:
-			settings.mySettings.transition = TRANSITION_NORMAL;
-			break;
-		case 1:
-			settings.mySettings.transition = TRANSITION_MOVEUP;
-			break;
-		case 2:
-			settings.mySettings.transition = TRANSITION_FADE;
-			break;
+	case 0:
+		settings.mySettings.transition = TRANSITION_NORMAL;
+		break;
+	case 1:
+		settings.mySettings.transition = TRANSITION_MOVEUP;
+		break;
+	case 2:
+		settings.mySettings.transition = TRANSITION_FADE;
+		break;
 	}
 	// ------------------------------------------------------------------------
 	settings.mySettings.timeout = webServer.arg("to").toInt();
@@ -2370,7 +2378,7 @@ void handleCommitSettings()
 		Serial.println(webServer.arg("st"));
 		setTime(webServer.arg("st").substring(11, 13).toInt(), webServer.arg("st").substring(14, 16).toInt(), 0, webServer.arg("st").substring(8, 10).toInt(), webServer.arg("st").substring(5, 7).toInt(), webServer.arg("st").substring(0, 4).toInt());
 #ifdef RTC_BACKUP
-		RTC.set(timeZone.toUTC(now()));
+		RTC.set(now());
 #endif
 	}
 	// ------------------------------------------------------------------------

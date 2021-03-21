@@ -12,16 +12,16 @@
 class LedDriver
 {
 public:
-    LedDriver();
-    ~LedDriver();
+	LedDriver();
+	~LedDriver();
 
-    void clear();
-    void show();
-    void setPixel(uint8_t x, uint8_t y, uint8_t color, uint8_t brightness);
-    void setPixel(uint8_t num, uint8_t color, uint8_t brightness);
+	void clear();
+	void show();
+	void setPixel(uint8_t x, uint8_t y, uint8_t color, uint8_t brightness);
+	void setPixel(uint8_t num, uint8_t color, uint8_t brightness);
 
 private:
-    Adafruit_NeoPixel *strip;
+	Adafruit_NeoPixel* strip;
 
 };
 

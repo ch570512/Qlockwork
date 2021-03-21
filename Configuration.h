@@ -11,7 +11,7 @@
 //******************************************************************************
 
 #define HOSTNAME "QLOCKWORK"
-#define WEBSITE_TITLE "QLOCKWORKs configuration page"
+#define WEBSITE_TITLE "QLOCKWORKs page"
 //#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
 #define WIFI_SETUP_TIMEOUT 120
 #define WIFI_AP_PASS "12345678"
@@ -142,6 +142,7 @@
 #define LED_LAYOUT_HORIZONTAL_1
 //#define LED_LAYOUT_VERTICAL_1
 //#define LED_LAYOUT_VERTICAL_2
+//#define LED_LAYOUT_VERTICAL_3
 
 #define NEOPIXEL_TYPE NEO_GRB + NEO_KHZ800     // see Adafruit_NeoPixel.h for help
 //#define NEOPIXEL_TYPE NEO_GRBW + NEO_KHZ800

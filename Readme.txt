@@ -67,7 +67,7 @@ Textfeed for events and infos, local and over the web.
 Support for 16 frontcovers (Original and DIY) in 6 languages.
 25 Colors.
 99 minute timer.
-2 Alarmtimes for every day of the week.
+2 Alarms with weekday selection.
 NTP timesync with timezone support.
 Automatic adjustment of daylight saving time.
 USB and Over-the-air firmware updates.
@@ -219,15 +219,18 @@ Configuration.h - Software settings:
 #define ABUSE_CORNER_LED_FOR_ALARM  Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
                                     If no alarm or timer is set the LED is used as expected.
 #define DEDICATION                  Show a text on the clocks webpage.
+
 #define POWERON_SELFTEST            Test LEDs at startup. Colors are: white, red, green, blue. In this order.
-#define SHOW_MODE_AMPM
-#define SHOW_MODE_SECONDS
-#define SHOW_MODE_WEEKDAY
-#define SHOW_MODE_DATE
-#define SHOW_MODE_MOONPHASE
-#define SHOW_MODE_TEST
+#define SHOW_MODE_AMPM              Show AM/PM.
+#define SHOW_MODE_SECONDS           Show seconds.
+#define SHOW_MODE_WEEKDAY           Show weekday.
+#define SHOW_MODE_DATE              Show date.
+#define SHOW_MODE_MOONPHASE         Show moonphase.
+#define SHOW_MODE_TEST              Show tests.
+
 #define APIKEY                      Your OpenWeather API key.
 #define LOCATION                    Your location for OpenWeather.
+
 #define TIMEZONE_*                  The time zone in which the clock is located. Important for the UTC offset and the
                                     summer/winter time change.
 #define FRONTCOVER_*                Frontcover of the clock. This also sets the language of the menu and the website.
@@ -319,6 +322,21 @@ Configuration.h - Hardware settings:
    000 019 020 039 040 059 060 079 080 099 100
 113                                           114
 
+#define LED_LAYOUT_VERTICAL_3       Vertical and corner and alarm LEDs at the end of the strip. (As seen from the front.)
+
+111                    114                    110
+   009 010 029 030 049 050 069 070 089 090 109
+   008 011 028 031 048 051 068 071 088 091 108
+   007 012 027 032 047 052 067 072 087 092 107
+   006 013 026 033 046 053 066 073 086 093 106
+   005 014 025 034 045 054 065 074 085 094 105
+   004 015 024 035 044 055 064 075 084 095 104
+   003 016 023 036 043 056 063 076 083 096 103
+   002 017 022 037 042 057 062 077 082 097 102
+   001 018 021 038 041 058 061 078 081 098 101
+   000 019 020 039 040 059 060 079 080 099 100
+112                                           113
+
 ******************************************************************************
 Configuration.h - Misc:
 ******************************************************************************
@@ -398,22 +416,29 @@ day=dd                              Set day of event
 month=mm                            Set month of event
 color=0                             Color of the eventtext, 0 to 24 (optional)
 text=text                           Set text of event, max. 40 characters
-                                    e.g.: http://your_clocks_ip/setEvent?day=27&month=10&color=5&text=This%20is%20an%20event.
+                                    e.g.: http://192.168.1.10/setEvent?day=27&month=10&color=5&text=This%20is%20an%20event.
 
 http://your_clocks_ip/showText?
 buzzer=1                            Number of times the buzzer will beep before showing the text (optional)
 color=0                             Color of the textfeed, 0 to 24 (optional)
 text=text                           Set text of feed, max. 80 characters
-                                    e.g.: http://your_clocks_ip/showText?buzzer=2&color=1&text=Instant%20text%20on%20Qlockwork!
+                                    e.g.: http://192.168.1.10/showText?buzzer=2&color=1&text=Instant%20text%20on%20Qlockwork!
 
 http://your_clocks_ip/control?
 mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), ...
                                     mode=17 (off, if all other modes are enabled) -- see modes.h and count.
-                                    e.g.: http://your_clocks_ip/control?mode=6
+                                    e.g.: http://192.168.1.10/control?mode=6
 
 ******************************************************************************
 Changelog:
 ******************************************************************************
+
+20210321:
+Fixed openweather bug for more than one weathercondition (Thanks to Manfred).
+Setting RTC vom Web should be LT - not UTC (Thanks to Manfred).
+Clear all LEDs before exiting test pattern (Thanks to espuno).
+Calculate white channel for RGBW (Thanks to Manfred).
+New LED_LAYOUT_VERTICAL_3 (Like vertical 2 but alarm LED = 114).
 
 20210224:
 WLAN RSSI on WEB page in Debug.
@@ -429,7 +454,6 @@ WLAN RSSI on WEB page in Debug.
 20210218:
 Outdoor pressure on WEB page.
 Replaced WEB page title HOSTNAME with WEBSITE_TITLE in configuration (Thanks to GenosseFlosse).
-Removed NUMPIXELS from configuration. Defaults to 115 even if you use less.
 
 20200709:
 Turn off timer when it is running.
