@@ -20,7 +20,7 @@
 //
 // ******************************************************************************
 
-#define FIRMWARE_VERSION 20210321
+#define FIRMWARE_VERSION 20210422
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -1294,6 +1294,7 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 		{
 			for (uint8_t x = 0; x <= 11; x++)
 			{
+				ESP.wdtFeed();
 				if (!(bitRead(screenBufferOld[y], 15 - x)) && (bitRead(screenBufferNew[y], 15 - x)))
 					brightnessBuffer[y][x]++;
 				if ((bitRead(screenBufferOld[y], 15 - x)) && !(bitRead(screenBufferNew[y], 15 - x)))

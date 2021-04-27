@@ -433,6 +433,9 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
+20210422:
+Finally fixed the watchdog reset in fade transition (Thanks to espuno!).
+
 20210321:
 Fixed openweather bug for more than one weathercondition (Thanks to Manfred).
 Setting RTC vom Web should be LT - not UTC (Thanks to Manfred).
