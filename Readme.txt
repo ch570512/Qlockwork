@@ -434,7 +434,7 @@ Changelog:
 ******************************************************************************
 
 20210422:
-Finally fixed the watchdog reset in fade transition (Thanks to espuno!).
+Reduced the watchdog resets (Thanks to espuno).
 
 20210321:
 Fixed openweather bug for more than one weathercondition (Thanks to Manfred).
