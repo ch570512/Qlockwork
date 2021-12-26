@@ -20,32 +20,36 @@ typedef enum eMode : uint8_t
 #ifdef SHOW_MODE_DATE
 	MODE_DATE,				// 4
 #endif
+#ifdef SHOW_MODE_SUNRISE_SUNSET
+	MODE_SUNRISE, 			// 5
+	MODE_SUNSET, 			// 6
+#endif
 #ifdef SHOW_MODE_MOONPHASE
-	MODE_MOONPHASE,			// 5
+	MODE_MOONPHASE,			// 7
 #endif
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
-	MODE_TEMP,				// 6
+	MODE_TEMP,				// 8
 #endif
 #ifdef SENSOR_DHT22
-	MODE_HUMIDITY,			// 7
+	MODE_HUMIDITY,			// 9
 #endif
 #ifdef APIKEY
-	MODE_EXT_TEMP,			// 8
-	MODE_EXT_HUMIDITY,		// 9
+	MODE_EXT_TEMP,			// 10
+	MODE_EXT_HUMIDITY,		// 11
 #endif
 #ifdef BUZZER
-	MODE_TIMER,				// 10
+	MODE_TIMER,				// 12
 #endif
 #ifdef SHOW_MODE_TEST
-	MODE_TEST,				// 11
-	MODE_RED,				// 12
-	MODE_GREEN,				// 13
-	MODE_BLUE,				// 14
-	MODE_WHITE,				// 15
+	MODE_TEST,				// 13
+	MODE_RED,				// 14
+	MODE_GREEN,				// 15
+	MODE_BLUE,				// 16
+	MODE_WHITE,				// 17
 #endif
-	MODE_COUNT,				// 16
-	MODE_BLANK,				// 17
-	MODE_FEED				// 18
+	MODE_COUNT,				// 18
+	MODE_BLANK,				// 19
+	MODE_FEED				// 20
 } Mode;
 
 // Overload the ControlType++ operator.

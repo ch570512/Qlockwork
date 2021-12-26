@@ -21,9 +21,10 @@
 //#define WIFI_BEEPS
 
 //#define NONE_TECHNICAL_ZERO
-#define AUTO_MODECHANGE_TIME 60
-#define FEED_SPEED 120
-#define EVENT_TIME 300
+#define AUTO_MODECHANGE_TIME 60 // seconds
+#define FEED_SPEED 120 // milliseconds
+#define SUNSET_SUNRISE_SPEED 5000 // milliseconds delay between sunrise screen -> sunrise time -> sunset screen -> sunset time
+#define EVENT_TIME 300 // seconds
 #define ALARM_LED_COLOR RED
 //#define ABUSE_CORNER_LED_FOR_ALARM
 
@@ -33,6 +34,7 @@
 #define SHOW_MODE_WEEKDAY
 #define SHOW_MODE_DATE
 #define SHOW_MODE_MOONPHASE
+#define SHOW_MODE_SUNRISE_SUNSET // works only if APIKEY is defined
 #define SHOW_MODE_TEST
 
 //#define APIKEY "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

@@ -7,7 +7,7 @@
 
 #include <ESP8266WiFi.h>
 #include <TimeLib.h>
-#include <WiFiUDP.h>
+#include <WiFiUdp.h>
 
 class Ntp
 {
