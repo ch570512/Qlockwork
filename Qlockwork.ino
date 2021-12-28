@@ -161,6 +161,18 @@ uint8_t alarmOn = false;
 uint32_t showEventTimer = EVENT_TIME;
 #endif
 
+#ifdef SHOW_MODE_SUNRISE_SUNSET
+#ifdef APIKEY
+	boolean sunrise_started = false;
+	int sunrise_millis = 0;
+	boolean sunset_started = false;
+	int sunset_millis = 0;
+	time_t sunset_unix = 0;
+	time_t sunrise_unix = 0;
+	int save_color_sunrise_sunset = 0;
+#endif
+#endif
+
 // Misc
 uint8_t testColumn = 0;
 int updateInfo = 0;
@@ -256,6 +268,7 @@ void setup()
 	wifiManager.autoConnect(HOSTNAME, WIFI_AP_PASS);
 	WiFi.hostname(HOSTNAME);
 	WiFi.setAutoReconnect(true);
+	WiFi.setAutoConnect(true);
 	if (!WiFi.isConnected())
 	{
 		WiFi.mode(WIFI_AP);
@@ -321,7 +334,7 @@ void setup()
 #ifdef SYSLOGSERVER_SERVER
 		Serial.println("Starting syslog.");
 #ifdef APIKEY
-		syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;outdoorTemperature;outdoorHumidity;ldrValue;errorCounterNTP;errorCounterDHT;errorCounterOutdoorWeather;freeHeapSize;upTime");
+		syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;outdoorTemperature;outdoorHumidity;sunriseTime;sunsetTime;ldrValue;errorCounterNTP;errorCounterDHT;errorCounterOutdoorWeather;freeHeapSize;upTime");
 #else
 		syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;ldrValue;errorCounterNTP;errorCounterDHT;freeHeapSize;upTime");
 #endif
@@ -334,10 +347,12 @@ void setup()
 #endif
 		!outdoorWeather.getOutdoorConditions(LOCATION, APIKEY, LANGSTR) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-		Serial.println(outdoorWeather.description);
-		Serial.println(outdoorWeather.temperature);
-		Serial.println(outdoorWeather.humidity);
-		Serial.println(outdoorWeather.pressure);
+		Serial.println("Weather description: " + String(outdoorWeather.description));
+		Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature));
+		Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity));
+		Serial.println("Pressure: " + String(outdoorWeather.pressure));
+		Serial.println("Sunrise: " + String(hour(timeZone.toLocal(outdoorWeather.sunrise))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunrise))));
+		Serial.println("Sunset: " + String(hour(timeZone.toLocal(outdoorWeather.sunset))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunset))));
 #endif
 #endif
 	}
@@ -397,6 +412,10 @@ void setup()
 			Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
 #endif
 		}
+	}
+	else
+	{
+		WiFi.reconnect();
 	}
 
 	// Define a random time
@@ -579,6 +598,11 @@ void loop()
 			Serial.println("Day on.");
 #endif
 			setMode(lastMode);
+			if (!WiFi.isConnected())
+			{
+				ESP.restart();
+			}
+
 		}
 
 		// ************************************************************************
@@ -615,6 +639,10 @@ void loop()
 #endif
 				}
 			}
+			else
+			{
+				WiFi.reconnect();
+			}
 		}
 
 		if (minute() == randomMinute)
@@ -623,14 +651,24 @@ void loop()
 			{
 				// Get weather from OpenWeather
 #ifdef APIKEY
+#ifdef DEBUG
+				Serial.println("Getting outdoor weather for location " + String(LOCATION) +":");
+#endif
 				!outdoorWeather.getOutdoorConditions(LOCATION, APIKEY, LANGSTR) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-				Serial.println(outdoorWeather.description);
-				Serial.println(outdoorWeather.temperature);
-				Serial.println(outdoorWeather.humidity);
-				Serial.println(outdoorWeather.pressure);
+				Serial.println("Location: " + String(LOCATION));
+				Serial.println("Weather description: " + String(outdoorWeather.description));
+				Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature));
+				Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity));
+				Serial.println("Pressure: " + String(outdoorWeather.pressure));
+				Serial.println("Sunrise: " + String(hour(timeZone.toLocal(outdoorWeather.sunrise))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunrise))));
+				Serial.println("Sunset: " + String(hour(timeZone.toLocal(outdoorWeather.sunset))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunset))));
 #endif
 #endif
+			}
+			else
+			{
+				WiFi.reconnect();
 			}
 		}
 
@@ -646,7 +684,9 @@ void loop()
 			{
 				time_t tempEspTime = now();
 #ifdef APIKEY
-				syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(outdoorWeather.temperature) + ";" + String(outdoorWeather.humidity) + ";" + String(ldrValue)\
+				syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(outdoorWeather.temperature) + ";" + String(outdoorWeather.humidity) + ";" \
+				+String(hour(timeZone.toLocal(outdoorWeather.sunrise))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunrise))) + ";" \
+				+ String(hour(timeZone.toLocal(outdoorWeather.sunset))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunset))) + ";" + String(ldrValue)\
 					+ ";" + String(errorCounterNTP) + ";" + String(errorCounterDHT) + ";" + String(errorCounterOutdoorWeather) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
 #else
 				syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(ldrValue)\
@@ -750,7 +790,14 @@ void loop()
 				case 0:
 #ifdef APIKEY
 					if (WiFi.isConnected())
+					{
 						setMode(MODE_EXT_TEMP);
+					}
+					else
+					{
+						WiFi.reconnect();
+						setMode(MODE_EXT_TEMP);
+					}
 #endif
 					autoMode = 1;
 					break;
@@ -760,7 +807,14 @@ void loop()
 #else
 #ifdef APIKEY
 					if (WiFi.isConnected())
+					{
 						setMode(MODE_EXT_TEMP);
+					}
+					else
+					{
+						WiFi.reconnect();
+						setMode(MODE_EXT_TEMP);
+					}
 #endif
 #endif
 					autoMode = 0;
@@ -851,6 +905,13 @@ void loop()
 		switch (mode)
 		{
 		case MODE_TIME:
+#ifdef SHOW_MODE_SUNRISE_SUNSET
+#ifdef APIKEY
+			sunrise_started = false;
+			sunset_started = false;
+#endif
+#endif
+
 			renderer.clearScreenBuffer(matrix);
 
 #ifdef FRONTCOVER_BINARY
@@ -909,8 +970,141 @@ void loop()
 			renderer.setPixelInScreenBuffer(5, 9, matrix);
 			break;
 #endif
+#ifdef SHOW_MODE_SUNRISE_SUNSET
+#ifdef APIKEY
+		case MODE_SUNRISE:
+			if (!sunrise_started) {
+				sunrise_unix = timeZone.toLocal(outdoorWeather.sunrise);
+				sunrise_started = true;
+				sunrise_millis = millis();
+				save_color_sunrise_sunset = settings.mySettings.color;
+			}
+			if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
+				settings.mySettings.color = YELLOW;
+				renderer.clearScreenBuffer(matrix);
+				// Sunrise screen
+				matrix[0] = 0b0000000000000000;
+				matrix[1] = 0b0000000000000000;
+				matrix[2] = 0b0000000000000000;
+				matrix[3] = 0b0000000000000000;
+				matrix[4] = 0b0000000000000000;
+				matrix[5] = 0b0000111000000000;
+				matrix[6] = 0b0011111110000000;
+				matrix[7] = 0b0111111111000000;
+				matrix[8] = 0b0111111111000000;
+				matrix[9] = 0b1111111111100000;
+			}
+			else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
+				renderer.clearScreenBuffer(matrix);
+				// Sunrise screen
+				matrix[0] = 0b0000000000000000;
+				matrix[1] = 0b0000000000000000;
+				matrix[2] = 0b0000111000000000;
+				matrix[3] = 0b0011111110000000;
+				matrix[4] = 0b0111111111000000;
+				matrix[5] = 0b0111111111000000;
+				matrix[6] = 0b1111111111100000;
+				matrix[7] = 0b1111111111100000;
+				matrix[8] = 0b0111111111000000;
+				matrix[9] = 0b0111111111000000;
+			}
+			else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5) {
+				renderer.clearScreenBuffer(matrix);
+				// Sunrise screen
+				matrix[0] = 0b0000111000000000;
+				matrix[1] = 0b0011111110000000;
+				matrix[2] = 0b0111111111000000;
+				matrix[3] = 0b0111111111000000;
+				matrix[4] = 0b1111111111100000;
+				matrix[5] = 0b1111111111100000;
+				matrix[6] = 0b0111111111000000;
+				matrix[7] = 0b0111111111000000;
+				matrix[8] = 0b0011111110000000;
+				matrix[9] = 0b0000111000000000;
+			}
+			else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 1.5) {
+				renderer.clearScreenBuffer(matrix);
+				renderer.setTime(hour(sunrise_unix), minute(sunrise_unix), matrix);
+				renderer.setCorners(minute(sunrise_unix), matrix);
+				renderer.clearEntryWords(matrix);
+			}
+			else {
+				sunrise_started = false;
+				settings.mySettings.color = save_color_sunrise_sunset;
+				setMode(MODE_TIME);
+			}
+			break;
+		case MODE_SUNSET:
+			if (!sunset_started) {
+				sunset_unix = timeZone.toLocal(outdoorWeather.sunset);
+				sunset_started = true;
+				sunset_millis = millis();
+			}
+			
+			if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
+				settings.mySettings.color = ORANGE;
+				renderer.clearScreenBuffer(matrix);
+				// Sunset screen
+				matrix[0] = 0b0000111000000000;
+				matrix[1] = 0b0011111110000000;
+				matrix[2] = 0b0111111111000000;
+				matrix[3] = 0b0111111111000000;
+				matrix[4] = 0b1111111111100000;
+				matrix[5] = 0b1111111111100000;
+				matrix[6] = 0b0111111111000000;
+				matrix[7] = 0b0111111111000000;
+				matrix[8] = 0b0011111110000000;
+				matrix[9] = 0b0000111000000000;
+			}
+			else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
+				renderer.clearScreenBuffer(matrix);
+				// Sunset screen
+				matrix[0] = 0b0000000000000000;
+				matrix[1] = 0b0000000000000000;
+				matrix[2] = 0b0000111000000000;
+				matrix[3] = 0b0011111110000000;
+				matrix[4] = 0b0111111111000000;
+				matrix[5] = 0b0111111111000000;
+				matrix[6] = 0b1111111111100000;
+				matrix[7] = 0b1111111111100000;
+				matrix[8] = 0b0111111111000000;
+				matrix[9] = 0b0111111111000000;
+			}
+			else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5) {
+				renderer.clearScreenBuffer(matrix);
+				// Sunset screen
+				matrix[0] = 0b0000000000000000;
+				matrix[1] = 0b0000000000000000;
+				matrix[2] = 0b0000000000000000;
+				matrix[3] = 0b0000000000000000;
+				matrix[4] = 0b0000000000000000;
+				matrix[5] = 0b0000111000000000;
+				matrix[6] = 0b0011111110000000;
+				matrix[7] = 0b0111111111000000;
+				matrix[8] = 0b0111111111000000;
+				matrix[9] = 0b1111111111100000;
+			}
+			else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 1.5) {
+				renderer.clearScreenBuffer(matrix);
+				renderer.setTime(hour(sunset_unix), minute(sunset_unix), matrix);
+				renderer.setCorners(minute(sunset_unix), matrix);
+				renderer.clearEntryWords(matrix);
+			}
+			else {
+				sunset_started = false;
+				settings.mySettings.color = save_color_sunrise_sunset;
+				setMode(MODE_TIME);
+			}
+			break;
+#endif
+#endif
 #ifdef SHOW_MODE_MOONPHASE
 		case MODE_MOONPHASE:
+#ifdef SHOW_MODE_SUNRISE_SUNSET
+#ifdef APIKEY
+			settings.mySettings.color = save_color_sunrise_sunset;
+#endif
+#endif
 			renderer.clearScreenBuffer(matrix);
 			switch (moonphase)
 			{
@@ -1016,7 +1210,7 @@ void loop()
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 		case MODE_TEMP:
 #ifdef DEBUG
-			Serial.println(String(roomTemperature));
+			Serial.println("Room Temperature: " + String(roomTemperature));
 #endif
 			renderer.clearScreenBuffer(matrix);
 			if (roomTemperature == 0)
@@ -1045,7 +1239,7 @@ void loop()
 #ifdef SENSOR_DHT22
 		case MODE_HUMIDITY:
 #ifdef DEBUG
-			Serial.println(String(roomHumidity));
+			Serial.println("Room Humidity: " + String(roomHumidity));
 #endif
 			renderer.clearScreenBuffer(matrix);
 			renderer.setSmallText(String(int(roomHumidity + 0.5)), TEXT_POS_TOP, matrix);
@@ -1059,7 +1253,7 @@ void loop()
 #ifdef APIKEY
 		case MODE_EXT_TEMP:
 #ifdef DEBUG
-			Serial.println(String(outdoorWeather.temperature));
+			Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature));
 #endif
 			renderer.clearScreenBuffer(matrix);
 			if (outdoorWeather.temperature > 0)
@@ -1076,7 +1270,7 @@ void loop()
 			break;
 		case MODE_EXT_HUMIDITY:
 #ifdef DEBUG
-			Serial.println(String(outdoorWeather.humidity));
+			Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity));
 #endif
 			renderer.clearScreenBuffer(matrix);
 			if (outdoorWeather.humidity < 100)
@@ -1127,9 +1321,9 @@ void loop()
 				renderer.clearScreenBuffer(matrix);
 				for (uint8_t z = 0; z <= 6; z++)
 				{
-					matrix[2 + z] |= (lettersBig[feedText[feedPosition] - 32][z] << 11 + y) & 0b1111111111100000;
-					matrix[2 + z] |= (lettersBig[feedText[feedPosition + 1] - 32][z] << 5 + y) & 0b1111111111100000;
-					matrix[2 + z] |= (lettersBig[feedText[feedPosition + 2] - 32][z] << y - 1) & 0b1111111111100000;
+					matrix[2 + z] |= (lettersBig[feedText[feedPosition] - 32][z] << (11 + y)) & 0b1111111111100000;
+					matrix[2 + z] |= (lettersBig[feedText[feedPosition + 1] - 32][z] << (5 + y)) & 0b1111111111100000;
+					matrix[2 + z] |= (lettersBig[feedText[feedPosition + 2] - 32][z] << (y - 1)) & 0b1111111111100000;
 				}
 				writeScreenBuffer(matrix, feedColor, brightness);
 				delay(FEED_SPEED);
@@ -1206,8 +1400,17 @@ void loop()
 	}
 
 	// Wait for mode timeout then switch back to time
-	if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout) setMode(MODE_TIME);
-
+	if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout)
+	{ 
+#ifdef SHOW_MODE_SUNRISE_SUNSET
+#ifdef APIKEY
+	  sunrise_started = false;
+	  sunset_started = false;
+#endif
+#endif
+	  setMode(MODE_TIME);
+  }
+  
 #ifdef DEBUG_FPS
 	debugFps();
 #endif
@@ -1418,6 +1621,12 @@ void setMode(Mode newMode)
 #endif
 #ifdef SHOW_MODE_DATE
 	case MODE_DATE:
+#endif
+#ifdef SHOW_MODE_SUNRISE_SUNSET
+#ifdef APIKEY
+	case MODE_SUNRISE:
+	case MODE_SUNSET:
+#endif
 #endif
 #ifdef SHOW_MODE_MOONPHASE
 	case MODE_MOONPHASE:
@@ -1752,9 +1961,11 @@ void handleRoot()
 #endif
 #ifdef APIKEY
 	message += "<br><br><i class = \"fa fa-tree\" style=\"font-size:20px;\"></i>"
-		"<br><i class = \"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.temperature) + "&deg;C / " + String(outdoorWeather.temperature * 1.8 + 32.0) + "&deg;F"
-		"<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "% RH"
-		"<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg"
+		"<br><i class = \"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.temperature) + "&deg;C / " + String(outdoorWeather.temperature * 1.8 + 32.0) + "&deg;F" +\
+		"<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "% RH" +\
+		"<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg" +\
+		"<br><i class = \"fa fa-sun-o\" style=\"font-size:20px;\"></i> " + String(hour(timeZone.toLocal(outdoorWeather.sunrise))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunrise))) +\
+		"<br><i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + String(hour(timeZone.toLocal(outdoorWeather.sunset))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunset))) +\
 		"<br>" + outdoorWeather.description;
 #endif
 	message += "<span style=\"font-size:12px;\">"

@@ -39,6 +39,8 @@ uint8_t OpenWeather::getOutdoorConditions(String location, String apiKey, String
         temperature = (double)weatherArray["main"]["temp"];
         humidity = (int)weatherArray["main"]["humidity"];
         pressure = (int)weatherArray["main"]["pressure"];
+        sunrise = (int)weatherArray["sys"]["sunrise"]; // api also provides sunrise / sunset times. Just use them as well.
+        sunset = (int)weatherArray["sys"]["sunset"];
         return 1;
     }
 }
