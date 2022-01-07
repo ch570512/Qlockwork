@@ -1,0 +1,61 @@
+sensor:
+  - platform: rest
+    name: qlckwrk
+    json_attributes:
+      - state
+      - brightness
+    resource: http://192.168.178.47/api
+    value_template: '{{ value_json.brightness }}'
+    verify_ssl: false
+  - platform: template
+    sensors:
+      qlckwrk_state:
+        friendly_name: 'Wortuhr Status'
+        value_template: '{{ states.sensor.qlckwrk.attributes["state"] }}'
+      qlckwrk_bright:
+        friendly_name: 'Wortuhr Helligkeit'
+        value_template: '{{ states.sensor.qlckwrk.attributes["brightness"] }}'
+
+rest_command:
+  lab_powbright:
+    url: 'http://192.168.178.47/api?state={{ state }}&brightness={{ brightness }}'
+    method: PUT
+    verify_ssl: false
+    
+light:
+  - platform: template
+    lights:
+      qlockwork:
+        friendly_name: "Wortuhr"
+        value_template: "{{ (states('sensor.qlckwrk_state')) }}"
+        level_template: "{{ states('sensor.qlckwrk') | int }}"
+        turn_on:
+          - service: rest_command.lab_powbright
+            data_template:
+              state: "on"
+              brightness: >
+                {{ states('sensor.qlckwrk') }}
+          - service: homeassistant.update_entity
+            entity_id: sensor.qlckwrk_state
+          - service: homeassistant.update_entity
+            entity_id: sensor.qlckwrk
+        turn_off:
+          - service: rest_command.lab_powbright
+            data_template:
+              state: "off"
+              brightness: >
+                {{ states('sensor.qlckwrk') }}
+          - service: homeassistant.update_entity
+            entity_id: sensor.qlckwrk_state
+          - service: homeassistant.update_entity
+            entity_id: sensor.qlckwrk
+        set_level:
+          - service: rest_command.lab_powbright
+            data_template:
+              state: "on"
+              brightness: >
+                {{ (brightness) | int }}
+          - service: homeassistant.update_entity
+            entity_id: sensor.qlckwrk_state
+          - service: homeassistant.update_entity
+            entity_id: sensor.qlckwrk
