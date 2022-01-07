@@ -1887,6 +1887,7 @@ void setupWebServer()
 	webServer.on("/setEvent", handleSetEvent);
 	webServer.on("/showText", handleShowText);
 	webServer.on("/control", handleControl);
+	webServer.on("/api", handleHomeAssistantRequest);
 	webServer.begin();
 }
 
@@ -2650,4 +2651,32 @@ void handleControl()
 {
 	setMode((Mode)webServer.arg("mode").toInt());
 	webServer.send(200, "text/plain", "OK.");
+}
+
+void handleHomeAssistantRequest()
+{
+	if (webServer.arg("state" == "on")) {
+		setMode(MODE_TIME);
+	} else if (webServer.arg("state" == "off")) {
+		setMode(MODE_BLANK);
+	}
+
+	settings.mySettings.brightness = webServer.arg("brightness").toInt();
+
+	String state = get_state();
+
+	webServer.send(200, "application/json", state);
+}
+
+String get_state()
+{
+	String s = "on";
+
+	if (mode == MODE_BLANK) {
+		String s = "off";
+	}
+
+	int b = settings.mySettings.brightness;
+
+	return "{\"state\": \"" + s + "\", \"brightness\": " + b + "}";
 }
