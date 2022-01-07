@@ -2655,13 +2655,21 @@ void handleControl()
 
 void handleHomeAssistantRequest()
 {
-	if (webServer.arg("state" == "on")) {
+	if (webServer.arg("state") == "on") {
+		int br = webServer.arg("brightness").toInt();
+
+		settings.mySettings.brightness = br;
+		maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+		brightness = maxBrightness;
 		setMode(MODE_TIME);
-	} else if (webServer.arg("state" == "off")) {
+	} else if (webServer.arg("state") == "off") {
+		int br = webServer.arg("brightness").toInt();
+
+		settings.mySettings.brightness = br;
+		maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+		brightness = maxBrightness;
 		setMode(MODE_BLANK);
 	}
-
-	settings.mySettings.brightness = webServer.arg("brightness").toInt();
 
 	String state = get_state();
 
@@ -2670,11 +2678,7 @@ void handleHomeAssistantRequest()
 
 String get_state()
 {
-	String s = "on";
-
-	if (mode == MODE_BLANK) {
-		String s = "off";
-	}
+	String s = mode == MODE_BLANK ? "off" : "on";
 
 	int b = settings.mySettings.brightness;
 
