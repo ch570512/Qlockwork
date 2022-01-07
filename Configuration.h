@@ -167,8 +167,8 @@
 
 // ESP8266
 #define PIN_IR_RECEIVER  16 // D0 (no interrupt)
-//#define PIN_WIRE_SCL     05 // D1 SCL
-//#define PIN_WIRE_SDA     04 // D2 SDA
+#define PIN_WIRE_SCL     05 // D1 SCL
+#define PIN_WIRE_SDA     04 // D2 SDA
 #define PIN_MODE_BUTTON  00 // D3 LOW_Flash
 #define PIN_LED          02 // D4 ESP8266_LED
 #define PIN_BUZZER       14 // D5
