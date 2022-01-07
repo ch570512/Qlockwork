@@ -4,21 +4,21 @@ sensor:
     json_attributes:
       - state
       - brightness
-    resource: http://192.168.178.47/api
-    value_template: '{{ value_json.brightness }}'
+    resource: http://192.168.178.63/api
+    value_template: '{{ ((value_json.brightness | int) / 100 * 255) | round(0) }}'
     verify_ssl: false
   - platform: template
     sensors:
       qlckwrk_state:
         friendly_name: 'Wortuhr Status'
-        value_template: '{{ states.sensor.qlckwrk.attributes["state"] }}'
+        value_template: "{{ state_attr('sensor.qlckwrk', 'state') }}"
       qlckwrk_bright:
         friendly_name: 'Wortuhr Helligkeit'
-        value_template: '{{ states.sensor.qlckwrk.attributes["brightness"] }}'
+        value_template: "{{ ((state_attr('sensor.qlckwrk', 'brightness') | int) / 100 * 255) | round(0) }}"
 
 rest_command:
   lab_powbright:
-    url: 'http://192.168.178.47/api?state={{ state }}&brightness={{ brightness }}'
+    url: 'http://192.168.178.63/api?state={{ state }}&brightness={{ brightness }}'
     method: PUT
     verify_ssl: false
     
@@ -27,14 +27,14 @@ light:
     lights:
       qlockwork:
         friendly_name: "Wortuhr"
-        value_template: "{{ (states('sensor.qlckwrk_state')) }}"
-        level_template: "{{ states('sensor.qlckwrk') | int }}"
+        value_template: "{{ states('sensor.qlckwrk_state') }}"
+        level_template: "{{ states('sensor.qlckwrk') }}"
         turn_on:
           - service: rest_command.lab_powbright
             data_template:
               state: "on"
               brightness: >
-                {{ states('sensor.qlckwrk') }}
+                {{ (states('sensor.qlckwrk') | int) / 255 * 100 | round(0) }}
           - service: homeassistant.update_entity
             entity_id: sensor.qlckwrk_state
           - service: homeassistant.update_entity
@@ -44,7 +44,7 @@ light:
             data_template:
               state: "off"
               brightness: >
-                {{ states('sensor.qlckwrk') }}
+                {{ (states('sensor.qlckwrk') | int) / 255 * 100 | round(0) }}
           - service: homeassistant.update_entity
             entity_id: sensor.qlckwrk_state
           - service: homeassistant.update_entity
@@ -54,7 +54,7 @@ light:
             data_template:
               state: "on"
               brightness: >
-                {{ (brightness) | int }}
+                {{ (brightness | int) / 255 * 100 | round(0) }}
           - service: homeassistant.update_entity
             entity_id: sensor.qlckwrk_state
           - service: homeassistant.update_entity
