@@ -53,7 +53,7 @@ http://diskussion.christians-bastel-laden.de/viewtopic.php?f=23&t=2843
 Top features:
 ******************************************************************************
 
-Almost no electronics needed. Only an ESP32 and an LED-stripe.
+Almost no electronics needed. Only an ESP8266 and an LED-stripe.
 Optional support for LDR, Buzzer, temperature and humidity sensor, IR-remote and buttons.
 Support for NeoPixel (RGB and RGBW) LED-stripes.
 Support for various horizontal and vertical LED layouts. 3 layouts included.
