@@ -20,7 +20,7 @@ typedef enum eMode : uint8_t
 #ifdef SHOW_MODE_DATE
 	MODE_DATE,				// 4
 #endif
-#ifdef SHOW_MODE_SUNRISE_SUNSET
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
 	MODE_SUNRISE, 			// 5
 	MODE_SUNSET, 			// 6
 #endif

@@ -53,7 +53,7 @@ http://diskussion.christians-bastel-laden.de/viewtopic.php?f=23&t=2843
 Top features:
 ******************************************************************************
 
-Almost no electronics needed. Only an ESP8266 and an LED-stripe.
+Almost no electronics needed. Only an ESP32 and an LED-stripe.
 Optional support for LDR, Buzzer, temperature and humidity sensor, IR-remote and buttons.
 Support for NeoPixel (RGB and RGBW) LED-stripes.
 Support for various horizontal and vertical LED layouts. 3 layouts included.
@@ -81,11 +81,13 @@ AM/PM
 Seconds
 Weekday
 Date
+Sunrise (needs OpenWeather)
+Sunset (needs OpenWeather)
 Moonphase
-Room temperature (RTX or DHT22)
-Room humidity (DHT22)
-Outdoor temperature (OpenWeather)
-Outdoor humidity (OpenWeather)
+Room temperature (needs RTX or DHT22)
+Room humidity (needs DHT22)
+Outdoor temperature (needs OpenWeather)
+Outdoor humidity (needs OpenWeather)
 Timer
 LED-test
 Red
@@ -97,16 +99,16 @@ White
 Needed libraries: (recommended/tested versions in brackets)
 ******************************************************************************
 
-Arduino IDE for Windows (1.8.13)
-esp8266 by ESP8266 Community (2.7.4)
+Arduino IDE for Windows (1.8.19)
+esp8266 by ESP8266 Community (2.7.4) (!!!)
 Arduino_JSON by Arduino (0.1.0)
-Adafruit NeoPixel by Adafruit (1.10.0)
-Adafruit Unified Sensor by Adafruit (1.1.4)
+Adafruit NeoPixel by Adafruit (1.10.4)
+Adafruit Unified Sensor by Adafruit (1.1.5)
 ArduinoHttpClient by Arduino (0.4.0)
 ArduinoOTA by Juraj Andressy (1.0.7)
-DHT sensor library by Adafruit (1.4.2)
-DS3232RTC by Jack Christensen (1.3.0)
-IRremoteESP8266 by Sebastien Warin (2.7.20)
+DHT sensor library by Adafruit (1.4.3)
+DS3232RTC by Jack Christensen (2.0.0)
+IRremoteESP8266 by Sebastien Warin (2.8.1)
 Time by Michael Margolis (1.6.1)
 
 Included in source is the Timezone library from Jack Christensen
@@ -154,6 +156,8 @@ Display AM/PM:                      Indicates whether it is AM or PM.
 Seconds:                            Shows the seconds.
 Weekday:                            Shows the weekday in local language.
 Date:                               Shows day and month.
+Sunrise:                            Time of sunrise.
+Sunset:                             Time of sunset.
 Moonphase:                          Shows the moonphase.
 Room temperature:                   Display of the measured temperature in the room (only with RTC or DHT22).
 Room humidity:                      Display of the measured humidity in the room (only with DHT22).
@@ -432,6 +436,9 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 ******************************************************************************
 Changelog:
 ******************************************************************************
+
+20220310:
+MODE SUNRISE SUNSET  (Thanks to GenosseFlosse).
 
 20210422:
 Reduced the watchdog resets (Thanks to espuno).
