@@ -1847,7 +1847,7 @@ void handleRoot() {
         "<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "% RH" +\
         "<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg" +\
         "<br><i class = \"fa fa-sun-o\" style=\"font-size:20px;\"></i> " + String(hour(timeZone.toLocal(outdoorWeather.sunrise))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunrise))) +\
-        "<br><i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + String(hour(timeZone.toLocal(outdoorWeather.sunset))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunset))) +\
+        " <i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + String(hour(timeZone.toLocal(outdoorWeather.sunset))) + ":" + String(minute(timeZone.toLocal(outdoorWeather.sunset))) +\
         "<br>" + outdoorWeather.description;
 #endif
     message += "<span style=\"font-size:12px;\">"
