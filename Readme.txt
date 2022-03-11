@@ -63,6 +63,7 @@ Adaptive brightness control when using an LDR.
 Indoor temperature from RTC or temperature and humidity from DHT sensor.
 Outdoor temperature and humidity from OpenWeather. You need an APIKey from OpenWeather to use this feature.
 Visualisation of moonphase.
+Show sunrise and sunset times with animation.
 Textfeed for events and infos, local and over the web.
 Support for 16 frontcovers (Original and DIY) in 6 languages.
 25 Colors.
@@ -214,6 +215,7 @@ Configuration.h - Software settings:
 #define NONE_TECHNICAL_ZERO         Displays the zero without the diagonal line.
 #define AUTO_MODECHANGE_TIME        Time in seconds to wait between switching from time to temperature.
 #define FEED_SPEED                  Feed delay in milliseconds. 120 is a good start.
+#define SUNSET_SUNRISE_SPEED        Milliseconds delay between sunrise screen -> sunrise time and sunset screen -> sunset time
 #define EVENT_TIME                  Time in seconds to wait between showing events. Comment to turn off events.
 #define ALARM_LED_COLOR             Color of the alarm LED. If not defined the display color will be used.
                                     The possible colors are:
@@ -230,6 +232,7 @@ Configuration.h - Software settings:
 #define SHOW_MODE_WEEKDAY           Show weekday.
 #define SHOW_MODE_DATE              Show date.
 #define SHOW_MODE_MOONPHASE         Show moonphase.
+#define SHOW_MODE_SUNRISE_SUNSET    Show sunrise and sunset times.
 #define SHOW_MODE_TEST              Show tests.
 
 #define APIKEY                      Your OpenWeather API key.
