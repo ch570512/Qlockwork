@@ -23,7 +23,7 @@
 //#define NONE_TECHNICAL_ZERO
 #define AUTO_MODECHANGE_TIME 60 // seconds
 #define FEED_SPEED 120 // milliseconds
-#define SUNSET_SUNRISE_SPEED 5000 // milliseconds delay between sunrise screen -> sunrise time -> sunset screen -> sunset time
+#define SUNSET_SUNRISE_SPEED 5000 // milliseconds delay between sunrise screen -> sunrise time and sunset screen -> sunset time
 #define EVENT_TIME 300 // seconds
 #define ALARM_LED_COLOR RED
 //#define ABUSE_CORNER_LED_FOR_ALARM
