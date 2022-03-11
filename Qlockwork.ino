@@ -353,7 +353,7 @@ void setup() {
 
 #ifdef SHOW_IP
     WiFi.isConnected() ? feedText = "  IP: " : feedText = "  AP-IP: ";
-    feedText += String(myIP[0]) + '.' + String(myIP[1]) + '.' + String(myIP[2]) + '.' + String(myIP[3]) + "   ";
+    feedText += String(myIP[0]) + "." + String(myIP[1]) + "." + String(myIP[2]) + "." + String(myIP[3]) + "   ";
     feedPosition = 0;
     feedColor = WHITE;
     mode = MODE_FEED;
