@@ -30,9 +30,15 @@ uint8_t OpenWeather::getOutdoorConditions(String location, String apiKey, String
         //response.replace('[', ' ');
         //response.replace(']', ' ');
         JSONVar weatherArray = JSON.parse(response);
+        if (JSON.typeof(weatherArray) == "undefined") {
+            #ifdef DEBUG
+            Serial.println("Parsing weatherArray failed!");
+            #endif
+            return 0;
+        }
         description = "";
         for (uint8_t i = 0; i < weatherArray["weather"].length(); i++) {
-            tempDescription = weatherArray["weather"][i]["description"];
+            tempDescription = (const char*)weatherArray["weather"][i]["description"];
             description += tempDescription + " ";
         }
         temperature = (double)weatherArray["main"]["temp"];
@@ -42,4 +48,5 @@ uint8_t OpenWeather::getOutdoorConditions(String location, String apiKey, String
         sunset = (int)weatherArray["sys"]["sunset"];
         return 1;
     }
+    return 0;
 }

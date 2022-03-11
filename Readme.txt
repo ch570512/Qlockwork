@@ -53,7 +53,7 @@ http://diskussion.christians-bastel-laden.de/viewtopic.php?f=23&t=2843
 Top features:
 ******************************************************************************
 
-Almost no electronics needed. Only an ESP8266 and an LED-stripe.
+Almost no electronics needed. Only an ESP32 and an LED-stripe.
 Optional support for LDR, Buzzer, temperature and humidity sensor, IR-remote and buttons.
 Support for NeoPixel (RGB and RGBW) LED-stripes.
 Support for various horizontal and vertical LED layouts. 3 layouts included.
@@ -100,7 +100,7 @@ Needed libraries: (recommended/tested versions in brackets)
 ******************************************************************************
 
 Arduino IDE for Windows (1.8.19)
-esp8266 by ESP8266 Community (2.7.4) (!!!)
+esp8266 by ESP8266 Community (3.0.2)
 Arduino_JSON by Arduino (0.1.0)
 Adafruit NeoPixel by Adafruit (1.10.4)
 Adafruit Unified Sensor by Adafruit (1.1.5)
@@ -436,6 +436,10 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 ******************************************************************************
 Changelog:
 ******************************************************************************
+
+20220311:
+Fixed a bug preventing compilation using esp8266 by ESP8266 Community (3.0.2).
+IDE change from VisualMicro to Visual Studio Code.
 
 20220310:
 MODE SUNRISE SUNSET  (Thanks to GenosseFlosse).
