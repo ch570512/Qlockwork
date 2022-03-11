@@ -9,8 +9,7 @@
 #include <TimeLib.h>
 #include <WiFiUdp.h>
 
-class Ntp
-{
+class Ntp {
 public:
     Ntp();
     ~Ntp();

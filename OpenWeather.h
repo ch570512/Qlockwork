@@ -8,8 +8,7 @@
 #include <Arduino_JSON.h>
 #include <ESP8266WiFi.h>
 
-class OpenWeather
-{
+class OpenWeather {
 public:
     OpenWeather();
     ~OpenWeather();
