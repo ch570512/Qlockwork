@@ -6,7 +6,7 @@ An advanced firmware for a DIY "word-clock".
 Qlockwork is an ESP8266 (NodeMCU or WeMos D1 mini) firmware (under GPL license) for a so called "word-clock".
 
 The clock adjusts the time and date once every hour via NTP with a time server on the Internet.
-If an RTC is installed, the time of the ESP is also set from the RTC every minute.
+If an RTC is installed, the time of the ESP is also set from the RTC via the SyncProvider.
 
 At startup the clock performs a short self test.
 The sequence of the colors should be: red, green, blue and white. If not, your LED driver setup is wrong.
@@ -282,7 +282,11 @@ Configuration.h - Hardware settings:
                                     If you see more than one try the code which is changing from button to button.
                                     DEBUG has to be defined to show you the code.
 
-#define NEOPIXEL_TYPE               Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW and RGBW.
+#define NEOPIXEL_RGB                Select if your LEDs are RGB only.
+#define NEOPIXEL_RGBW               Select if your LEDs have a distinct white channel (RGBW).
+
+#define NEOPIXEL_TYPE               Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW, RGBW...
+                                    See \libraries\Adafruit_NeoPixel.h for help.
 
 #define LED_LAYOUT_HORIZONTAL_1     Horizontal and corner and alarm LEDs at the end of the strip. (As seen from the front.)
 
@@ -348,21 +352,21 @@ Configuration.h - Hardware settings:
 Configuration.h - Misc:
 ******************************************************************************
 
-#define DEBUG                       Show debug infos in the serial console
-#define DEBUG_WEB                   Show debug infos on the web page
-#define DEBUG_MATRIX                Renders the output of the matrix for the German front in the serial console
-#define DEBUG_FPS                   Show number of loops per second in the serial console
+#define DEBUG                       Show debug infos in the serial console.
+#define DEBUG_WEB                   Show debug infos on the web page.
+#define DEBUG_MATRIX                Renders the output of the matrix for the German front in the serial console.
+#define DEBUG_FPS                   Show number of loops per second in the serial console.
 
-#define SYSLOGSERVER                Turn logging to a syslogserver on/off
-#define SYSLOGSERVER_SERVER         Address of the syslogserver
-#define SYSLOGSERVER_PORT           Port of the syslogserver
+#define SYSLOGSERVER                Turn logging to a syslogserver on/off.
+#define SYSLOGSERVER_SERVER         Address of the syslogserver.
+#define SYSLOGSERVER_PORT           Port of the syslogserver.
 
 #define UPDATE_INFO_*               The update info periodically anonymously checks if there is a firmwareupdate
-                                    available. No user data is send to the host. Comment if you do not want this info
-#define UPDATE_INFOSERVER           Address of the updateinfo server
-#define UPDATE_INFOFILE             Path and name of the updateinfo file
+                                    available. No user data is send to the host. Comment if you do not want this info.
+#define UPDATE_INFOSERVER           Address of the updateinfo server.
+#define UPDATE_INFOFILE             Path and name of the updateinfo file.
 
-#define SERIAL_SPEED                Serial port speed for the console
+#define SERIAL_SPEED                Serial port speed for the console.
 
 ******************************************************************************
 Events.h
@@ -440,12 +444,19 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
+20220312:
+Clocks brightness from LDR is now transitioning smoothly between values.
+Sunrise and sunset now uses global timeout to switch back to time.
+Fixed a bug causing the RTC not to work.
+Added option to select RBG or RGBW for LedDriver.
+Using transition "Move up" in menus. "Fade" was not working too well.
+
 20220311:
 Fixed a bug preventing compilation using esp8266 by ESP8266 Community (3.0.2).
-IDE change from VisualMicro to Visual Studio Code.
+IDE change from VisualMicro to free Visual Studio Code.
 
 20220310:
-MODE SUNRISE SUNSET  (Thanks to GenosseFlosse).
+Mode sunrise and sunset (Thanks to GenosseFlosse).
 
 20210422:
 Reduced the watchdog resets (Thanks to espuno).
@@ -454,7 +465,7 @@ Reduced the watchdog resets (Thanks to espuno).
 Fixed openweather bug for more than one weathercondition (Thanks to Manfred).
 Setting RTC vom Web should be LT - not UTC (Thanks to Manfred).
 Clear all LEDs before exiting test pattern (Thanks to espuno).
-Calculate white channel for RGBW (Thanks to Manfred).
+Calculate white channel for NEO_WRGB (Thanks to Manfred).
 New LED_LAYOUT_VERTICAL_3 (Like vertical 2 but alarm LED = 114).
 
 20210224:

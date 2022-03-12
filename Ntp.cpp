@@ -4,16 +4,13 @@
 
 #include "Ntp.h"
 
-Ntp::Ntp()
-{
+Ntp::Ntp() {
 }
 
-Ntp::~Ntp()
-{
+Ntp::~Ntp() {
 }
 
-time_t Ntp::getTime(char* server)
-{
+time_t Ntp::getTime(char* server) {
     uint8_t packetBuffer[49] = {};
     packetBuffer[0] = 0xE3;
     packetBuffer[1] = 0x00;
@@ -31,10 +28,8 @@ time_t Ntp::getTime(char* server)
     wifiUdp.write(packetBuffer, 48);
     wifiUdp.endPacket();
     uint32_t beginWait = millis();
-    while ((millis() - beginWait) < 5000)
-    {
-        if (wifiUdp.parsePacket() >= 48)
-        {
+    while ((millis() - beginWait) < 5000) {
+        if (wifiUdp.parsePacket() >= 48) {
             wifiUdp.read(packetBuffer, 48);
             uint32_t ntpTime = (packetBuffer[40] << 24) + (packetBuffer[41] << 16) + (packetBuffer[42] << 8) + packetBuffer[43];
             // NTP time is seconds from 1900, TimeLib.h needs seconds from 1970

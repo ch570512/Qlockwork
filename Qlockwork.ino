@@ -1,4 +1,4 @@
-// ******************************************************************************
+//*****************************************************************************
 // QLOCKWORK
 // An advanced firmware for a DIY "word-clock"
 //
@@ -18,9 +18,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// ******************************************************************************
+//*****************************************************************************
 
-#define FIRMWARE_VERSION 20220311
+#define FIRMWARE_VERSION 20220312
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -40,7 +40,6 @@
 #include "Colors.h"
 #include "Configuration.h"
 #include "Events.h"
-#include "Languages.h"
 #include "LedDriver.h"
 #include "Modes.h"
 #include "Ntp.h"
@@ -52,9 +51,9 @@
 #include "Timezones.h"
 #include "WiFiManager.h"
 
-//******************************************************************************
+//*****************************************************************************
 // Init
-//******************************************************************************
+//*****************************************************************************
 
 // Servers
 ESP8266WebServer webServer(80);
@@ -79,7 +78,7 @@ Syslog syslog(wifiUdp, SYSLOGSERVER_SERVER, SYSLOGSERVER_PORT, HOSTNAME, "QLOCKW
 
 // RTC
 #ifdef RTC_BACKUP
-DS3232RTC RTC(true);
+DS3232RTC RTC;
 #endif
 
 // LED driver 
@@ -114,8 +113,8 @@ uint8_t lastDay = 0;
 uint8_t lastMinute = 0;
 uint8_t lastHour = 0;
 uint8_t lastSecond = 0;
-uint32_t last500Millis = 0;
-uint32_t last50Millis = 0;
+// uint32_t last500Millis = 0;
+// uint32_t last50Millis = 0;
 time_t upTime = 0;
 uint8_t randomHour = 0;
 uint8_t randomMinute = 0;
@@ -141,11 +140,13 @@ uint8_t errorCounterDHT = 0;
 // Brightness and LDR
 uint8_t maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
 uint8_t brightness = maxBrightness;
-uint16_t ldrValue = 0;
 #ifdef LDR
+uint16_t ldrValue = 0;
 uint16_t lastLdrValue = 0;
 uint16_t minLdrValue = 511; // The ESP will crash if minLdrValue and maxLdrValue are equal due to an error in map()
 uint16_t maxLdrValue = 512;
+uint8_t iTargetBrightness = 0;
+unsigned long iBrightnessMillis = 0;
 #endif
 
 // Alarm
@@ -164,12 +165,12 @@ uint8_t alarmOn = false;
 #ifdef SHOW_MODE_SUNRISE_SUNSET
 #ifdef APIKEY
 boolean sunrise_started = false;
-int sunrise_millis = 0;
+unsigned long sunrise_millis = 0;
 boolean sunset_started = false;
-int sunset_millis = 0;
+unsigned long sunset_millis = 0;
 time_t sunset_unix = 0;
 time_t sunrise_unix = 0;
-int save_color_sunrise_sunset = 0;
+int save_color_sunrise_sunset = settings.mySettings.color;
 #endif
 #endif
 
@@ -180,9 +181,9 @@ IPAddress myIP = { 0,0,0,0 };
 uint32_t lastButtonPress = 0;
 bool testFlag = false;
 
-//******************************************************************************
+//*****************************************************************************
 // Setup()
-//******************************************************************************
+//*****************************************************************************
 
 void setup() {
 
@@ -368,6 +369,7 @@ void setup() {
     renderer.clearScreenBuffer(matrix);
 
 #ifdef RTC_BACKUP
+    RTC.begin();
     setSyncProvider(RTC.get);
     Serial.print("RTC Sync.");
     if (timeStatus() != timeSet) Serial.print(" FAIL!");
@@ -446,15 +448,15 @@ void setup() {
 #endif
 } // setup()
 
-// ******************************************************************************
+//*****************************************************************************
 // Loop()
-// ******************************************************************************
+//*****************************************************************************
 
 void loop() {
   
-    // ************************************************************************
+    //*************************************************************************
     // Run once a day
-    // ************************************************************************
+    //*************************************************************************
 
     if (day() != lastDay) {
         lastDay = day();
@@ -483,9 +485,9 @@ void loop() {
         }
     }
 
-    // ************************************************************************
+    //*************************************************************************
     // Run once every hour
-    // ************************************************************************
+    //*************************************************************************
 
     if (hour() != lastHour) {
         lastHour = hour();
@@ -511,9 +513,9 @@ void loop() {
         }
 #endif
 
-        // ************************************************************************
+        //*********************************************************************
         // Run once every random hour (once a day)
-        // ************************************************************************
+        //*********************************************************************
 
         if (hour() == randomHour) {
             // Get updateinfo
@@ -525,9 +527,9 @@ void loop() {
 
     }
 
-    // ************************************************************************
+    //*************************************************************************
     // Run once every minute
-    // ************************************************************************
+    //*************************************************************************
 
     if (minute() != lastMinute) {
         lastMinute = minute();
@@ -583,9 +585,9 @@ void loop() {
                 ESP.restart();
         }
 
-        // ************************************************************************
+        //*********************************************************************
         // Run once every random minute (once an hour) or if NTP has an error
-        // ************************************************************************
+        //*********************************************************************
 
         if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10))) {
             if (WiFi.isConnected()) {
@@ -641,9 +643,9 @@ void loop() {
             }
         }
 
-        // ************************************************************************
+        //*********************************************************************
         // Run once every 5 minutes
-        // ************************************************************************
+        //*********************************************************************
 
         if (minute() % 5 == 0) {
 #ifdef SYSLOGSERVER_SERVER
@@ -674,9 +676,9 @@ void loop() {
         }
     }
 
-    // ************************************************************************
+    //*************************************************************************
     // Run once every second
-    // ************************************************************************
+    //*************************************************************************
 
     if (second() != lastSecond) {
         lastSecond = second();
@@ -698,16 +700,17 @@ void loop() {
 #endif
 
         // Set brightness from LDR
-#ifdef LDR
-        if (settings.mySettings.useAbc)
-            setBrightnessFromLdr();
-#endif
+// #ifdef LDR
+//         if (settings.mySettings.useAbc)
+//             setBrightnessFromLdr();
+// #endif
 
 #ifdef FRONTCOVER_BINARY
         if (mode != MODE_BLANK)
             screenBufferNeedsUpdate = true;
 #else
-        // Running displayupdate in MODE_TIME or MODE_BLANK every second will lock the ESP due to TRANSITION_FADE
+        // General Screenbuffer-Update every second.
+        // (not in MODE_TIME or MODE_BLANK because it will lock the ESP due to TRANSITION_FADE)
         if ((mode != MODE_TIME) && (mode != MODE_BLANK))
             screenBufferNeedsUpdate = true;
 #endif
@@ -802,9 +805,9 @@ void loop() {
 #endif
     }
 
-    // ************************************************************************
+    //*************************************************************************
     // Run always
-    // ************************************************************************
+    //*************************************************************************
 
     if (mode == MODE_FEED)
         screenBufferNeedsUpdate = true;
@@ -812,6 +815,17 @@ void loop() {
     // Call HTTP- and OTA-handle
     webServer.handleClient();
     ArduinoOTA.handle();
+
+    // Set brightness from LDR and update display (not screenbuffer) at 40Hz.
+#ifdef LDR
+    if ((millis() > iBrightnessMillis) && !testFlag) {
+        iBrightnessMillis = millis() + 25;
+        iTargetBrightness = getBrightnessFromLDR();
+        if (brightness < iTargetBrightness) brightness++;
+        if (brightness > iTargetBrightness) brightness--;
+        writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+    }
+#endif
 
 #ifdef IR_RECEIVER
     // Look for IR commands
@@ -856,7 +870,6 @@ void loop() {
             sunset_started = false;
 #endif
 #endif
-
             renderer.clearScreenBuffer(matrix);
 
 #ifdef FRONTCOVER_BINARY
@@ -923,7 +936,8 @@ void loop() {
                 sunrise_millis = millis();
                 save_color_sunrise_sunset = settings.mySettings.color;
             }
-            if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
+            // if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
+            if (millis() < sunrise_millis + 1000) {
                 settings.mySettings.color = YELLOW;
                 renderer.clearScreenBuffer(matrix);
                 // Sunrise screen
@@ -938,7 +952,8 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b1111111111100000;
             }
-            else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
+            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
+            else if (millis() < sunrise_millis + 2000) {
                 renderer.clearScreenBuffer(matrix);
                 // Sunrise screen
                 matrix[0] = 0b0000000000000000;
@@ -952,7 +967,8 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b0111111111000000;
             }
-            else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5) {
+            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5) {
+            else if (millis() < sunrise_millis + 3000) {
                 renderer.clearScreenBuffer(matrix);
                 // Sunrise screen
                 matrix[0] = 0b0000111000000000;
@@ -966,7 +982,8 @@ void loop() {
                 matrix[8] = 0b0011111110000000;
                 matrix[9] = 0b0000111000000000;
             }
-            else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 1.5) {
+            //else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 1.5) {
+            else if (millis() < sunrise_millis + 4000 + settings.mySettings.timeout * 1000) {
                 renderer.clearScreenBuffer(matrix);
                 renderer.setTime(hour(sunrise_unix), minute(sunrise_unix), matrix);
                 renderer.setCorners(minute(sunrise_unix), matrix);
@@ -978,14 +995,17 @@ void loop() {
                 setMode(MODE_TIME);
             }
             break;
+            
         case MODE_SUNSET:
             if (!sunset_started) {
                 sunset_unix = timeZone.toLocal(outdoorWeather.sunset);
                 sunset_started = true;
                 sunset_millis = millis();
             }
-            
-            if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
+
+            // Matrix is only updatet every second.
+            // if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
+            if (millis() < sunset_millis + 1000) {
                 settings.mySettings.color = ORANGE;
                 renderer.clearScreenBuffer(matrix);
                 // Sunset screen
@@ -1000,7 +1020,8 @@ void loop() {
                 matrix[8] = 0b0011111110000000;
                 matrix[9] = 0b0000111000000000;
             }
-            else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
+            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
+            else if (millis() < sunset_millis + 2000) {
                 renderer.clearScreenBuffer(matrix);
                 // Sunset screen
                 matrix[0] = 0b0000000000000000;
@@ -1014,7 +1035,8 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b0111111111000000;
             }
-            else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5) {
+            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5) {
+            else if (millis() < sunset_millis + 3000) {
                 renderer.clearScreenBuffer(matrix);
                 // Sunset screen
                 matrix[0] = 0b0000000000000000;
@@ -1028,7 +1050,8 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b1111111111100000;
             }
-            else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 1.5) {
+            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 1.5) {
+            else if (millis() < sunset_millis + 4000 + settings.mySettings.timeout * 1000) {
                 renderer.clearScreenBuffer(matrix);
                 renderer.setTime(hour(sunset_unix), minute(sunset_unix), matrix);
                 renderer.setCorners(minute(sunset_unix), matrix);
@@ -1261,7 +1284,7 @@ void loop() {
                     matrix[2 + z] |= (lettersBig[feedText[feedPosition + 2] - 32][z] << (y - 1)) & 0b1111111111100000;
                 }
                 writeScreenBuffer(matrix, feedColor, brightness);
-                delay(FEED_SPEED);
+                delay(120);
             }
             feedPosition++;
             if (feedPosition == feedText.length() - 2) {
@@ -1315,12 +1338,13 @@ void loop() {
             break;
         default:
             if (runTransitionOnce) {
-                if (settings.mySettings.transition == TRANSITION_NORMAL)
-                    writeScreenBuffer(matrix, settings.mySettings.color, brightness);
-                if (settings.mySettings.transition == TRANSITION_FADE)
-                    writeScreenBufferFade(matrixOld, matrix, settings.mySettings.color, brightness);
-                if (settings.mySettings.transition == TRANSITION_MOVEUP)
-                    moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
+                //if (settings.mySettings.transition == TRANSITION_NORMAL)
+                //    writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+                //if (settings.mySettings.transition == TRANSITION_FADE)
+                //    writeScreenBufferFade(matrixOld, matrix, settings.mySettings.color, brightness);
+                //if (settings.mySettings.transition == TRANSITION_MOVEUP)
+                //    moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
+                moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
                 runTransitionOnce = false;
                 testColumn = 0;
             }
@@ -1332,34 +1356,23 @@ void loop() {
 
     // Wait for mode timeout then switch back to time
     if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout) {
-#ifdef SHOW_MODE_SUNRISE_SUNSET
-#ifdef APIKEY
-      sunrise_started = false;
-      sunset_started = false;
-#endif
-#endif
-      setMode(MODE_TIME);
-  }
+// #ifdef SHOW_MODE_SUNRISE_SUNSET
+// #ifdef APIKEY
+//        sunrise_started = false;
+//        sunset_started = false;
+// #endif
+// #endif
+        setMode(MODE_TIME);
+    }
   
 #ifdef DEBUG_FPS
     debugFps();
 #endif
 } // loop()
 
-//******************************************************************************
+//*****************************************************************************
 // Transitions
-//******************************************************************************
-
-void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness) {
-    for (uint8_t z = 0; z <= 9; z++) {
-        for (uint8_t i = 0; i <= 8; i++)
-            screenBufferOld[i] = screenBufferOld[i + 1];
-        screenBufferOld[9] = screenBufferNew[z];
-        writeScreenBuffer(screenBufferOld, color, brightness);
-        webServer.handleClient();
-        delay(50);
-    }
-}
+//*****************************************************************************
 
 void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightness) {
     ledDriver.clear();
@@ -1396,7 +1409,18 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
 #endif
 
     ledDriver.show();
-}
+} // writeScreenBuffer
+
+void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness) {
+    for (uint8_t z = 0; z <= 9; z++) {
+        for (uint8_t i = 0; i <= 8; i++)
+            screenBufferOld[i] = screenBufferOld[i + 1];
+        screenBufferOld[9] = screenBufferNew[z];
+        writeScreenBuffer(screenBufferOld, color, brightness);
+        webServer.handleClient();
+        delay(50);
+    }
+} // moveScreenBufferUp
 
 void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness) {
     ledDriver.clear();
@@ -1445,11 +1469,11 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
         webServer.handleClient();
         ledDriver.show();
     }
-}
+} // writeScreenBufferFade
 
-//******************************************************************************
+//*****************************************************************************
 // "On/off" pressed
-//******************************************************************************
+//*****************************************************************************
 
 void buttonOnOffPressed() {
 #ifdef DEBUG
@@ -1458,9 +1482,9 @@ void buttonOnOffPressed() {
     mode == MODE_BLANK ? setLedsOn() : setLedsOff();
 }
 
-//******************************************************************************
+//*****************************************************************************
 // "Time" pressed
-//******************************************************************************
+//*****************************************************************************
 
 void buttonTimePressed() {
 #ifdef DEBUG
@@ -1477,14 +1501,14 @@ void buttonTimePressed() {
         alarmOn = false;
     }
 #endif
-
+    settings.mySettings.color = save_color_sunrise_sunset;
     modeTimeout = 0;
     setMode(MODE_TIME);
 }
 
-//******************************************************************************
+//*****************************************************************************
 // "Mode" pressed
-//******************************************************************************
+//*****************************************************************************
 
 void buttonModePressed() {
 #ifdef DEBUG
@@ -1503,13 +1527,12 @@ void buttonModePressed() {
         return;
     }
 #endif
-
     setMode(mode++);
 }
 
-//******************************************************************************
+//*****************************************************************************
 // Set mode
-//******************************************************************************
+//*****************************************************************************
 
 void setMode(Mode newMode) {
     screenBufferNeedsUpdate = true;
@@ -1517,7 +1540,7 @@ void setMode(Mode newMode) {
     lastMode = mode;
     mode = newMode;
 
-    // set timeout
+    // set timeout for selected mode
     switch (mode) {
 #ifdef SHOW_MODE_AMPM
     case MODE_AMPM:
@@ -1531,12 +1554,12 @@ void setMode(Mode newMode) {
 #ifdef SHOW_MODE_DATE
     case MODE_DATE:
 #endif
-#ifdef SHOW_MODE_SUNRISE_SUNSET
-#ifdef APIKEY
-    case MODE_SUNRISE:
-    case MODE_SUNSET:
-#endif
-#endif
+// #ifdef SHOW_MODE_SUNRISE_SUNSET
+// #ifdef APIKEY
+//     case MODE_SUNRISE:
+//     case MODE_SUNSET:
+// #endif
+// #endif
 #ifdef SHOW_MODE_MOONPHASE
     case MODE_MOONPHASE:
 #endif
@@ -1559,12 +1582,13 @@ void setMode(Mode newMode) {
     }
 }
 
-//******************************************************************************
+//*****************************************************************************
 // Get brightness from LDR
-//******************************************************************************
+//*****************************************************************************
 
 #ifdef LDR
-void setBrightnessFromLdr() {
+//void setBrightnessFromLdr() {
+uint8_t getBrightnessFromLDR() {
 #ifdef LDR_IS_INVERSE
     ldrValue = 1024 - analogRead(PIN_LDR);
 #else
@@ -1574,21 +1598,23 @@ void setBrightnessFromLdr() {
         minLdrValue = ldrValue;
     if (ldrValue > maxLdrValue)
         maxLdrValue = ldrValue;
-    if ((ldrValue >= (lastLdrValue + 40)) || (ldrValue <= (lastLdrValue - 40))) { // Hysteresis is 40
+    if ((ldrValue >= (lastLdrValue + 10)) || (ldrValue <= (lastLdrValue - 10))) { // Hysteresis is 10
         lastLdrValue = ldrValue;
-        brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
-        screenBufferNeedsUpdate = true;
-#ifdef DEBUG
-        Serial.printf("Brightness: %u (min: %u, max: %u)\r\n", brightness, MIN_BRIGHTNESS, maxBrightness);
-        Serial.printf("LDR: %u (min: %u, max: %u)\r\n", ldrValue, minLdrValue, maxLdrValue);
-#endif
+//      brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
+        return (uint8_t)map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
+//      screenBufferNeedsUpdate = true;
+// #ifdef DEBUG
+//      Serial.printf("Brightness: %u (min: %u, max: %u)\r\n", brightness, MIN_BRIGHTNESS, maxBrightness);
+//      Serial.printf("LDR: %u (min: %u, max: %u)\r\n", ldrValue, minLdrValue, maxLdrValue);
+// #endif
     }
+    return iTargetBrightness;
 }
 #endif
 
-//******************************************************************************
+//*****************************************************************************
 // Get update info from server
-//******************************************************************************
+//*****************************************************************************
 
 #ifdef UPDATE_INFOSERVER
 void getUpdateInfo() {
@@ -1599,6 +1625,12 @@ void getUpdateInfo() {
         String response = httpClient.responseBody();
         response.trim();
         JSONVar updateArray = JSON.parse(response);
+        if (JSON.typeof(updateArray) == "undefined") {
+            #ifdef DEBUG
+            Serial.println("Parsing updateArray failed!");
+            #endif
+            return;
+        }
         updateInfo = (int)updateArray["channel"]["unstable"]["version"];
     }
 #ifdef DEBUG
@@ -1607,9 +1639,9 @@ void getUpdateInfo() {
 }
 #endif
 
-//******************************************************************************
+//*****************************************************************************
 // Get room conditions
-//******************************************************************************
+//*****************************************************************************
 
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 void getRoomConditions() {
@@ -1642,9 +1674,9 @@ void getRoomConditions() {
 }
 #endif
 
-//******************************************************************************
+//*****************************************************************************
 // Misc
-//******************************************************************************
+//*****************************************************************************
 
 #ifdef MODE_BUTTON
 ICACHE_RAM_ATTR void buttonModeInterrupt() {
@@ -1756,9 +1788,9 @@ void debugFps() {
 }
 #endif
 
-//******************************************************************************
+//*****************************************************************************
 // Webserver
-//******************************************************************************
+//*****************************************************************************
 
 void setupWebServer() {
     webServer.onNotFound(handleNotFound);

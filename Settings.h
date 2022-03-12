@@ -1,6 +1,6 @@
-//******************************************************************************
+//*****************************************************************************
 // Settings.h
-//******************************************************************************
+//*****************************************************************************
 
 #ifndef SETTINGS_H
 #define SETTINGS_H
@@ -15,14 +15,12 @@
 #define SETTINGS_MAGIC_NUMBER 0x2A
 #define SETTINGS_VERSION 25
 
-class Settings
-{
+class Settings {
 public:
     Settings();
     ~Settings();
 
-    struct MySettings
-    {
+    struct MySettings {
         uint8_t magicNumber;
         uint8_t version;
         boolean useAbc;

@@ -1,14 +1,14 @@
-//******************************************************************************
+//*****************************************************************************
 // Configuration.h
 // See README.txt for help
-//******************************************************************************
+//*****************************************************************************
 
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-//******************************************************************************
+//*****************************************************************************
 // Software settings
-//******************************************************************************
+//*****************************************************************************
 
 #define HOSTNAME "QLOCKWORK"
 #define WEBSITE_TITLE "QLOCKWORKs page"
@@ -22,8 +22,6 @@
 
 //#define NONE_TECHNICAL_ZERO
 #define AUTO_MODECHANGE_TIME 60 // seconds
-#define FEED_SPEED 120 // milliseconds
-#define SUNSET_SUNRISE_SPEED 5000 // milliseconds delay between sunrise screen -> sunrise time and sunset screen -> sunset time
 #define EVENT_TIME 300 // seconds
 #define ALARM_LED_COLOR RED
 //#define ABUSE_CORNER_LED_FOR_ALARM
@@ -60,9 +58,9 @@
 //#define FRONTCOVER_NL
 //#define FRONTCOVER_BINARY
 
-//******************************************************************************
+//*****************************************************************************
 // Timezone
-//******************************************************************************
+//*****************************************************************************
 
 //#define TIMEZONE_IDLW  // IDLW  International Date Line West UTC-12
 //#define TIMEZONE_SST   // SST   Samoa Standard Time UTC-11
@@ -96,9 +94,9 @@
 //#define TIMEZONE_SBT   // SBT   Solomon Islands Time UTC+11
 //#define TIMEZONE_NZST  // NZST  New Zealand Standard Time UTC+12
 
-//******************************************************************************
+//*****************************************************************************
 // Hardware settings
-//******************************************************************************
+//*****************************************************************************
 
 #define SERIAL_SPEED 115200
 
@@ -146,12 +144,16 @@
 //#define LED_LAYOUT_VERTICAL_2
 //#define LED_LAYOUT_VERTICAL_3
 
+#define NEOPIXEL_RGB
+//#define NEOPIXEL_RGBW
+
 #define NEOPIXEL_TYPE NEO_GRB + NEO_KHZ800     // see Adafruit_NeoPixel.h for help
+//#define NEOPIXEL_TYPE NEO_WRGB + NEO_KHZ800
 //#define NEOPIXEL_TYPE NEO_GRBW + NEO_KHZ800
 
-//******************************************************************************
+//*****************************************************************************
 // Misc
-//******************************************************************************
+//*****************************************************************************
 
 //#define DEBUG
 //#define DEBUG_WEB
