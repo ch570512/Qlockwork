@@ -32,7 +32,7 @@
 #define SHOW_MODE_WEEKDAY
 #define SHOW_MODE_DATE
 #define SHOW_MODE_MOONPHASE
-#define SHOW_MODE_SUNRISE_SUNSET // works only if APIKEY is defined
+//#define SHOW_MODE_SUNRISE_SUNSET // works only if APIKEY is defined
 #define SHOW_MODE_TEST
 
 //#define APIKEY "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

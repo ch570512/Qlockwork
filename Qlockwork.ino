@@ -20,7 +20,7 @@
 //
 //*****************************************************************************
 
-#define FIRMWARE_VERSION 20220312
+#define FIRMWARE_VERSION 20220411
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -36,7 +36,6 @@
 #include <IRrecv.h>
 #include <IRutils.h>
 #include <TimeLib.h>
-
 #include "Colors.h"
 #include "Configuration.h"
 #include "Events.h"
@@ -98,14 +97,14 @@ uint8_t errorCounterNTP = 0;
 // Screenbuffer
 uint16_t matrix[10] = {};
 uint16_t matrixOld[10] = {};
-boolean screenBufferNeedsUpdate = true;
+bool screenBufferNeedsUpdate = true;
 
 // Mode
 Mode mode = MODE_TIME;
 Mode lastMode = mode;
 uint32_t modeTimeout = 0;
 uint32_t autoModeChangeTimer = AUTO_MODECHANGE_TIME;
-boolean runTransitionOnce = false;
+bool runTransitionOnce = false;
 uint8_t autoMode = 0;
 
 // Time
@@ -151,7 +150,7 @@ unsigned long iBrightnessMillis = 0;
 
 // Alarm
 #ifdef BUZZER
-boolean alarmTimerSet = false;
+bool alarmTimerSet = false;
 uint8_t alarmTimer = 0;
 uint8_t alarmTimerSecond = 0;
 uint8_t alarmOn = false;
@@ -162,16 +161,14 @@ uint8_t alarmOn = false;
     uint32_t showEventTimer = EVENT_TIME;
 #endif
 
-#ifdef SHOW_MODE_SUNRISE_SUNSET
-#ifdef APIKEY
-boolean sunrise_started = false;
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
+bool sunrise_started = false;
 unsigned long sunrise_millis = 0;
-boolean sunset_started = false;
+bool sunset_started = false;
 unsigned long sunset_millis = 0;
 time_t sunset_unix = 0;
 time_t sunrise_unix = 0;
 int save_color_sunrise_sunset = settings.mySettings.color;
-#endif
 #endif
 
 // Misc
@@ -864,11 +861,9 @@ void loop() {
 
         switch (mode) {
         case MODE_TIME:
-#ifdef SHOW_MODE_SUNRISE_SUNSET
-#ifdef APIKEY
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
             sunrise_started = false;
             sunset_started = false;
-#endif
 #endif
             renderer.clearScreenBuffer(matrix);
 
@@ -927,8 +922,7 @@ void loop() {
             renderer.setPixelInScreenBuffer(5, 9, matrix);
             break;
 #endif
-#ifdef SHOW_MODE_SUNRISE_SUNSET
-#ifdef APIKEY
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
         case MODE_SUNRISE:
             if (!sunrise_started) {
                 sunrise_unix = timeZone.toLocal(outdoorWeather.sunrise);
@@ -1064,13 +1058,10 @@ void loop() {
             }
             break;
 #endif
-#endif
 #ifdef SHOW_MODE_MOONPHASE
         case MODE_MOONPHASE:
-#ifdef SHOW_MODE_SUNRISE_SUNSET
-#ifdef APIKEY
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
             settings.mySettings.color = save_color_sunrise_sunset;
-#endif
 #endif
             renderer.clearScreenBuffer(matrix);
             switch (moonphase) {
@@ -1356,12 +1347,11 @@ void loop() {
 
     // Wait for mode timeout then switch back to time
     if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout) {
-// #ifdef SHOW_MODE_SUNRISE_SUNSET
-// #ifdef APIKEY
+// #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
 //        sunrise_started = false;
 //        sunset_started = false;
 // #endif
-// #endif
+
         setMode(MODE_TIME);
     }
   
@@ -1501,7 +1491,9 @@ void buttonTimePressed() {
         alarmOn = false;
     }
 #endif
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
     settings.mySettings.color = save_color_sunrise_sunset;
+#endif
     modeTimeout = 0;
     setMode(MODE_TIME);
 }
@@ -1554,11 +1546,9 @@ void setMode(Mode newMode) {
 #ifdef SHOW_MODE_DATE
     case MODE_DATE:
 #endif
-// #ifdef SHOW_MODE_SUNRISE_SUNSET
-// #ifdef APIKEY
+// #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
 //     case MODE_SUNRISE:
 //     case MODE_SUNSET:
-// #endif
 // #endif
 #ifdef SHOW_MODE_MOONPHASE
     case MODE_MOONPHASE:

@@ -301,7 +301,7 @@ Configuration.h - Hardware settings:
    087 086 085 084 083 082 081 080 079 078 077
    088 089 090 091 092 093 094 095 096 097 098
    109 108 107 106 105 104 103 102 101 100 099
-110                                            113
+110                                           113
 
 #define LED_LAYOUT_VERTICAL_1       Vertical and corner and alarm LEDs (almost) within the strip. (As seen from the front.)
 
@@ -443,6 +443,10 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 ******************************************************************************
 Changelog:
 ******************************************************************************
+
+20220411:
+Fixed a bug causing the project not to compile.
+<Qlockwork.ino:1504:33: error: 'save_color_sunrise_sunset' was not declared in this scope>
 
 20220312:
 Clocks brightness from LDR is now transitioning smoothly between values.
