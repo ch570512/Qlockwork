@@ -20,7 +20,7 @@
 //
 //*****************************************************************************
 
-#define FIRMWARE_VERSION 20220411
+#define FIRMWARE_VERSION 20220429
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -182,8 +182,8 @@ bool testFlag = false;
 // Setup()
 //*****************************************************************************
 
-void setup() {
-
+void setup()
+{
     // init serial port
     Serial.begin(SERIAL_SPEED);
     while (!Serial);
@@ -267,7 +267,8 @@ void setup() {
     WiFi.hostname(HOSTNAME);
     WiFi.setAutoReconnect(true);
     WiFi.setAutoConnect(true);
-    if (!WiFi.isConnected()) {
+    if (!WiFi.isConnected())
+    {
         WiFi.mode(WIFI_AP);
         Serial.println("No WLAN connected. Staying in AP mode.");
         writeScreenBuffer(matrix, RED, brightness);
@@ -279,13 +280,15 @@ void setup() {
         delay(1000);
         myIP = WiFi.softAPIP();
     }
-    else {
+    else
+    {
         WiFi.mode(WIFI_STA);
         Serial.println("WLAN connected. Switching to STA mode.");
         Serial.println("RSSI: " + String(WiFi.RSSI()));
         writeScreenBuffer(matrix, GREEN, brightness);
 #if defined(BUZZER) && defined(WIFI_BEEPS)
-        for (uint8_t i = 0; i <= 2; i++) {
+        for (uint8_t i = 0; i <= 2; i++)
+        {
 #ifdef DEBUG
             Serial.println("Beep!");
 #endif
@@ -305,20 +308,23 @@ void setup() {
 
         Serial.println("Starting OTA service.");
 #ifdef DEBUG
-        ArduinoOTA.onStart([]() {
-                Serial.println("Start OTA update.");
-            });
-        ArduinoOTA.onError([](ota_error_t error) {
-                Serial.println("OTA Error: " + String(error));
-                if (error == OTA_AUTH_ERROR) Serial.println("Auth failed.");
-                else if (error == OTA_BEGIN_ERROR) Serial.println("Begin failed.");
-                else if (error == OTA_CONNECT_ERROR) Serial.println("Connect failed.");
-                else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive failed.");
-                else if (error == OTA_END_ERROR) Serial.println("End failed.");
-            });
-        ArduinoOTA.onEnd([]() {
-                Serial.println("End OTA update.");
-            });
+        ArduinoOTA.onStart([]()
+        {
+            Serial.println("Start OTA update.");
+        });
+        ArduinoOTA.onError([](ota_error_t error)
+        {
+            Serial.println("OTA Error: " + String(error));
+            if (error == OTA_AUTH_ERROR) Serial.println("Auth failed.");
+            else if (error == OTA_BEGIN_ERROR) Serial.println("Begin failed.");
+            else if (error == OTA_CONNECT_ERROR) Serial.println("Connect failed.");
+            else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive failed.");
+            else if (error == OTA_END_ERROR) Serial.println("End failed.");
+        });
+        ArduinoOTA.onEnd([]()
+        {
+            Serial.println("End OTA update.");
+        });
 #endif
         ArduinoOTA.setPassword(OTA_PASS);
         ArduinoOTA.begin();
@@ -378,10 +384,12 @@ void setup() {
 #endif
 
     // Get the time!
-    if (WiFi.isConnected()) {
+    if (WiFi.isConnected())
+    {
         // Set ESP (and RTC) time from NTP
         time_t tempNtpTime = ntp.getTime(ntpServer);
-        if (tempNtpTime) {
+        if (tempNtpTime)
+        {
             errorCounterNTP = 0;
             setTime(timeZone.toLocal(tempNtpTime));
 #ifdef DEBUG
@@ -395,7 +403,8 @@ void setup() {
 #endif
 #endif
         }
-        else {
+        else
+        {
             if (errorCounterNTP < 255)
                 errorCounterNTP++;
 #ifdef DEBUG
@@ -403,7 +412,8 @@ void setup() {
 #endif
         }
     }
-    else {
+    else
+    {
         WiFi.reconnect();
     }
 
@@ -449,13 +459,14 @@ void setup() {
 // Loop()
 //*****************************************************************************
 
-void loop() {
-  
+void loop()
+{
     //*************************************************************************
     // Run once a day
     //*************************************************************************
 
-    if (day() != lastDay) {
+    if (day() != lastDay)
+    {
         lastDay = day();
         screenBufferNeedsUpdate = true;
 
@@ -474,7 +485,8 @@ void loop() {
 #endif
 
         // Change color
-        if (settings.mySettings.colorChange == COLORCHANGE_DAY) {
+        if (settings.mySettings.colorChange == COLORCHANGE_DAY)
+        {
             settings.mySettings.color = random(0, COLORCHANGE_COUNT + 1);
 #ifdef DEBUG
             Serial.printf("Color changed to: %u\r\n", settings.mySettings.color);
@@ -486,12 +498,14 @@ void loop() {
     // Run once every hour
     //*************************************************************************
 
-    if (hour() != lastHour) {
+    if (hour() != lastHour)
+    {
         lastHour = hour();
         screenBufferNeedsUpdate = true;
 
         // Change color
-        if (settings.mySettings.colorChange == COLORCHANGE_HOUR) {
+        if (settings.mySettings.colorChange == COLORCHANGE_HOUR)
+        {
             settings.mySettings.color = random(0, COLOR_COUNT + 1);
 #ifdef DEBUG
             Serial.printf("Color changed to: %u\r\n", settings.mySettings.color);
@@ -500,7 +514,8 @@ void loop() {
 
         // Hourly beep
 #ifdef BUZZER
-        if ((settings.mySettings.hourBeep == true) && (mode == MODE_TIME)) {
+        if ((settings.mySettings.hourBeep == true) && (mode == MODE_TIME))
+        {
             digitalWrite(PIN_BUZZER, HIGH);
             delay(25);
             digitalWrite(PIN_BUZZER, LOW);
@@ -514,7 +529,8 @@ void loop() {
         // Run once every random hour (once a day)
         //*********************************************************************
 
-        if (hour() == randomHour) {
+        if (hour() == randomHour)
+        {
             // Get updateinfo
 #ifdef UPDATE_INFOSERVER
             if (WiFi.isConnected())
@@ -528,7 +544,8 @@ void loop() {
     // Run once every minute
     //*************************************************************************
 
-    if (minute() != lastMinute) {
+    if (minute() != lastMinute)
+    {
         lastMinute = minute();
         screenBufferNeedsUpdate = true;
 
@@ -539,7 +556,8 @@ void loop() {
 
 #ifdef BUZZER
         // Switch on buzzer for alarm 1
-        if (settings.mySettings.alarm1 && (hour() == hour(settings.mySettings.alarm1Time)) && (minute() == minute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, weekday())) {
+        if (settings.mySettings.alarm1 && (hour() == hour(settings.mySettings.alarm1Time)) && (minute() == minute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, weekday()))
+        {
             alarmOn = BUZZTIME_ALARM_1;
 #ifdef DEBUG
             Serial.println("Alarm1 on.");
@@ -547,7 +565,8 @@ void loop() {
         }
 
         // Switch on buzzer for alarm 2
-        if (settings.mySettings.alarm2 && (hour() == hour(settings.mySettings.alarm2Time)) && (minute() == minute(settings.mySettings.alarm2Time)) && bitRead(settings.mySettings.alarm2Weekdays, weekday())) {
+        if (settings.mySettings.alarm2 && (hour() == hour(settings.mySettings.alarm2Time)) && (minute() == minute(settings.mySettings.alarm2Time)) && bitRead(settings.mySettings.alarm2Weekdays, weekday()))
+        {
             alarmOn = BUZZTIME_ALARM_2;
 #ifdef DEBUG
             Serial.println("Alarm2 on.");
@@ -565,14 +584,16 @@ void loop() {
 #endif
 
         // Set night- and daymode
-        if ((hour() == hour(settings.mySettings.nightOffTime)) && (minute() == minute(settings.mySettings.nightOffTime))) {
+        if ((hour() == hour(settings.mySettings.nightOffTime)) && (minute() == minute(settings.mySettings.nightOffTime)))
+        {
 #ifdef DEBUG
             Serial.println("Night off.");
 #endif
             setMode(MODE_BLANK);
         }
 
-        if ((hour() == hour(settings.mySettings.dayOnTime)) && (minute() == minute(settings.mySettings.dayOnTime))) {
+        if ((hour() == hour(settings.mySettings.dayOnTime)) && (minute() == minute(settings.mySettings.dayOnTime)))
+        {
 #ifdef DEBUG
             Serial.println("Day on.");
 #endif
@@ -586,11 +607,14 @@ void loop() {
         // Run once every random minute (once an hour) or if NTP has an error
         //*********************************************************************
 
-        if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10))) {
-            if (WiFi.isConnected()) {
+        if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10)))
+        {
+            if (WiFi.isConnected())
+            {
                 // Set ESP (and RTC) time from NTP
                 time_t tempNtpTime = ntp.getTime(ntpServer);
-                if (tempNtpTime) {
+                if (tempNtpTime)
+                {
                     errorCounterNTP = 0;
                     setTime(timeZone.toLocal(tempNtpTime));
 #ifdef DEBUG
@@ -604,20 +628,24 @@ void loop() {
 #endif
 #endif
                 }
-                else {
+                else
+                {
                     if (errorCounterNTP < 255) errorCounterNTP++;
 #ifdef DEBUG
                     Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
 #endif
                 }
             }
-            else {
+            else
+            {
                 WiFi.reconnect();
             }
         }
 
-        if (minute() == randomMinute) {
-            if (WiFi.isConnected()) {
+        if (minute() == randomMinute)
+        {
+            if (WiFi.isConnected())
+            {
                 // Get weather from OpenWeather
 #ifdef APIKEY
 #ifdef DEBUG
@@ -635,7 +663,8 @@ void loop() {
 #endif
 #endif
             }
-            else {
+            else
+            {
                 WiFi.reconnect();
             }
         }
@@ -644,10 +673,12 @@ void loop() {
         // Run once every 5 minutes
         //*********************************************************************
 
-        if (minute() % 5 == 0) {
+        if (minute() % 5 == 0)
+        {
 #ifdef SYSLOGSERVER_SERVER
             // Write some data to syslog
-            if (WiFi.isConnected()) {
+            if (WiFi.isConnected())
+            {
                 time_t tempEspTime = now();
 #ifdef APIKEY
                 syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(outdoorWeather.temperature) + ";" + String(outdoorWeather.humidity) + ";" \
@@ -664,7 +695,8 @@ void loop() {
             }
 #endif
             // Change color
-            if (settings.mySettings.colorChange == COLORCHANGE_FIVE) {
+            if (settings.mySettings.colorChange == COLORCHANGE_FIVE)
+            {
                 settings.mySettings.color = random(0, COLOR_COUNT + 1);
 #ifdef DEBUG
                 Serial.printf("Color changed to: %u\r\n", settings.mySettings.color);
@@ -677,16 +709,19 @@ void loop() {
     // Run once every second
     //*************************************************************************
 
-    if (second() != lastSecond) {
+    if (second() != lastSecond)
+    {
         lastSecond = second();
         upTime++;
 
 #ifdef BUZZER
         // Make some noise
-        if (alarmOn) {
+        if (alarmOn)
+        {
             alarmOn--;
             digitalRead(PIN_BUZZER) ? digitalWrite(PIN_BUZZER, LOW) : digitalWrite(PIN_BUZZER, HIGH);
-            if (!alarmOn) {
+            if (!alarmOn)
+            {
 #ifdef DEBUG
                 Serial.println("Alarm: off");
 #endif
@@ -719,7 +754,8 @@ void loop() {
 
         // Countdown timeralarm by one minute in the second it was activated
 #ifdef BUZZER
-        if (alarmTimer && alarmTimerSet && (alarmTimerSecond == second())) {
+        if (alarmTimer && alarmTimerSet && (alarmTimerSecond == second()))
+        {
             alarmTimer--;
 #ifdef DEBUG
             if (alarmTimer)
@@ -727,7 +763,8 @@ void loop() {
 #endif
         }
         // Switch on buzzer for timer
-        if (!alarmTimer && alarmTimerSet) {
+        if (!alarmTimer && alarmTimerSet)
+        {
             alarmTimerSet = false;
             alarmOn = BUZZTIME_TIMER;
 #ifdef DEBUG
@@ -737,20 +774,25 @@ void loop() {
 #endif
 
         // Auto switch modes
-        if (settings.mySettings.modeChange && (mode == MODE_TIME)) {
+        if (settings.mySettings.modeChange && (mode == MODE_TIME))
+        {
             autoModeChangeTimer--;
-            if (!autoModeChangeTimer) {
+            if (!autoModeChangeTimer)
+            {
 #ifdef DEBUG
                 Serial.println("Auto modechange. (" + String(autoMode) + ")");
 #endif
                 autoModeChangeTimer = AUTO_MODECHANGE_TIME;
-                switch (autoMode) {
+                switch (autoMode)
+                {
                 case 0:
 #ifdef APIKEY
-                    if (WiFi.isConnected()) {
+                    if (WiFi.isConnected())
+                    {
                         setMode(MODE_EXT_TEMP);
                     }
-                    else {
+                    else
+                    {
                         WiFi.reconnect();
                         setMode(MODE_EXT_TEMP);
                     }
@@ -762,10 +804,12 @@ void loop() {
                     setMode(MODE_TEMP);
 #else
 #ifdef APIKEY
-                    if (WiFi.isConnected()) {
+                    if (WiFi.isConnected())
+                    {
                         setMode(MODE_EXT_TEMP);
                     }
-                    else {
+                    else
+                    {
                         WiFi.reconnect();
                         setMode(MODE_EXT_TEMP);
                     }
@@ -779,12 +823,16 @@ void loop() {
 
         // Show event in feed
 #ifdef EVENT_TIME
-        if (mode == MODE_TIME) {
+        if (mode == MODE_TIME)
+        {
             showEventTimer--;
-            if (!showEventTimer) {
+            if (!showEventTimer)
+            {
                 showEventTimer = EVENT_TIME;
-                for (uint8_t i = 0; i < (sizeof(events) / sizeof(event_t)); i++) {
-                    if ((day() == events[i].day) && (month() == events[i].month)) {
+                for (uint8_t i = 0; i < (sizeof(events) / sizeof(event_t)); i++)
+                {
+                    if ((day() == events[i].day) && (month() == events[i].month))
+                    {
                         if (events[i].year)
                             feedText = "  " + events[i].text + " (" + String(year() - events[i].year) + ")   ";
                         else
@@ -815,8 +863,9 @@ void loop() {
 
     // Set brightness from LDR and update display (not screenbuffer) at 40Hz.
 #ifdef LDR
-    if ((millis() > iBrightnessMillis) && !testFlag) {
-        iBrightnessMillis = millis() + 25;
+    if ((millis() > iBrightnessMillis + 25) && !testFlag)
+    {
+        iBrightnessMillis = millis();
         iTargetBrightness = getBrightnessFromLDR();
         if (brightness < iTargetBrightness) brightness++;
         if (brightness > iTargetBrightness) brightness--;
@@ -826,13 +875,15 @@ void loop() {
 
 #ifdef IR_RECEIVER
     // Look for IR commands
-    if (irrecv.decode(&irDecodeResult)) {
+    if (irrecv.decode(&irDecodeResult))
+    {
 #ifdef DEBUG_IR
         Serial.print("IR signal: 0x");
         serialPrintUint64(irDecodeResult.value, HEX);
         Serial.println();
 #endif
-        switch (irDecodeResult.value) {
+        switch (irDecodeResult.value)
+        {
         case IR_CODE_ONOFF:
             buttonOnOffPressed();
             break;
@@ -848,18 +899,21 @@ void loop() {
 #endif
 
     // Render a new screenbuffer if needed
-    if (screenBufferNeedsUpdate) {
+    if (screenBufferNeedsUpdate)
+    {
         screenBufferNeedsUpdate = false;
 
         // Save old screenbuffer (or not if it's the test pattern)
-        if (testFlag) {
+        if (testFlag)
+        {
             for (uint8_t i = 0; i <= 9; i++) matrixOld[i] = 0;
             testFlag = false;
         }
         else
             for (uint8_t i = 0; i <= 9; i++) matrixOld[i] = matrix[i];
 
-        switch (mode) {
+        switch (mode)
+        {
         case MODE_TIME:
 #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
             sunrise_started = false;
@@ -895,7 +949,8 @@ void loop() {
         case MODE_SECONDS:
             renderer.clearScreenBuffer(matrix);
             renderer.setCorners(minute(), matrix);
-            for (uint8_t i = 0; i <= 6; i++) {
+            for (uint8_t i = 0; i <= 6; i++)
+            {
                 matrix[1 + i] |= numbersBig[second() / 10][i] << 11;
                 matrix[1 + i] |= numbersBig[second() % 10][i] << 5;
             }
@@ -924,14 +979,16 @@ void loop() {
 #endif
 #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
         case MODE_SUNRISE:
-            if (!sunrise_started) {
+            if (!sunrise_started)
+            {
                 sunrise_unix = timeZone.toLocal(outdoorWeather.sunrise);
                 sunrise_started = true;
                 sunrise_millis = millis();
                 save_color_sunrise_sunset = settings.mySettings.color;
             }
-            // if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
-            if (millis() < sunrise_millis + 1000) {
+            // if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333)
+            if (millis() < sunrise_millis + 1000)
+            {
                 settings.mySettings.color = YELLOW;
                 renderer.clearScreenBuffer(matrix);
                 // Sunrise screen
@@ -946,8 +1003,9 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b1111111111100000;
             }
-            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
-            else if (millis() < sunrise_millis + 2000) {
+            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666)
+            else if (millis() < sunrise_millis + 2000)
+            {
                 renderer.clearScreenBuffer(matrix);
                 // Sunrise screen
                 matrix[0] = 0b0000000000000000;
@@ -961,8 +1019,9 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b0111111111000000;
             }
-            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5) {
-            else if (millis() < sunrise_millis + 3000) {
+            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5)
+            else if (millis() < sunrise_millis + 3000)
+            {
                 renderer.clearScreenBuffer(matrix);
                 // Sunrise screen
                 matrix[0] = 0b0000111000000000;
@@ -976,14 +1035,16 @@ void loop() {
                 matrix[8] = 0b0011111110000000;
                 matrix[9] = 0b0000111000000000;
             }
-            //else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 1.5) {
-            else if (millis() < sunrise_millis + 4000 + settings.mySettings.timeout * 1000) {
+            //else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 1.5)
+            else if (millis() < sunrise_millis + 4000 + settings.mySettings.timeout * 1000)
+            {
                 renderer.clearScreenBuffer(matrix);
                 renderer.setTime(hour(sunrise_unix), minute(sunrise_unix), matrix);
                 renderer.setCorners(minute(sunrise_unix), matrix);
                 renderer.clearEntryWords(matrix);
             }
-            else {
+            else
+            {
                 sunrise_started = false;
                 settings.mySettings.color = save_color_sunrise_sunset;
                 setMode(MODE_TIME);
@@ -991,15 +1052,17 @@ void loop() {
             break;
             
         case MODE_SUNSET:
-            if (!sunset_started) {
+            if (!sunset_started)
+            {
                 sunset_unix = timeZone.toLocal(outdoorWeather.sunset);
                 sunset_started = true;
                 sunset_millis = millis();
             }
 
             // Matrix is only updatet every second.
-            // if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333) {
-            if (millis() < sunset_millis + 1000) {
+            // if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333)
+            if (millis() < sunset_millis + 1000)
+            {
                 settings.mySettings.color = ORANGE;
                 renderer.clearScreenBuffer(matrix);
                 // Sunset screen
@@ -1014,8 +1077,9 @@ void loop() {
                 matrix[8] = 0b0011111110000000;
                 matrix[9] = 0b0000111000000000;
             }
-            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666) {
-            else if (millis() < sunset_millis + 2000) {
+            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666)
+            else if (millis() < sunset_millis + 2000)
+            {
                 renderer.clearScreenBuffer(matrix);
                 // Sunset screen
                 matrix[0] = 0b0000000000000000;
@@ -1029,8 +1093,9 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b0111111111000000;
             }
-            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5) {
-            else if (millis() < sunset_millis + 3000) {
+            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5)
+            else if (millis() < sunset_millis + 3000)
+            {
                 renderer.clearScreenBuffer(matrix);
                 // Sunset screen
                 matrix[0] = 0b0000000000000000;
@@ -1044,14 +1109,16 @@ void loop() {
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b1111111111100000;
             }
-            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 1.5) {
-            else if (millis() < sunset_millis + 4000 + settings.mySettings.timeout * 1000) {
+            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 1.5)
+            else if (millis() < sunset_millis + 4000 + settings.mySettings.timeout * 1000)
+            {
                 renderer.clearScreenBuffer(matrix);
                 renderer.setTime(hour(sunset_unix), minute(sunset_unix), matrix);
                 renderer.setCorners(minute(sunset_unix), matrix);
                 renderer.clearEntryWords(matrix);
             }
-            else {
+            else
+            {
                 sunset_started = false;
                 settings.mySettings.color = save_color_sunrise_sunset;
                 setMode(MODE_TIME);
@@ -1064,7 +1131,8 @@ void loop() {
             settings.mySettings.color = save_color_sunrise_sunset;
 #endif
             renderer.clearScreenBuffer(matrix);
-            switch (moonphase) {
+            switch (moonphase)
+            {
             case 0:
                 matrix[0] = 0b0000111000000000;
                 matrix[1] = 0b0011000110000000;
@@ -1170,19 +1238,22 @@ void loop() {
             Serial.println("Room Temperature: " + String(roomTemperature));
 #endif
             renderer.clearScreenBuffer(matrix);
-            if (roomTemperature == 0) {
+            if (roomTemperature == 0)
+            {
                 matrix[0] = 0b0000000001000000;
                 matrix[1] = 0b0000000010100000;
                 matrix[2] = 0b0000000010100000;
                 matrix[3] = 0b0000000011100000;
             }
-            if (roomTemperature > 0) {
+            if (roomTemperature > 0)
+            {
                 matrix[0] = 0b0000000001000000;
                 matrix[1] = 0b0100000010100000;
                 matrix[2] = 0b1110000010100000;
                 matrix[3] = 0b0100000011100000;
             }
-            if (roomTemperature < 0) {
+            if (roomTemperature < 0)
+            {
                 matrix[0] = 0b0000000001000000;
                 matrix[1] = 0b0000000010100000;
                 matrix[2] = 0b1110000010100000;
@@ -1210,14 +1281,14 @@ void loop() {
             Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature));
 #endif
             renderer.clearScreenBuffer(matrix);
-            if (outdoorWeather.temperature > 0) {
+            if (outdoorWeather.temperature > 0)
+            {
                 matrix[1] = 0b0100000000000000;
                 matrix[2] = 0b1110000000000000;
                 matrix[3] = 0b0100000000000000;
             }
-            if (outdoorWeather.temperature < 0) {
+            if (outdoorWeather.temperature < 0)
                 matrix[2] = 0b1110000000000000;
-            }
             renderer.setSmallText(String(int(abs(outdoorWeather.temperature) + 0.5)), TEXT_POS_BOTTOM, matrix);
             break;
         case MODE_EXT_HUMIDITY:
@@ -1227,7 +1298,8 @@ void loop() {
             renderer.clearScreenBuffer(matrix);
             if (outdoorWeather.humidity < 100)
                 renderer.setSmallText(String(outdoorWeather.humidity), TEXT_POS_TOP, matrix);
-            else {
+            else
+            {
                 matrix[0] = 0b0010111011100000;
                 matrix[1] = 0b0110101010100000;
                 matrix[2] = 0b0010101010100000;
@@ -1267,9 +1339,11 @@ void loop() {
             renderer.clearScreenBuffer(matrix);
             break;
         case MODE_FEED:
-            for (uint8_t y = 0; y <= 5; y++) {
+            for (uint8_t y = 0; y <= 5; y++)
+            {
                 renderer.clearScreenBuffer(matrix);
-                for (uint8_t z = 0; z <= 6; z++) {
+                for (uint8_t z = 0; z <= 6; z++)
+                {
                     matrix[2 + z] |= (lettersBig[feedText[feedPosition] - 32][z] << (11 + y)) & 0b1111111111100000;
                     matrix[2 + z] |= (lettersBig[feedText[feedPosition + 1] - 32][z] << (5 + y)) & 0b1111111111100000;
                     matrix[2 + z] |= (lettersBig[feedText[feedPosition + 2] - 32][z] << (y - 1)) & 0b1111111111100000;
@@ -1278,7 +1352,8 @@ void loop() {
                 delay(120);
             }
             feedPosition++;
-            if (feedPosition == feedText.length() - 2) {
+            if (feedPosition == feedText.length() - 2)
+            {
                 feedPosition = 0;
                 setMode(MODE_TIME);
             }
@@ -1296,14 +1371,16 @@ void loop() {
 #endif
 
         // write screenbuffer to display
-        switch (mode) {
+        switch (mode)
+        {
         case MODE_TIME:
         case MODE_BLANK:
             if (settings.mySettings.transition == TRANSITION_NORMAL)
                 writeScreenBuffer(matrix, settings.mySettings.color, brightness);
             if (settings.mySettings.transition == TRANSITION_FADE)
                 writeScreenBufferFade(matrixOld, matrix, settings.mySettings.color, brightness);
-            if (settings.mySettings.transition == TRANSITION_MOVEUP) {
+            if (settings.mySettings.transition == TRANSITION_MOVEUP)
+            {
                 if (minute() % 5 == 0)
                     moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
                 else
@@ -1328,7 +1405,8 @@ void loop() {
             writeScreenBuffer(matrix, feedColor, brightness);
             break;
         default:
-            if (runTransitionOnce) {
+            if (runTransitionOnce)
+            {
                 //if (settings.mySettings.transition == TRANSITION_NORMAL)
                 //    writeScreenBuffer(matrix, settings.mySettings.color, brightness);
                 //if (settings.mySettings.transition == TRANSITION_FADE)
@@ -1346,12 +1424,12 @@ void loop() {
     }
 
     // Wait for mode timeout then switch back to time
-    if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout) {
+    if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout)
+    {
 // #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
 //        sunrise_started = false;
 //        sunset_started = false;
 // #endif
-
         setMode(MODE_TIME);
     }
   
@@ -1364,24 +1442,29 @@ void loop() {
 // Transitions
 //*****************************************************************************
 
-void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightness) {
+void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightness)
+{
     ledDriver.clear();
-    for (uint8_t y = 0; y <= 9; y++) {
-        for (uint8_t x = 0; x <= 10; x++) {
+    for (uint8_t y = 0; y <= 9; y++)
+    {
+        for (uint8_t x = 0; x <= 10; x++)
+        {
             if (bitRead(screenBuffer[y], 15 - x))
                 ledDriver.setPixel(x, y, color, brightness);
         }
     }
 
     // Corner LEDs
-    for (uint8_t y = 0; y <= 3; y++) {
+    for (uint8_t y = 0; y <= 3; y++)
+    {
         if (bitRead(screenBuffer[y], 4))
             ledDriver.setPixel(110 + y, color, brightness);
     }
 
     // Alarm LED
 #ifdef BUZZER
-    if (bitRead(screenBuffer[4], 4)) {
+    if (bitRead(screenBuffer[4], 4))
+    {
 #ifdef ALARM_LED_COLOR
 #ifdef ABUSE_CORNER_LED_FOR_ALARM
         if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet)
@@ -1401,8 +1484,10 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
     ledDriver.show();
 } // writeScreenBuffer
 
-void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness) {
-    for (uint8_t z = 0; z <= 9; z++) {
+void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness)
+{
+    for (uint8_t z = 0; z <= 9; z++)
+    {
         for (uint8_t i = 0; i <= 8; i++)
             screenBufferOld[i] = screenBufferOld[i + 1];
         screenBufferOld[9] = screenBufferNew[z];
@@ -1412,22 +1497,28 @@ void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], 
     }
 } // moveScreenBufferUp
 
-void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness) {
+void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness)
+{
     ledDriver.clear();
     uint8_t brightnessBuffer[10][12] = {};
 
     // Copy old matrix to buffer
-    for (uint8_t y = 0; y <= 9; y++) {
-        for (uint8_t x = 0; x <= 11; x++) {
+    for (uint8_t y = 0; y <= 9; y++)
+    {
+        for (uint8_t x = 0; x <= 11; x++)
+        {
             if (bitRead(screenBufferOld[y], 15 - x))
                 brightnessBuffer[y][x] = brightness;
         }
     }
 
     // Fade old to new matrix
-    for (uint8_t i = 0; i < brightness; i++) {
-        for (uint8_t y = 0; y <= 9; y++) {
-            for (uint8_t x = 0; x <= 11; x++) {
+    for (uint8_t i = 0; i < brightness; i++)
+    {
+        for (uint8_t y = 0; y <= 9; y++)
+        {
+            for (uint8_t x = 0; x <= 11; x++)
+            {
                 ESP.wdtFeed();
                 if (!(bitRead(screenBufferOld[y], 15 - x)) && (bitRead(screenBufferNew[y], 15 - x)))
                     brightnessBuffer[y][x]++;
@@ -1465,7 +1556,8 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 // "On/off" pressed
 //*****************************************************************************
 
-void buttonOnOffPressed() {
+void buttonOnOffPressed()
+{
 #ifdef DEBUG
     Serial.println("On/off pressed.");
 #endif
@@ -1476,14 +1568,16 @@ void buttonOnOffPressed() {
 // "Time" pressed
 //*****************************************************************************
 
-void buttonTimePressed() {
+void buttonTimePressed()
+{
 #ifdef DEBUG
     Serial.println("Time pressed.");
 #endif
 
     // Switch off alarm
 #ifdef BUZZER
-    if (alarmOn) {
+    if (alarmOn)
+    {
 #ifdef DEBUG
         Serial.println("Alarm: off");
 #endif
@@ -1502,14 +1596,16 @@ void buttonTimePressed() {
 // "Mode" pressed
 //*****************************************************************************
 
-void buttonModePressed() {
+void buttonModePressed()
+{
 #ifdef DEBUG
     Serial.println("Mode pressed.");
 #endif
 
     // Switch off alarm
 #ifdef BUZZER
-    if (alarmOn) {
+    if (alarmOn)
+    {
 #ifdef DEBUG
         Serial.println("Alarm: off");
 #endif
@@ -1526,14 +1622,16 @@ void buttonModePressed() {
 // Set mode
 //*****************************************************************************
 
-void setMode(Mode newMode) {
+void setMode(Mode newMode)
+{
     screenBufferNeedsUpdate = true;
     runTransitionOnce = true;
     lastMode = mode;
     mode = newMode;
 
     // set timeout for selected mode
-    switch (mode) {
+    switch (mode)
+    {
 #ifdef SHOW_MODE_AMPM
     case MODE_AMPM:
 #endif
@@ -1577,8 +1675,9 @@ void setMode(Mode newMode) {
 //*****************************************************************************
 
 #ifdef LDR
-//void setBrightnessFromLdr() {
-uint8_t getBrightnessFromLDR() {
+//void setBrightnessFromLdr()
+uint8_t getBrightnessFromLDR()
+{
 #ifdef LDR_IS_INVERSE
     ldrValue = 1024 - analogRead(PIN_LDR);
 #else
@@ -1588,7 +1687,8 @@ uint8_t getBrightnessFromLDR() {
         minLdrValue = ldrValue;
     if (ldrValue > maxLdrValue)
         maxLdrValue = ldrValue;
-    if ((ldrValue >= (lastLdrValue + 10)) || (ldrValue <= (lastLdrValue - 10))) { // Hysteresis is 10
+    if ((ldrValue >= (lastLdrValue + 10)) || (ldrValue <= (lastLdrValue - 10))) // Hysteresis is 10
+    {
         lastLdrValue = ldrValue;
 //      brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
         return (uint8_t)map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
@@ -1607,15 +1707,18 @@ uint8_t getBrightnessFromLDR() {
 //*****************************************************************************
 
 #ifdef UPDATE_INFOSERVER
-void getUpdateInfo() {
+void getUpdateInfo()
+{
     WiFiClient wifiClient;
     HttpClient httpClient = HttpClient(wifiClient, UPDATE_INFOSERVER, 80);
     httpClient.get(UPDATE_INFOFILE);
-    if (httpClient.responseStatusCode() == 200) {
+    if (httpClient.responseStatusCode() == 200)
+    {
         String response = httpClient.responseBody();
         response.trim();
         JSONVar updateArray = JSON.parse(response);
-        if (JSON.typeof(updateArray) == "undefined") {
+        if (JSON.typeof(updateArray) == "undefined")
+        {
             #ifdef DEBUG
             Serial.println("Parsing updateArray failed!");
             #endif
@@ -1634,7 +1737,8 @@ void getUpdateInfo() {
 //*****************************************************************************
 
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
-void getRoomConditions() {
+void getRoomConditions()
+{
 #if defined(RTC_BACKUP) && !defined(SENSOR_DHT22)
     roomTemperature = RTC.temperature() / 4.0 + RTC_TEMPERATURE_OFFSET;
 #ifdef DEBUG
@@ -1644,7 +1748,8 @@ void getRoomConditions() {
 #ifdef SENSOR_DHT22
     float dhtTemperature = dht.readTemperature();
     float dhtHumidity = dht.readHumidity();
-    if (!isnan(dhtTemperature) && !isnan(dhtHumidity)) {
+    if (!isnan(dhtTemperature) && !isnan(dhtHumidity))
+    {
         errorCounterDHT = 0;
         roomTemperature = dhtTemperature + DHT_TEMPERATURE_OFFSET;
         roomHumidity = dhtHumidity + DHT_HUMIDITY_OFFSET;
@@ -1653,7 +1758,8 @@ void getRoomConditions() {
         Serial.println("Humidity (DHT): " + String(roomHumidity) + "%");
 #endif
     }
-    else {
+    else
+    {
         if (errorCounterDHT < 255)
             errorCounterDHT++;
 #ifdef DEBUG
@@ -1669,8 +1775,10 @@ void getRoomConditions() {
 //*****************************************************************************
 
 #ifdef MODE_BUTTON
-ICACHE_RAM_ATTR void buttonModeInterrupt() {
-    if (millis() > lastButtonPress + 250) {
+ICACHE_RAM_ATTR void buttonModeInterrupt()
+{
+    if (millis() > lastButtonPress + 250)
+    {
         lastButtonPress = millis();
         buttonModePressed();
     }
@@ -1678,8 +1786,10 @@ ICACHE_RAM_ATTR void buttonModeInterrupt() {
 #endif
 
 #ifdef ONOFF_BUTTON
-ICACHE_RAM_ATTR void buttonOnOffInterrupt() {
-    if (millis() > lastButtonPress + 250) {
+ICACHE_RAM_ATTR void buttonOnOffInterrupt()
+{
+    if (millis() > lastButtonPress + 250)
+    {
         lastButtonPress = millis();
         buttonOnOffPressed();
     }
@@ -1687,8 +1797,10 @@ ICACHE_RAM_ATTR void buttonOnOffInterrupt() {
 #endif
 
 #ifdef TIME_BUTTON
-ICACHE_RAM_ATTR void buttonTimeInterrupt() {
-    if (millis() > lastButtonPress + 250) {
+ICACHE_RAM_ATTR void buttonTimeInterrupt()
+{
+    if (millis() > lastButtonPress + 250)
+    {
         lastButtonPress = millis();
         buttonTimePressed();
     }
@@ -1696,7 +1808,8 @@ ICACHE_RAM_ATTR void buttonTimeInterrupt() {
 #endif
 
 // Switch off LEDs
-void setLedsOff() {
+void setLedsOff()
+{
 #ifdef DEBUG
     Serial.println("LEDs: off");
 #endif
@@ -1704,7 +1817,8 @@ void setLedsOff() {
 }
 
 // Switch on LEDs
-void setLedsOn() {
+void setLedsOn()
+{
 #ifdef DEBUG
     Serial.println("LEDs: on");
 #endif
@@ -1713,7 +1827,8 @@ void setLedsOn() {
 
 // Calculate moonphase
 #ifdef SHOW_MODE_MOONPHASE
-int getMoonphase(int y, int m, int d) {
+int getMoonphase(int y, int m, int d)
+{
     int b;
     int c;
     int e;
@@ -1737,26 +1852,28 @@ int getMoonphase(int y, int m, int d) {
 
 // Write screenbuffer to console
 #ifdef DEBUG_MATRIX
-void debugScreenBuffer(uint16_t screenBuffer[]) {
-    const char buchstabensalat[][12] = {
-      { 'E', 'S', 'K', 'I', 'S', 'T', 'A', 'F', 'U', 'N', 'F', '1' },
-      { 'Z', 'E', 'H', 'N', 'Z', 'W', 'A', 'N', 'Z', 'I', 'G', '2' },
-      { 'D', 'R', 'E', 'I', 'V', 'I', 'E', 'R', 'T', 'E', 'L', '3' },
-      { 'V', 'O', 'R', 'F', 'U', 'N', 'K', 'N', 'A', 'C', 'H', '4' },
-      { 'H', 'A', 'L', 'B', 'A', 'E', 'L', 'F', 'U', 'N', 'F', 'A' },
-      { 'E', 'I', 'N', 'S', 'X', 'A', 'M', 'Z', 'W', 'E', 'I', ' ' },
-      { 'D', 'R', 'E', 'I', 'P', 'M', 'J', 'V', 'I', 'E', 'R', ' ' },
-      { 'S', 'E', 'C', 'H', 'S', 'N', 'L', 'A', 'C', 'H', 'T', ' ' },
-      { 'S', 'I', 'E', 'B', 'E', 'N', 'Z', 'W', 'O', 'L', 'F', ' ' },
-      { 'Z', 'E', 'H', 'N', 'E', 'U', 'N', 'K', 'U', 'H', 'R', ' ' }
+void debugScreenBuffer(uint16_t screenBuffer[])
+{
+    const char buchstabensalat[][12] =
+    {
+        { 'E', 'S', 'K', 'I', 'S', 'T', 'A', 'F', 'U', 'N', 'F', '1' },
+        { 'Z', 'E', 'H', 'N', 'Z', 'W', 'A', 'N', 'Z', 'I', 'G', '2' },
+        { 'D', 'R', 'E', 'I', 'V', 'I', 'E', 'R', 'T', 'E', 'L', '3' },
+        { 'V', 'O', 'R', 'F', 'U', 'N', 'K', 'N', 'A', 'C', 'H', '4' },
+        { 'H', 'A', 'L', 'B', 'A', 'E', 'L', 'F', 'U', 'N', 'F', 'A' },
+        { 'E', 'I', 'N', 'S', 'X', 'A', 'M', 'Z', 'W', 'E', 'I', ' ' },
+        { 'D', 'R', 'E', 'I', 'P', 'M', 'J', 'V', 'I', 'E', 'R', ' ' },
+        { 'S', 'E', 'C', 'H', 'S', 'N', 'L', 'A', 'C', 'H', 'T', ' ' },
+        { 'S', 'I', 'E', 'B', 'E', 'N', 'Z', 'W', 'O', 'L', 'F', ' ' },
+        { 'Z', 'E', 'H', 'N', 'E', 'U', 'N', 'K', 'U', 'H', 'R', ' ' }
     };
     //Serial.println("\033[0;0H"); // set cursor to 0, 0 position
     Serial.println(" -----------");
-    for (uint8_t y = 0; y <= 9; y++) {
+    for (uint8_t y = 0; y <= 9; y++)
+    {
         Serial.print('|');
-        for (uint8_t x = 0; x <= 10; x++) {
+        for (uint8_t x = 0; x <= 10; x++)
             Serial.print((bitRead(screenBuffer[y], 15 - x) ? buchstabensalat[y][x] : ' '));
-        }
         Serial.print('|');
         Serial.println((bitRead(screenBuffer[y], 4) ? buchstabensalat[y][11] : ' '));
     }
@@ -1766,12 +1883,15 @@ void debugScreenBuffer(uint16_t screenBuffer[]) {
 
 // Write FPS to console
 #ifdef DEBUG_FPS
-void debugFps() {
+void debugFps()
+{
     static uint16_t frames;
     static uint32_t lastFpsCheck;
     frames++;
-    if ((millis() % 1000 == 0) && (millis() != lastFpsCheck)) {
-        lastFpsCheck = millis();
+    //if ((millis() % 1000 == 0) && (millis() != lastFpsCheck))
+    if (millis() % 1000 == 0)
+    {
+        //lastFpsCheck = millis();
         Serial.printf("FPS: %u\r\n", frames);
         frames = 0;
     }
@@ -1782,7 +1902,8 @@ void debugFps() {
 // Webserver
 //*****************************************************************************
 
-void setupWebServer() {
+void setupWebServer()
+{
     webServer.onNotFound(handleNotFound);
     webServer.on("/", handleRoot);
     webServer.on("/handleButtonOnOff", []() { buttonOnOffPressed(); callRoot(); });
@@ -1797,17 +1918,20 @@ void setupWebServer() {
     webServer.begin();
 }
 
-void callRoot() {
+void callRoot()
+{
     webServer.send(200, "text/html", "<!doctype html><html><head><script>window.onload=function(){window.location.replace('/');}</script></head></html>");
 }
 
 // Page 404
-void handleNotFound() {
+void handleNotFound()
+{
     webServer.send(404, "text/plain", "404 - File Not Found.");
 }
 
 // Page /
-void handleRoot() {
+void handleRoot()
+{
     String message = "<!doctype html>"
         "<html>"
         "<head>"
@@ -1873,7 +1997,7 @@ void handleRoot() {
         "<br>" + outdoorWeather.description;
 #endif
     message += "<span style=\"font-size:12px;\">"
-        "<br><br><a href=\"http://tmw-it.ch/qlockwork/\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
+        "<br><br><a href=\"http://thorsten-wahl.ch/qlockwork/\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
         "<br>Firmware: " + String(FIRMWARE_VERSION);
 #ifdef UPDATE_INFOSERVER
     if (updateInfo > int(FIRMWARE_VERSION))
@@ -1951,7 +2075,8 @@ void handleRoot() {
 }
 
 // Page settings
-void handleButtonSettings() {
+void handleButtonSettings()
+{
 #ifdef DEBUG
     Serial.println("Settings pressed.");
 #endif
@@ -2367,7 +2492,8 @@ void handleButtonSettings() {
     webServer.send(200, "text/html", message);
 }
 
-void handleCommitSettings() {
+void handleCommitSettings()
+{
 #ifdef DEBUG
     Serial.println("Commit settings pressed.");
 #endif
@@ -2413,8 +2539,10 @@ void handleCommitSettings() {
         Serial.println("Timer started.");
 #endif
     }
-    else {
-        if (alarmTimerSet) {
+    else
+    {
+        if (alarmTimerSet)
+        {
             alarmTimer = 0;
             alarmTimerSecond = 0;
             alarmTimerSet = false;
@@ -2431,7 +2559,8 @@ void handleCommitSettings() {
 #endif
     // ------------------------------------------------------------------------
 #ifdef LDR
-    if (webServer.arg("ab") == "0") {
+    if (webServer.arg("ab") == "0")
+    {
         settings.mySettings.useAbc = false;
         brightness = maxBrightness;
     }
@@ -2445,7 +2574,8 @@ void handleCommitSettings() {
     // ------------------------------------------------------------------------
     settings.mySettings.color = webServer.arg("co").toInt();
     // ------------------------------------------------------------------------
-    switch (webServer.arg("cc").toInt()) {
+    switch (webServer.arg("cc").toInt())
+    {
     case 0:
         settings.mySettings.colorChange = COLORCHANGE_NO;
         break;
@@ -2460,7 +2590,8 @@ void handleCommitSettings() {
         break;
     }
     // ------------------------------------------------------------------------
-    switch (webServer.arg("tr").toInt()) {
+    switch (webServer.arg("tr").toInt())
+    {
     case 0:
         settings.mySettings.transition = TRANSITION_NORMAL;
         break;
@@ -2480,7 +2611,8 @@ void handleCommitSettings() {
     // ------------------------------------------------------------------------
     webServer.arg("ii") == "0" ? settings.mySettings.itIs = false : settings.mySettings.itIs = true;
     // ------------------------------------------------------------------------
-    if (webServer.arg("st").length()) {
+    if (webServer.arg("st").length())
+    {
         Serial.println(webServer.arg("st"));
         setTime(webServer.arg("st").substring(11, 13).toInt(), webServer.arg("st").substring(14, 16).toInt(), 0, webServer.arg("st").substring(8, 10).toInt(), webServer.arg("st").substring(5, 7).toInt(), webServer.arg("st").substring(0, 4).toInt());
 #ifdef RTC_BACKUP
@@ -2494,13 +2626,15 @@ void handleCommitSettings() {
 }
 
 // Page reset
-void handleReset() {
+void handleReset()
+{
     webServer.send(200, "text/plain", "OK. I'll be back!");
     ESP.restart();
 }
 
 // Page setEvent
-void handleSetEvent() {
+void handleSetEvent()
+{
     events[0].day = webServer.arg("day").toInt();
     events[0].month = webServer.arg("month").toInt();
     events[0].text = webServer.arg("text").substring(0, 40);
@@ -2513,7 +2647,8 @@ void handleSetEvent() {
 }
 
 // Page showText
-void handleShowText() {
+void handleShowText()
+{
     uint8_t feedBuzzer = webServer.arg("buzzer").toInt();
     feedColor = webServer.arg("color").toInt();
     feedText = "  " + webServer.arg("text").substring(0, 80) + "   ";
@@ -2525,7 +2660,8 @@ void handleShowText() {
 #endif
 
 #ifdef BUZZER
-    for (uint8_t i = 0; i < feedBuzzer; i++) {
+    for (uint8_t i = 0; i < feedBuzzer; i++)
+    {
         digitalWrite(PIN_BUZZER, HIGH);
         delay(75);
         digitalWrite(PIN_BUZZER, LOW);
@@ -2536,7 +2672,8 @@ void handleShowText() {
     setMode(MODE_FEED);
 }
 
-void handleControl() {
+void handleControl()
+{
     setMode((Mode)webServer.arg("mode").toInt());
     webServer.send(200, "text/plain", "OK.");
 }

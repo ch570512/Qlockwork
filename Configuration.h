@@ -164,7 +164,7 @@
 //#define SYSLOGSERVER_SERVER "192.168.0.1"
 //#define SYSLOGSERVER_PORT 514
 
-#define UPDATE_INFOSERVER "tmw-it.ch"
+#define UPDATE_INFOSERVER "thorsten-wahl.ch"
 #define UPDATE_INFOFILE "/qlockwork/updateinfo.json"
 
 // ESP8266

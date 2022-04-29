@@ -41,7 +41,7 @@ Disclaimer: Qlockwork uses lots of third party libraries.
             You use the Qlockwork firmware at your own risk.
 
 You can find the QLOCKWORK web-site here:
-http://tmw-it.ch/qlockwork/
+http://thorsten-wahl.ch/qlockwork/
 
 You can download the latest version of the firmware here:
 https://github.com/ch570512/Qlockwork
@@ -444,8 +444,12 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
+20220429:
+Moved the web-site from "tmw-it.ch" to "thorsten-wahl.ch"
+The UPDATE_INFOSERVER also moved there. Please update your Configuration.h
+
 20220411:
-Fixed a bug causing the project not to compile.
+Fixed a bug causing the project not to compile in a certain configuration.
 <Qlockwork.ino:1504:33: error: 'save_color_sunrise_sunset' was not declared in this scope>
 
 20220312:
