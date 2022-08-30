@@ -445,7 +445,7 @@ Changelog:
 ******************************************************************************
 
 20220830:
-Fixed the issue that ADB can not be disabled.
+Fixed the issue that adaptive brightness control (ABC) can not be disabled in settings.
 
 20220429:
 Moved the web-site from "tmw-it.ch" to "thorsten-wahl.ch"
