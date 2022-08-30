@@ -20,7 +20,7 @@
 //
 //*****************************************************************************
 
-#define FIRMWARE_VERSION 20220429
+#define FIRMWARE_VERSION 20220830
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -731,12 +731,6 @@ void loop()
         }
 #endif
 
-        // Set brightness from LDR
-// #ifdef LDR
-//         if (settings.mySettings.useAbc)
-//             setBrightnessFromLdr();
-// #endif
-
 #ifdef FRONTCOVER_BINARY
         if (mode != MODE_BLANK)
             screenBufferNeedsUpdate = true;
@@ -863,13 +857,16 @@ void loop()
 
     // Set brightness from LDR and update display (not screenbuffer) at 40Hz.
 #ifdef LDR
-    if ((millis() > iBrightnessMillis + 25) && !testFlag)
+    if (settings.mySettings.useAbc)
     {
-        iBrightnessMillis = millis();
-        iTargetBrightness = getBrightnessFromLDR();
-        if (brightness < iTargetBrightness) brightness++;
-        if (brightness > iTargetBrightness) brightness--;
-        writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+        if ((millis() > iBrightnessMillis + 25) && !testFlag)
+        {
+            iBrightnessMillis = millis();
+            iTargetBrightness = getBrightnessFromLDR();
+            if (brightness < iTargetBrightness) brightness++;
+            if (brightness > iTargetBrightness) brightness--;
+            writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+        }
     }
 #endif
 
@@ -1675,7 +1672,6 @@ void setMode(Mode newMode)
 //*****************************************************************************
 
 #ifdef LDR
-//void setBrightnessFromLdr()
 uint8_t getBrightnessFromLDR()
 {
 #ifdef LDR_IS_INVERSE
@@ -1690,13 +1686,7 @@ uint8_t getBrightnessFromLDR()
     if ((ldrValue >= (lastLdrValue + 10)) || (ldrValue <= (lastLdrValue - 10))) // Hysteresis is 10
     {
         lastLdrValue = ldrValue;
-//      brightness = map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
         return (uint8_t)map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
-//      screenBufferNeedsUpdate = true;
-// #ifdef DEBUG
-//      Serial.printf("Brightness: %u (min: %u, max: %u)\r\n", brightness, MIN_BRIGHTNESS, maxBrightness);
-//      Serial.printf("LDR: %u (min: %u, max: %u)\r\n", ldrValue, minLdrValue, maxLdrValue);
-// #endif
     }
     return iTargetBrightness;
 }

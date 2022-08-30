@@ -444,6 +444,9 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 Changelog:
 ******************************************************************************
 
+20220830:
+Fixed the issue that ADB can not be disabled.
+
 20220429:
 Moved the web-site from "tmw-it.ch" to "thorsten-wahl.ch"
 The UPDATE_INFOSERVER also moved there. Please update your Configuration.h
