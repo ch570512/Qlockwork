@@ -61,7 +61,7 @@ Webpage to control and configure the clock via WiFi.
 Adaptive brightness control when using an LDR.
 3 transitions for timechange.
 Indoor temperature from RTC or temperature and humidity from DHT sensor.
-Outdoor temperature and humidity from OpenWeather. You need an APIKey from OpenWeather to use this feature.
+Outdoor temperature and humidity from MeteoWeather.
 Visualisation of moonphase.
 Show sunrise and sunset times with animation.
 Textfeed for events and infos, local and over the web.
@@ -82,13 +82,13 @@ AM/PM
 Seconds
 Weekday
 Date
-Sunrise (needs OpenWeather)
-Sunset (needs OpenWeather)
+Sunrise (needs MeteoWeather)
+Sunset (needs MeteoWeather)
 Moonphase
 Room temperature (needs RTX or DHT22)
 Room humidity (needs DHT22)
-Outdoor temperature (needs OpenWeather)
-Outdoor humidity (needs OpenWeather)
+Outdoor temperature (needs MeteoWeather)
+Outdoor humidity (needs MeteoWeather)
 Timer
 LED-test
 Red
@@ -162,8 +162,8 @@ Sunset:                             Time of sunset.
 Moonphase:                          Shows the moonphase.
 Room temperature:                   Display of the measured temperature in the room (only with RTC or DHT22).
 Room humidity:                      Display of the measured humidity in the room (only with DHT22).
-Outdoor temperature:                Display the temperature for your location from OpenWeather.
-Outdoor humidity:                   Display the humidity for your location from OpenWeather.
+Outdoor temperature:                Display the temperature for your location from MeteoWeather.
+Outdoor humidity:                   Display the humidity for your location from MeteoWeather.
 Timer:                              Display of the remaining time if a timer is set.
 LED-Test:                           Moves a horizontal bar across the display.
 Red:                                Set all LEDs to red.
@@ -235,8 +235,10 @@ Configuration.h - Software settings:
 #define SHOW_MODE_SUNRISE_SUNSET    Show sunrise and sunset times.
 #define SHOW_MODE_TEST              Show tests.
 
-#define APIKEY                      Your OpenWeather API key.
-#define LOCATION                    Your location for OpenWeather.
+#define WEATHER                     Enable MeteoWeather usage to display weather information from the internet.
+#define LATITUDE                    Your location latitude for MeteoWeather API.
+#define LONGITUDE                   Your location longitude for MeteoWeather API.
+#define TIMZONE                     Your location timezone for MeteoWeather API.
 
 #define TIMEZONE_*                  The time zone in which the clock is located. Important for the UTC offset and the
                                     summer/winter time change.
@@ -443,6 +445,10 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 ******************************************************************************
 Changelog:
 ******************************************************************************
+20240908:
+Switch to MeteoWeather API for weather and sunrise/sunset information (API Key no longer required, regestration for API no longer needed).
+Beatification of debug output and webcontrol page for sunrise/sunset.
+Fixed transitions.
 
 20220830:
 Fixed the issue that adaptive brightness control (ABC) can not be disabled in settings.

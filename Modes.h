@@ -20,7 +20,7 @@ typedef enum eMode : uint8_t
 #ifdef SHOW_MODE_DATE
     MODE_DATE,				// 4
 #endif
-#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
     MODE_SUNRISE, 			// 5
     MODE_SUNSET, 			// 6
 #endif
@@ -33,7 +33,7 @@ typedef enum eMode : uint8_t
 #ifdef SENSOR_DHT22
     MODE_HUMIDITY,			// 9
 #endif
-#ifdef APIKEY
+#ifdef WEATHER
     MODE_EXT_TEMP,			// 10
     MODE_EXT_HUMIDITY,		// 11
 #endif
