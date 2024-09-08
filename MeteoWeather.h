@@ -1,17 +1,18 @@
 //*****************************************************************************
-// OpenWeather.h - Get weather data and sunrise/sunset times from OpenWeather
+// MeteoWeather.h - Get weather data and sunrise/sunset times from Open-Meteo
 //*****************************************************************************
 
-#ifndef OPENWEATHER_H
-#define OPENWEATHER_H
+#ifndef METEOWEATHER_H
+#define METEOWEATHER_H
 
-#include <Arduino_JSON.h>
+// #include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 
-class OpenWeather {
+class MeteoWeather {
 public:
-    OpenWeather();
-    ~OpenWeather();
+    MeteoWeather();
+    ~MeteoWeather();
 
     String description;
     double temperature;
@@ -20,7 +21,7 @@ public:
     time_t sunrise;
     time_t sunset;
 
-    uint8_t getOutdoorConditions(String location, String apiKey, String langStr);
+    uint8_t getOutdoorConditions(String lat, String lon, String timezone);
 
 private:
 
