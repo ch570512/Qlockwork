@@ -24,6 +24,7 @@
 #define AUTO_MODECHANGE_TIME 60 // seconds
 #define EVENT_TIME 300 // seconds
 #define ALARM_LED_COLOR RED
+#define NIGHT_BRIGHTNESS_DELAY 1800 // s
 //#define ABUSE_CORNER_LED_FOR_ALARM
 
 //#define POWERON_SELFTEST
