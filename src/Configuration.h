@@ -1,12 +1,12 @@
-//*****************************************************************************
+//******************************************************************************
 // Configuration.h
 // See README.txt for help
-//*****************************************************************************
+//******************************************************************************
 
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-//*****************************************************************************
+//******************************************************************************
 // Software settings
 //*****************************************************************************
 
@@ -21,8 +21,8 @@
 //#define WIFI_BEEPS
 
 //#define NONE_TECHNICAL_ZERO
-#define AUTO_MODECHANGE_TIME 60 // seconds
-#define EVENT_TIME 300 // seconds
+#define AUTO_MODECHANGE_TIME 180 // s
+#define EVENT_TIME 600 // s
 #define ALARM_LED_COLOR RED
 #define NIGHT_BRIGHTNESS_DELAY 1800 // s
 //#define ABUSE_CORNER_LED_FOR_ALARM
@@ -33,8 +33,8 @@
 #define SHOW_MODE_WEEKDAY
 #define SHOW_MODE_DATE
 #define SHOW_MODE_MOONPHASE
-//#define SHOW_MODE_SUNRISE_SUNSET // works only if APIKEY is defined
-#define SHOW_MODE_TEST
+#define SHOW_MODE_SUNRISE_SUNSET
+// #define SHOW_MODE_TEST
 
 #define WEATHER // Show weather data
 
@@ -62,9 +62,9 @@
 //#define FRONTCOVER_NL
 //#define FRONTCOVER_BINARY
 
-//*****************************************************************************
+//******************************************************************************
 // Timezone
-//*****************************************************************************
+//******************************************************************************
 
 //#define TIMEZONE_IDLW  // IDLW  International Date Line West UTC-12
 //#define TIMEZONE_SST   // SST   Samoa Standard Time UTC-11
@@ -176,6 +176,7 @@
 //#define PIN_WIRE_SCL     05 // D1 SCL
 //#define PIN_WIRE_SDA     04 // D2 SDA
 #define PIN_MODE_BUTTON  00 // D3 LOW_Flash
+#define PIN_MODE_BUTTON_LED 14 // D5 Button LED
 #define PIN_LED          02 // D4 ESP8266_LED
 #define PIN_BUZZER       14 // D5
 #define PIN_DHT22        12 // D6
