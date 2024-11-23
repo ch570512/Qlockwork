@@ -61,7 +61,8 @@ Webpage to control and configure the clock via WiFi.
 Adaptive brightness control when using an LDR.
 3 transitions for timechange.
 Indoor temperature from RTC or temperature and humidity from DHT sensor.
-Outdoor temperature and humidity from MeteoWeather. You need an WEATHER from MeteoWeather to use this feature.
+Outdoor temperature and humidity from MeteoWeather. You need WEATHER from MeteoWeather to use this feature.
+
 Visualisation of moonphase.
 Show sunrise and sunset times with animation.
 Textfeed for events and infos, local and over the web.
