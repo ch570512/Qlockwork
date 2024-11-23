@@ -35,6 +35,7 @@ public:
     void unsetPixelInScreenBuffer(uint8_t x, uint8_t y, uint16_t matrix[]);
     void clearScreenBuffer(uint16_t matrix[]);
     void setAllScreenBuffer(uint16_t matrix[]);
+    void setLoveSign(uint16_t matrix[]);
 
 private:
     boolean isNumber(char symbol);

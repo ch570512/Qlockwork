@@ -16,7 +16,8 @@ void Settings::resetToDefault() {
     mySettings.magicNumber = SETTINGS_MAGIC_NUMBER;
     mySettings.version = SETTINGS_VERSION;
     mySettings.useAbc = false;
-    mySettings.brightness = 50;
+    mySettings.brightness_during_daytime = 50;
+    mySettings.brightness_during_nighttime = 20;
     mySettings.color = WHITE;
     mySettings.colorChange = COLORCHANGE_NO;
     mySettings.transition = TRANSITION_FADE;
