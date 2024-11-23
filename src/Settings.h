@@ -13,7 +13,7 @@
 #include "Modes.h"
 
 #define SETTINGS_MAGIC_NUMBER 0x2A
-#define SETTINGS_VERSION 25
+#define SETTINGS_VERSION 26
 
 class Settings {
 public:
@@ -24,7 +24,8 @@ public:
         uint8_t magicNumber;
         uint8_t version;
         boolean useAbc;
-        int16_t brightness;
+        int16_t brightness_during_daytime;
+        int16_t brightness_during_nighttime;
         uint8_t color;
         uint8_t colorChange;
         uint8_t transition;

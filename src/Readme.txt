@@ -61,7 +61,7 @@ Webpage to control and configure the clock via WiFi.
 Adaptive brightness control when using an LDR.
 3 transitions for timechange.
 Indoor temperature from RTC or temperature and humidity from DHT sensor.
-Outdoor temperature and humidity from MeteoWeather.
+Outdoor temperature and humidity from MeteoWeather. You need an WEATHER from MeteoWeather to use this feature.
 Visualisation of moonphase.
 Show sunrise and sunset times with animation.
 Textfeed for events and infos, local and over the web.
@@ -71,6 +71,7 @@ Support for 16 frontcovers (Original and DIY) in 6 languages.
 2 Alarms with weekday selection.
 NTP timesync with timezone support.
 Automatic adjustment of daylight saving time.
+Different brightnesses can be set for day- and nighttime.
 USB and Over-the-air firmware updates.
 
 ******************************************************************************
@@ -103,7 +104,6 @@ Needed libraries: (recommended/tested versions in brackets)
 Arduino IDE for Windows (1.8.19)
 esp8266 by ESP8266 Community (3.0.2)
 Arduino_JSON by Arduino (0.1.0)
-ArduinoJason by bblanchon (7.1.0)
 Adafruit NeoPixel by Adafruit (1.10.4)
 Adafruit Unified Sensor by Adafruit (1.1.5)
 ArduinoHttpClient by Arduino (0.4.0)
@@ -187,6 +187,8 @@ ABC:                                Enable (on) or disable (off) adaptive bright
                                     Brightness will adjust itself in the range of MIN_BRIGHTNESS and brightness.
 Brightness:                         Brightness of the LEDs in percent. The range is MIN_BRIGHTNESS to MAX_BRIGHTNESS.
                                     If ABC is enabled this is the maximum achievable brightness.
+Brightness during nighttime:        Brightness level at nighttime. Nighttime starts at sunset + NIGHT_BRIGHTNESS_DELAY
+                                    and ends at sunrise - NIGHT_BRIGHTNESS_DELAY.
 Color:                              Choose one of 25 colors for the LEDs.
 Colorchange:                        Change the color in intervals.
                                     Do not change (off), every 5 minutes (five), every hour (hour), every day (day).
@@ -217,6 +219,7 @@ Configuration.h - Software settings:
 #define AUTO_MODECHANGE_TIME        Time in seconds to wait between switching from time to temperature.
 #define FEED_SPEED                  Feed delay in milliseconds. 120 is a good start.
 #define SUNSET_SUNRISE_SPEED        Milliseconds delay between sunrise screen -> sunrise time and sunset screen -> sunset time
+#define NIGHT_BRIGHTNESS_DELAY      Delay for brightness adjustment (nighttime brightness or daytime brightness)
 #define EVENT_TIME                  Time in seconds to wait between showing events. Comment to turn off events.
 #define ALARM_LED_COLOR             Color of the alarm LED. If not defined the display color will be used.
                                     The possible colors are:
@@ -236,10 +239,11 @@ Configuration.h - Software settings:
 #define SHOW_MODE_SUNRISE_SUNSET    Show sunrise and sunset times.
 #define SHOW_MODE_TEST              Show tests.
 
-#define WEATHER                     Enable MeteoWeather usage to display weather information from the internet.
-#define LATITUDE                    Your location latitude for MeteoWeather API.
-#define LONGITUDE                   Your location longitude for MeteoWeather API.
-#define TIMZONE                     Your location timezone for MeteoWeather API.
+#define WEATHER                     Show weather (with meteoweather API)
+
+#define LATITUDE                    Latitude for weather location.
+#define LONGITUDE                   Longitude for weather location.
+#define TIMEZONE                    Timezone for weather location.
 
 #define TIMEZONE_*                  The time zone in which the clock is located. Important for the UTC offset and the
                                     summer/winter time change.
@@ -415,7 +419,8 @@ hb=0                                Hourly beep on [1] or off [0]
 ti=0                                Timer in minutes
 mc=0                                Modechange on [1] or off [0]
 ab=1                                ABC on [1] or off [0]
-br=50                               Brightness in percent
+br_day=50                           Brightness during day in percent
+br_night=50                         Brightness during night in percent
 co=14                               Number of the LEDs color. See Colors.h
 cc=0                                Number of colorchange. See Colors.h
 tr=1                                Number of transition. See Modes.h
@@ -446,6 +451,11 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 ******************************************************************************
 Changelog:
 ******************************************************************************
+
+20241105:
+Introduced night brightness level. The night brightness level is applied if sunrise/sunset times are available via weather API.
+NIGHT_BRIGHTNESS_DELAY is subtracted from sunrise time and added to sunset time for switching between brightness values.
+
 20240908:
 Switch to MeteoWeather API for weather and sunrise/sunset information (API Key no longer required, regestration for API no longer needed).
 Beatification of debug output and webcontrol page for sunrise/sunset.

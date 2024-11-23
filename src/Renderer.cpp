@@ -1475,3 +1475,9 @@ void Renderer::setAllScreenBuffer(uint16_t matrix[]) {
     for (uint8_t i = 0; i <= 9; i++)
         matrix[i] = 0b1111111111111111;
 }
+
+void Renderer::setLoveSign(uint16_t matrix[])
+{
+  matrix[0] = 0b0001001111000000;
+  matrix[4] = 0b0000111000000000;
+}

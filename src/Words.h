@@ -80,19 +80,19 @@
 #define DE_HALB				matrix[4] |= 0b1111000000000000
 #define DE_DREIVIERTEL		matrix[2] |= 0b1111111111100000
 
-#define DE_H_EIN			matrix[5] |= 0b1110000000000000
-#define DE_H_EINS			matrix[5] |= 0b1111000000000000
-#define DE_H_ZWEI			matrix[5] |= 0b0000000111100000
-#define DE_H_DREI			matrix[6] |= 0b1111000000000000
-#define DE_H_VIER			matrix[6] |= 0b0000000111100000
-#define DE_H_FUENF			matrix[4] |= 0b0000000111100000
-#define DE_H_SECHS			matrix[7] |= 0b1111100000000000
-#define DE_H_SIEBEN			matrix[8] |= 0b1111110000000000
-#define DE_H_ACHT			matrix[7] |= 0b0000000111100000
-#define DE_H_NEUN			matrix[9] |= 0b0001111000000000
-#define DE_H_ZEHN			matrix[9] |= 0b1111000000000000
-#define DE_H_ELF			matrix[4] |= 0b0000011100000000
-#define DE_H_ZWOELF			matrix[8] |= 0b0000001111100000
+#define DE_H_EIN			matrix[5] |= 0b0011100000000000
+#define DE_H_EINS			matrix[5] |= 0b0011110000000000
+#define DE_H_ZWEI			matrix[5] |= 0b1111000000000000
+#define DE_H_DREI			matrix[6] |= 0b0111100000000000
+#define DE_H_VIER			matrix[7] |= 0b0000000111100000
+#define DE_H_FUENF			matrix[6] |= 0b0000000111100000
+#define DE_H_SECHS			matrix[9] |= 0b0111110000000000
+#define DE_H_SIEBEN			matrix[5] |= 0b0000011111100000
+#define DE_H_ACHT			matrix[8] |= 0b0111100000000000
+#define DE_H_NEUN			matrix[7] |= 0b0001111000000000
+#define DE_H_ZEHN			matrix[8] |= 0b0000001111000000
+#define DE_H_ELF			matrix[7] |= 0b1110000000000000
+#define DE_H_ZWOELF			matrix[4] |= 0b0000001111100000
 
 #endif
 
@@ -133,7 +133,7 @@
 #define EN_ITIS				matrix[0] |= 0b1101100000000000
 #define EN_TIME				matrix[0] |= 0b0000000111100000
 #define EN_A				matrix[1] |= 0b1000000000000000
-#define EN_OCLOCK			matrix[9] |= 0b0000011111100000
+#define EN_OCLOCK			matrix[9] |= 0b0000111111100000
 #define EN_AM				matrix[0] |= 0b0000000110000000
 #define EN_PM				matrix[0] |= 0b0000000001100000
 
