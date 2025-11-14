@@ -40,9 +40,6 @@ Disclaimer: Qlockwork uses lots of third party libraries.
             I can not guarantee the integrity of these libraries.
             You use the Qlockwork firmware at your own risk.
 
-You can find the QLOCKWORK web-site here:
-http://thorsten-wahl.ch/qlockwork/
-
 You can download the latest version of the firmware here:
 https://github.com/ch570512/Qlockwork
 
@@ -622,3 +619,4 @@ Code cleanup and bugfixes.
 
 20170312:
 Inital release.
+
