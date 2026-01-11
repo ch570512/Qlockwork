@@ -1,6 +1,6 @@
 //*****************************************************************************
 // Configuration.h
-// See README.txt for help
+// See Readme.md for help
 //*****************************************************************************
 
 #ifndef CONFIGURATION_H
@@ -20,7 +20,7 @@
 #define SHOW_IP
 //#define WIFI_BEEPS
 
-//#define NONE_TECHNICAL_ZERO
+#define NONE_TECHNICAL_ZERO
 #define AUTO_MODECHANGE_TIME 60 // seconds
 #define EVENT_TIME 300 // seconds
 #define ALARM_LED_COLOR RED
@@ -32,15 +32,13 @@
 #define SHOW_MODE_WEEKDAY
 #define SHOW_MODE_DATE
 #define SHOW_MODE_MOONPHASE
-//#define SHOW_MODE_SUNRISE_SUNSET // works only if APIKEY is defined
+//#define SHOW_MODE_SUNRISE_SUNSET
 #define SHOW_MODE_TEST
 
 #define WEATHER // Show weather data
-
 // Enter the location for which you want the current weather data displayed as latitude and longitude and the time zone.
 #define LATITUDE "56.2345678"
 #define LONGITUDE "12.123456789"
-
 #define TIMEZONE "Europe/Berlin"
 
 //#define FRONTCOVER_EN
@@ -111,6 +109,7 @@
 
 #define ESP_LED
 
+// range from 0 to 255
 #define MIN_BRIGHTNESS 20
 #define MAX_BRIGHTNESS 255
 #define TEST_BRIGHTNESS 80
@@ -150,7 +149,8 @@
 #define NEOPIXEL_RGB
 //#define NEOPIXEL_RGBW
 
-#define NEOPIXEL_TYPE NEO_GRB + NEO_KHZ800     // see Adafruit_NeoPixel.h for help
+// see Adafruit_NeoPixel.h for help
+#define NEOPIXEL_TYPE NEO_GRB + NEO_KHZ800
 //#define NEOPIXEL_TYPE NEO_WRGB + NEO_KHZ800
 //#define NEOPIXEL_TYPE NEO_GRBW + NEO_KHZ800
 
@@ -167,8 +167,8 @@
 //#define SYSLOGSERVER_SERVER "192.168.0.1"
 //#define SYSLOGSERVER_PORT 514
 
-#define UPDATE_INFOSERVER "thorsten-wahl.ch"
-#define UPDATE_INFOFILE "/qlockwork/updateinfo.json"
+//#define UPDATE_INFOSERVER "not_available.de"
+//#define UPDATE_INFOFILE "/qlockwork/updateinfo.json"
 
 // ESP8266
 #define PIN_IR_RECEIVER  16 // D0 (no interrupt)

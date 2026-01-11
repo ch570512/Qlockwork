@@ -1,7 +1,5 @@
-******************************************************************************
-QLOCKWORK
-An advanced firmware for a DIY "word-clock".
-******************************************************************************
+# QLOCKWORK
+## An advanced firmware for a DIY "word-clock".
 
 Qlockwork is an ESP8266 (NodeMCU or WeMos D1 mini) firmware (under GPL license) for a so called "word-clock".
 
@@ -32,23 +30,20 @@ You will also find a circuit diagram, a partslist and some pictures in the "/mis
 All sensors, the RTC and the buzzer are optional.
 The clock will run with the ESP8266 module only. No PCB needed.
 
-Warning:    Do not power up the clock from USB only.
-            This would blow up the ESP or even the USB port because of high power demand of the LED stripe.
-            Always use an external 5V powersupply with at least 4A.
+**Warning:**
+Do not power up the clock from USB only.
+This would blow up the ESP or even the USB port because of the high power demand of the LED stripe.
+Always (!) use an external 5V powersupply with at least 4A.
 
-Disclaimer: Qlockwork uses lots of third party libraries.
-            I can not guarantee the integrity of these libraries.
-            You use the Qlockwork firmware at your own risk.
+**Disclaimer:**
+Qlockwork uses lots of third party libraries.
+I cannot guarantee the integrity of these libraries.
+You use the Qlockwork firmware at your own risk.
 
-You can download the latest version of the firmware here:
+You can download the latest version of the firmware from:
 https://github.com/ch570512/Qlockwork
 
-Visit this forum for comments, suggestions and bug reports:
-http://diskussion.christians-bastel-laden.de/viewtopic.php?f=23&t=2843
-
-******************************************************************************
-Top features:
-******************************************************************************
+## Top features:
 
 Almost no electronics needed. Only an ESP8266 and an LED-stripe.
 Optional support for LDR, Buzzer, temperature and humidity sensor, IR-remote and buttons.
@@ -70,9 +65,7 @@ NTP timesync with timezone support.
 Automatic adjustment of daylight saving time.
 USB and Over-the-air firmware updates.
 
-******************************************************************************
-Pages:
-******************************************************************************
+## Pages:
 
 Time
 AM/PM
@@ -93,14 +86,12 @@ Green
 Blue
 White
 
-******************************************************************************
-Needed libraries: (recommended/tested versions in brackets)
-******************************************************************************
+## Needed libraries: (recommended/tested versions in brackets)
 
 Arduino IDE for Windows (1.8.19)
 esp8266 by ESP8266 Community (3.0.2)
 Arduino_JSON by Arduino (0.1.0)
-ArduinoJason by bblanchon (7.1.0)
+ArduinoJson by bblanchon (7.1.0)
 Adafruit NeoPixel by Adafruit (1.10.4)
 Adafruit Unified Sensor by Adafruit (1.1.5)
 ArduinoHttpClient by Arduino (0.4.0)
@@ -113,9 +104,7 @@ Time by Michael Margolis (1.6.1)
 Included in source is the Timezone library from Jack Christensen
 and WiFiManager by AlexT.
 
-******************************************************************************
-Compiler-Options: (recommended/tested)
-******************************************************************************
+## Compiler-Options: (recommended/tested)
 
 Board: "LOLIN(WEMOS) D1 R2 & mini"
 CPU Frequency: "80 MHz"
@@ -128,9 +117,7 @@ Exceptions: "Disabled"
 Erase Flash: "Only Sketch"
 SSL Support: "All SSL ciphers"
 
-******************************************************************************
-Misc:
-******************************************************************************
+## Misc:
 
 For OTA and web-server updates check out:
 http://esp8266.github.io/Arduino/versions/2.3.0/doc/ota_updates/readme.html
@@ -139,16 +126,14 @@ Don't forget to install Python 2.7 and to select "Add python.exe to path" while 
 Call "http://your_clocks_ip/update" to upload a new firmware via webbrowser.
 Call "http://your_clocks_ip/reset" to restart the ESP.
 
-******************************************************************************
-Operation manual:
-******************************************************************************
+## Operation manual
 
 Press "on/off" to switch the LEDs on and off.
 Press "Settings" to configure the clock via web-site.
 Press "Mode" to jump to the next page.
 Press "Time" to always jump back to the time page.
 
-*** Modes: *******************************************************************
+### Modes:
 
 Time:                               The default mode of the clock. Shows the actual time. :)
 Display AM/PM:                      Indicates whether it is AM or PM.
@@ -169,7 +154,7 @@ Green:                              Set all LEDs to green.
 Blue:                               Set all LEDs to blue.
 White:                              Set all LEDs to white.
 
-*** Settings: ****************************************************************
+### Settings:
 
 Alarm 1:                            Enable (on) or disable (off) alarm 1.
                                     Time for alarm 1.
@@ -194,9 +179,8 @@ Day on:                             Set the time the clocks turns itself on at d
 Show "It is":                       Enable (on) or disable (off) "It is". It will be shown every half and full hour anyway.
 Set date/time:                      Date and time of the clock. The seconds are set to zero if you press save.
 
-******************************************************************************
-Configuration.h - Software settings:
-******************************************************************************
+## Configuration.h
+### Software settings
 
 #define HOSTNAME                    The name of the clock.
 #define WEBSITE_TITLE               Title on top of the clocks webpage.
@@ -242,9 +226,7 @@ Configuration.h - Software settings:
                                     summer/winter time change.
 #define FRONTCOVER_*                Frontcover of the clock. This also sets the language of the menu and the website.
 
-******************************************************************************
-Configuration.h - Hardware settings:
-******************************************************************************
+### Hardware settings
 
 #define ESP_LED                     Displays the function using the LED on the ESP. It flashes once a second.
 
@@ -348,9 +330,7 @@ Configuration.h - Hardware settings:
    000 019 020 039 040 059 060 079 080 099 100
 112                                           113
 
-******************************************************************************
-Configuration.h - Misc:
-******************************************************************************
+### Misc
 
 #define DEBUG                       Show debug infos in the serial console.
 #define DEBUG_WEB                   Show debug infos on the web page.
@@ -368,9 +348,7 @@ Configuration.h - Misc:
 
 #define SERIAL_SPEED                Serial port speed for the console.
 
-******************************************************************************
-Events.h
-******************************************************************************
+## Events.h
 
 event_t events[]                    Display a textfeed on a particular day of the year.
                                     The format of an entry in the array is:
@@ -385,9 +363,7 @@ event_t events[]                    Display a textfeed on a particular day of th
                                     BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
                                     Do not change the first entry.
 
-******************************************************************************
-Web-API:
-******************************************************************************
+## Web-API:
 
 http://your_clocks_ip/commitSettings?
 a1=0                                Alarm 1 on [1] or off [0]
@@ -440,50 +416,49 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
                                     mode=17 (off, if all other modes are enabled) -- see modes.h and count.
                                     e.g.: http://192.168.1.10/control?mode=6
 
-******************************************************************************
-Changelog:
-******************************************************************************
-20240908:
+## Changelog:
+
+### 20240908:
 Switch to MeteoWeather API for weather and sunrise/sunset information (API Key no longer required, regestration for API no longer needed).
 Beatification of debug output and webcontrol page for sunrise/sunset.
 Fixed transitions.
 
-20220830:
+### 20220830:
 Fixed the issue that adaptive brightness control (ABC) can not be disabled in settings.
 
-20220429:
+### 20220429:
 Moved the web-site from "tmw-it.ch" to "thorsten-wahl.ch"
 The UPDATE_INFOSERVER also moved there. Please update your Configuration.h
 
-20220411:
+### 20220411:
 Fixed a bug causing the project not to compile in a certain configuration.
 <Qlockwork.ino:1504:33: error: 'save_color_sunrise_sunset' was not declared in this scope>
 
-20220312:
+### 20220312:
 Clocks brightness from LDR is now transitioning smoothly between values.
 Sunrise and sunset now uses global timeout to switch back to time.
 Fixed a bug causing the RTC not to work.
 Added option to select RBG or RGBW for LedDriver.
 Using transition "Move up" in menus. "Fade" was not working too well.
 
-20220311:
+### 20220311:
 Fixed a bug preventing compilation using esp8266 by ESP8266 Community (3.0.2).
 IDE change from VisualMicro to free Visual Studio Code.
 
-20220310:
+### 20220310:
 Mode sunrise and sunset (Thanks to GenosseFlosse).
 
-20210422:
+### 20210422:
 Reduced the watchdog resets (Thanks to espuno).
 
-20210321:
+### 20210321:
 Fixed openweather bug for more than one weathercondition (Thanks to Manfred).
 Setting RTC vom Web should be LT - not UTC (Thanks to Manfred).
 Clear all LEDs before exiting test pattern (Thanks to espuno).
 Calculate white channel for NEO_WRGB (Thanks to Manfred).
 New LED_LAYOUT_VERTICAL_3 (Like vertical 2 but alarm LED = 114).
 
-20210224:
+### 20210224:
 WLAN RSSI on WEB page in Debug.
 // -30 dBm Ausgezeichnet Dies ist die maximal erreichbare und für jedes Einsatzszenario geeignete Signalstärke.
 // -50 dBm Ausgezeichnet Dieser ausgezeichnete Signalpegel ist für alle Netzwerkanwendungen geeignet.
@@ -494,11 +469,11 @@ WLAN RSSI on WEB page in Debug.
 // -90 dBm Sehr schlecht Meistens Rauschen, das die meisten Funktionen behindert.
 //-100 dBm Am schlechtesten Nur Rauschen.
 
-20210218:
+### 20210218:
 Outdoor pressure on WEB page.
 Replaced WEB page title HOSTNAME with WEBSITE_TITLE in configuration (Thanks to GenosseFlosse).
 
-20200709:
+### 20200709:
 Turn off timer when it is running.
 Some localization in settings and weather.
 Fixed alarm running 4 times longer than configured.
@@ -506,54 +481,54 @@ Set Hostname (Thanks to toto79).
 Fixes to Buttons for esp8266 2.7.x (Thanks to toto79).
 Fixes to WiFiManager for esp8266 2.7.x (Thanks to toto79).
 
-20200112:
+### 20200112:
 WEB API for Clock On/Off.
 
-20200107:
+### 20200107:
 Bugfixes.
 
-20200101:
+### 20200101:
 Outdoor weather from OpenWeatherMap.
 New LED driver with LED array mapping.
 Reworked Configuration.h
 Switched to lean Arduino_Json.h
 
-20191212:
+### 20191212:
 Some housekeeping.
 
-20190520:
+### 20190520:
 #define WIFI_BEEPS
 Fixed rare flickering in fade transition.
 
-20190204:
+### 20190204:
 Maior update of "Readme.txt"
 
-20190106:
+### 20190106:
 Removed Yahoo weather.
 
-20190105:
+### 20190105:
 Bugfix negative outdoorTemperature.
 Bugfix outdoorCode not available.
 
-20181213:
+### 20181213:
 No hourly beep if clock is off.
 Some small improvements.
 
-20181101:
+### 20181101:
 Settings set to defaults!
 Hourly beep.
 Set color of textfeed from URL.
 Set color of events[0].text from URL.
 Code cleanup and some minor bugfixes.
 
-20181027:
+### 20181027:
 Show textfeed from URL.
 
-20181021:
+### 20181021:
 Set events[0] from URL.
 Name is back to Qlockwork (from Qlockwork2).
 
-20180930:
+### 20180930:
 Use esp8266 by ESP8266 Community Version 2.4.2
 Updated included libraries.
 Removed legacy support for LPD8806RGBW.
@@ -561,26 +536,26 @@ Hardwareflags in debuginfo on webpage.
 If NTP-request fails, try again every minute - don't wait for an hour.
 More housekeeping.
 
-20180929:
+### 20180929:
 Cleaned up libraries.
 
-20180130:
+### 20180130:
 Transition "Move up"
 Rewrote some code.
 Removed FastLED.
 FRONTCOVER_BINARY
 
-20180120:
+### 20180120:
 Hardware mode-, on/off- and timebutton.
 Moved PIN_IR_RECEIVER from D3 to D0.
 Tooltips for webbuttons.
 Added description of the Web-API in Readme.txt
 Cleanup and bugfixes.
 
-20171127:
+### 20171127:
 Bugfixes.
 
-20171125:
+### 20171125:
 Set weekdays for alarms on web-page.
 Set alarm to "on" if alarmtime is changed.
 Set time, timeout, "Night off", "Day on" on web-page.
@@ -593,30 +568,29 @@ Removed "#define LANGUAGE_*". Now set from "#define FRONTCOVER_*"
 Removed experimantal DUAL-support.
 Settings set to defaults.
 
-20171111 (stable):
+### 20171111 (stable):
 Cleanup and bugfixes.
 New syslog format.
 
-20171019:
+### 20171019:
 Changing automode.
 Bugfix for Firefox.
 
-20171013:
+### 20171013:
 Settings of alarms, colorchange, automode and show "It is" on Web-Page.
 RTC is now on UTC.
 
-20171006:
+### 20171006:
 Moonphase.
 Color humidity indicator.
 Faster Web-GUI.
 Better offline behavior.
 Reset via URL.
 
-20170929:
+### 20170929:
 Adaptive Brightness Control (ABC).
 New syslog logging.
 Code cleanup and bugfixes.
 
-20170312:
+### 20170312:
 Inital release.
-
