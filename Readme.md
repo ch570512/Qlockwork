@@ -86,21 +86,22 @@ https://github.com/ch570512/Qlockwork
 
 ## Needed libraries: (recommended/tested versions in brackets)
 ```
-Arduino IDE for Windows (1.8.19)
-esp8266 by ESP8266 Community (3.0.2)
-Arduino_JSON by Arduino (0.1.0)
-ArduinoJson by bblanchon (7.1.0)
-Adafruit NeoPixel by Adafruit (1.10.4)
-Adafruit Unified Sensor by Adafruit (1.1.5)
-ArduinoHttpClient by Arduino (0.4.0)
-ArduinoOTA by Juraj Andressy (1.0.7)
-DHT sensor library by Adafruit (1.4.3)
+Arduino IDE (1.8.19)
+esp8266 by ESP8266 Community (3.1.2)
+
+Adafruit NeoPixel by Adafruit (1.15.2)
+Adafruit Unified Sensor by Adafruit (1.1.15)
+Arduino_JSON by Arduino (0.2.0)
+ArduinoJson by bblanchon (7.4.2)
+ArduinoHttpClient by Arduino (0.6.1)
+ArduinoOTA by Juraj Andressy (1.1.0)
+DHT sensor library by Adafruit (1.4.6)
 DS3232RTC by Jack Christensen (2.0.0)
 IRremoteESP8266 by Sebastien Warin (2.8.1)
 Time by Michael Margolis (1.6.1)
 ```
 
-Included in source is the Timezone library from Jack Christensen
+Included in tis source is the Timezone library from Jack Christensen
 and WiFiManager by AlexT.
 
 ## Compiler-Options: (recommended/tested)

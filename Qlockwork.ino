@@ -20,7 +20,7 @@
 //
 //*****************************************************************************
 
-#define FIRMWARE_VERSION 20260110
+#define FIRMWARE_VERSION 20260112
 
 #include <Arduino.h>
 #include <Arduino_JSON.h>
@@ -1991,7 +1991,7 @@ void handleRoot()
                " <i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset))));
 #endif
     message += "<span style=\"font-size:12px;\">"
-               "<br><br><a href=\"http://thorsten-wahl.ch/qlockwork/\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
+               "<br><br><a href=\"https://github.com/ch570512/Qlockwork\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
                "<br>Firmware: " +
                String(FIRMWARE_VERSION);
 #ifdef UPDATE_INFOSERVER
@@ -2648,7 +2648,7 @@ void handleCommitSettings()
 // Page reset
 void handleReset()
 {
-    webServer.send(200, "text/plain", "OK. I'll be back!");
+    webServer.send(200, "text/plain", "RESET. I'll be back!");
     ESP.restart();
 }
 
