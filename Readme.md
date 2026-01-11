@@ -121,6 +121,7 @@ SSL Support: "All SSL ciphers"
 
 For OTA and web-server updates check out:
 `http://esp8266.github.io/Arduino/versions/2.3.0/doc/ota_updates/readme.html`
+
 Don't forget to install Python 2.7 and to select "Add python.exe to path" while installing.
 
 - Visit `http://your_clocks_ip/update` to upload a new firmware via webbrowser.
@@ -227,9 +228,10 @@ Set date/time:                      Date and time of the clock. The seconds are 
 #define TIMEZONE_*                  The time zone in which the clock is located. Important for the UTC offset and the
                                     summer/winter time change.
 #define FRONTCOVER_*                Frontcover of the clock. This also sets the language of the menu and the website.
+```
 
 ### Hardware settings
-
+```
 #define ESP_LED                     Displays the function using the LED on the ESP. It flashes once a second.
 
 #define ONOFF_BUTTON                Use a hardware on/off-button.
