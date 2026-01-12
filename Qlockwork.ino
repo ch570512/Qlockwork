@@ -274,7 +274,7 @@ void setup()
     if (!WiFi.isConnected())
     {
         WiFi.mode(WIFI_AP);
-        Serial.println("No WLAN connected. Staying in AP mode.");
+        Serial.println("No WiFi connected. AP mode.");
         writeScreenBuffer(matrix, RED, brightness);
 #if defined(BUZZER) && defined(WIFI_BEEPS)
         digitalWrite(PIN_BUZZER, HIGH);
@@ -287,7 +287,7 @@ void setup()
     else
     {
         WiFi.mode(WIFI_STA);
-        Serial.println("WLAN connected. Switching to STA mode.");
+        Serial.println("WiFi connected. STA mode.");
         Serial.println("RSSI: " + String(WiFi.RSSI()));
         writeScreenBuffer(matrix, GREEN, brightness);
 #if defined(BUZZER) && defined(WIFI_BEEPS)
@@ -313,7 +313,7 @@ void setup()
         Serial.println("Starting OTA service.");
 #ifdef DEBUG
         ArduinoOTA.onStart([]()
-                           { Serial.println("Start OTA update."); });
+                           { Serial.println("Starting OTA update."); });
         ArduinoOTA.onError([](ota_error_t error)
                            {
             Serial.println("OTA Error: " + String(error));
@@ -438,9 +438,9 @@ void setup()
     settings.mySettings.alarm2 ? Serial.print("on ") : Serial.print("off ");
     Serial.println(settings.mySettings.alarm2Weekdays, BIN);
     Serial.printf("Random time: %02u:%02u:%02u\r\n", randomHour, randomMinute, randomSecond);
-    Serial.println("DEBUG is on.");
+    Serial.println("DEBUG enabled.");
 #else
-    Serial.println("DEBUG is off.");
+    Serial.println("DEBUG disabled.");
 #endif
 
     lastDay = day() - 1;

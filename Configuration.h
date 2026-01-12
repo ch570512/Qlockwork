@@ -36,7 +36,8 @@
 #define SHOW_MODE_TEST
 
 #define WEATHER // Show weather data
-// Enter the location for which you want the current weather data displayed as latitude and longitude and the time zone.
+// Enter the location for which you want the current weather data displayed as
+// latitude and longitude and the time zone.
 #define LATITUDE "56.2345678"
 #define LONGITUDE "12.123456789"
 #define TIMEZONE "Europe/Berlin"
@@ -109,7 +110,7 @@
 
 #define ESP_LED
 
-// range from 0 to 255
+// Range is 0 to 255
 #define MIN_BRIGHTNESS 20
 #define MAX_BRIGHTNESS 255
 #define TEST_BRIGHTNESS 80
@@ -149,7 +150,7 @@
 #define NEOPIXEL_RGB
 //#define NEOPIXEL_RGBW
 
-// see Adafruit_NeoPixel.h for help
+// See Adafruit_NeoPixel.h for help
 #define NEOPIXEL_TYPE NEO_GRB + NEO_KHZ800
 //#define NEOPIXEL_TYPE NEO_WRGB + NEO_KHZ800
 //#define NEOPIXEL_TYPE NEO_GRBW + NEO_KHZ800
@@ -167,7 +168,7 @@
 //#define SYSLOGSERVER_SERVER "192.168.0.1"
 //#define SYSLOGSERVER_PORT 514
 
-//#define UPDATE_INFOSERVER "not_available.de"
+//#define UPDATE_INFOSERVER "not_available.com"
 //#define UPDATE_INFOFILE "/qlockwork/updateinfo.json"
 
 // ESP8266

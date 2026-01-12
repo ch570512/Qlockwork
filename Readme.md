@@ -2,6 +2,7 @@
 ## An advanced firmware for a DIY "word-clock".
 
 Qlockwork is an ESP8266 (NodeMCU or WeMos D1 mini) firmware (under GPL license) for a so called "word-clock".
+You can find the latest version at: [Qlockwork on GitHub](https://github.com/ch570512/Qlockwork)
 
 The clock adjusts the time and date once every hour via NTP with a time server on the Internet.
 If an RTC is installed, the time of the ESP is also set from the RTC via the SyncProvider.
@@ -40,9 +41,6 @@ Qlockwork uses lots of third party libraries.
 I cannot guarantee the integrity of these libraries.
 You use the Qlockwork firmware at your own risk.
 
-You can download the latest version of the firmware from:
-https://github.com/ch570512/Qlockwork
-
 ## Top features:
 - Almost no electronics needed. Only an ESP8266 and an LED-stripe.
 - Optional support for LDR, Buzzer, temperature and humidity sensor, IR-remote and buttons.
@@ -73,16 +71,16 @@ https://github.com/ch570512/Qlockwork
 - Sunrise (needs MeteoWeather)
 - Sunset (needs MeteoWeather)
 - Moonphase
-- Room temperature (needs RTX or DHT22)
+- Room temperature (needs RTC or DHT22)
 - Room humidity (needs DHT22)
 - Outdoor temperature (needs MeteoWeather)
 - Outdoor humidity (needs MeteoWeather)
 - Timer
-- LED-test
-- Red
-- Green
-- Blue
-- White
+- LED-address-test
+- All LED "red"
+- All LED "green"
+- All LED "blue"
+- All LED "white"
 
 ## Needed libraries: (recommended/tested versions in brackets)
 ```
@@ -94,14 +92,13 @@ Adafruit Unified Sensor by Adafruit (1.1.15)
 Arduino_JSON by Arduino (0.2.0)
 ArduinoJson by bblanchon (7.4.2)
 ArduinoHttpClient by Arduino (0.6.1)
-ArduinoOTA by Juraj Andressy (1.1.0)
 DHT sensor library by Adafruit (1.4.6)
 DS3232RTC by Jack Christensen (2.0.0)
 IRremoteESP8266 by Sebastien Warin (2.8.1)
 Time by Michael Margolis (1.6.1)
 ```
 
-Included in tis source is the Timezone library from Jack Christensen
+Included in this source is the Timezone library from Jack Christensen
 and WiFiManager by AlexT.
 
 ## Compiler-Options: (recommended/tested)
@@ -347,9 +344,10 @@ Set date/time:                      Date and time of the clock. The seconds are 
 #define SYSLOGSERVER_SERVER         Address of the syslogserver.
 #define SYSLOGSERVER_PORT           Port of the syslogserver.
 
-#define UPDATE_INFO_*               The update info periodically anonymously checks if there is a firmwareupdate
+#define UPDATE_INFO_*               The updateinfo-server is retired. This will not work anymore.
+                                    The update info periodically anonymously checks if there is a firmwareupdate
                                     available. No user data is send to the host. Comment if you do not want this info.
-#define UPDATE_INFOSERVER           Address of the updateinfo server.
+#define UPDATE_INFOSERVER           The Address of the updateinfo server.
 #define UPDATE_INFOFILE             Path and name of the updateinfo file.
 
 #define SERIAL_SPEED                Serial port speed for the console.
@@ -427,8 +425,9 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 
 ## Changelog:
 
-#### 20260110:
+#### 20260112:
 After all these years, it's time to tidy up a bit.
+Retired the updateinfo-server.
 
 #### 20240908:
 Switch to MeteoWeather API for weather and sunrise/sunset information.
@@ -439,7 +438,7 @@ Fixed transitions.
 Fixed the issue that adaptive brightness control (ABC) can not be disabled in settings.
 
 #### 20220429:
-Moved the web-site from "tmw-it.ch" to "thorsten-wahl.ch"
+Moved the web-site from "not_available.com" to "not_available.com"
 The UPDATE_INFOSERVER also moved there. Please update your Configuration.h
 
 #### 20220411:
