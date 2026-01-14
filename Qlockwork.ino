@@ -20,10 +20,9 @@
 //
 //*****************************************************************************
 
-#define FIRMWARE_VERSION 20260112
+#define FIRMWARE_VERSION 20260115
 
 #include <Arduino.h>
-#include <Arduino_JSON.h>
 #include <ArduinoHttpClient.h>
 #include <ArduinoOTA.h>
 #include <DHT.h>
@@ -36,6 +35,8 @@
 #include <IRrecv.h>
 #include <IRutils.h>
 #include <TimeLib.h>
+#include <Timezone.h>
+#include <WiFiManager.h>
 
 #include "Colors.h"
 #include "Configuration.h"
@@ -47,18 +48,15 @@
 #include "Renderer.h"
 #include "Settings.h"
 #include "Syslog.h"
-#include "Timezone.h"
 #include "Timezones.h"
-#include "WiFiManager.h"
 
 //*****************************************************************************
 // Init
 //*****************************************************************************
 
-// Servers
+// HTTP-Server
+#ifdef WEBSERVER
 ESP8266WebServer webServer(80);
-#ifdef UPDATE_INFOSERVER
-ESP8266HTTPUpdateServer httpUpdater;
 #endif
 
 // DHT22
@@ -187,7 +185,7 @@ bool testFlag = false;
 
 void setup()
 {
-    // init serial port
+    // Init serial port
     Serial.begin(SERIAL_SPEED);
     while (!Serial)
         ;
@@ -197,6 +195,9 @@ void setup()
     Serial.println();
     Serial.println("*** QLOCKWORK ***");
     Serial.println("Firmware: " + String(FIRMWARE_VERSION));
+
+    // Init settings
+    settings.loadFromEEPROM();
 
 #ifdef POWERON_SELFTEST
     renderer.setAllScreenBuffer(matrix);
@@ -305,6 +306,7 @@ void setup()
         delay(1000);
         myIP = WiFi.localIP();
 
+#ifdef ARDUINO_OTA
         // mDNS is needed to see HOSTNAME in Arduino IDE
         Serial.println("Starting mDNS responder.");
         MDNS.begin(HOSTNAME);
@@ -327,6 +329,7 @@ void setup()
 #endif
         ArduinoOTA.setPassword(OTA_PASS);
         ArduinoOTA.begin();
+#endif
 
 #ifdef SYSLOGSERVER_SERVER
         Serial.println("Starting syslog.");
@@ -344,6 +347,9 @@ void setup()
 #endif
         !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
+        Serial.println("Latitude: " + String(LATITUDE));
+        Serial.println("Longitude: " + String(LONGITUDE));
+        Serial.println("Timezone: " + String(TIMEZONE));
         Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + " �C");
         Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity) + " %rH");
         Serial.println("Sunrise: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
@@ -360,12 +366,11 @@ void setup()
     mode = MODE_FEED;
 #endif
 
+#ifdef WEBSERVER
     Serial.println("Starting webserver.");
     setupWebServer();
-#ifdef UPDATE_INFOSERVER
-    Serial.println("Starting updateserver.");
-    httpUpdater.setup(&webServer);
 #endif
+
     renderer.clearScreenBuffer(matrix);
 
 #ifdef RTC_BACKUP
@@ -426,9 +431,11 @@ void setup()
     getRoomConditions();
 #endif
 
-    // print some infos
+    // Print some infos
 #ifdef DEBUG
-    Serial.printf("Defined events: %u\r\n", sizeof(events) / sizeof(event_t));
+#ifdef EVENT_TIME
+    Serial.printf("Defined events: %u\r\n", sizeof(events) / sizeof(event_t) - 1);
+#endif
     Serial.printf("Day on: %02u:%02u:00\r\n", hour(settings.mySettings.dayOnTime), minute(settings.mySettings.dayOnTime));
     Serial.printf("Night off: %02u:%02u:00\r\n", hour(settings.mySettings.nightOffTime), minute(settings.mySettings.nightOffTime));
     Serial.printf("Alarm1: %02u:%02u:00 ", hour(settings.mySettings.alarm1Time), minute(settings.mySettings.alarm1Time));
@@ -529,11 +536,38 @@ void loop()
 
         if (hour() == randomHour)
         {
-            // Get updateinfo
-#ifdef UPDATE_INFOSERVER
             if (WiFi.isConnected())
-                getUpdateInfo();
+            {
+                // Set ESP (and RTC) time from NTP
+                time_t tempNtpTime = ntp.getTime(ntpServer);
+                if (tempNtpTime)
+                {
+                    errorCounterNTP = 0;
+#ifdef DEBUG
+                    Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
+                    Serial.printf("Drift (ESP): %d sec.\r\n", tempNtpTime - timeZone.toUTC(now()));
 #endif
+                    setTime(timeZone.toLocal(tempNtpTime));
+#ifdef RTC_BACKUP
+#ifdef DEBUG
+                    Serial.printf("Drift (RTC): %d sec.\r\n", tempNtpTime - timeZone.toUTC(RTC.get()));
+#endif
+                    RTC.set(timeZone.toLocal(tempNtpTime));
+#endif
+                }
+                else
+                {
+                    if (errorCounterNTP < 255)
+                        errorCounterNTP++;
+#ifdef DEBUG
+                    Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
+#endif
+                }
+            }
+            else
+            {
+                WiFi.reconnect();
+            }
         }
     }
 
@@ -604,41 +638,41 @@ void loop()
         // Run once every random minute (once an hour) or if NTP has an error
         //*********************************************************************
 
-        if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10)))
-        {
-            if (WiFi.isConnected())
-            {
-                // Set ESP (and RTC) time from NTP
-                time_t tempNtpTime = ntp.getTime(ntpServer);
-                if (tempNtpTime)
+        /*         if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10)))
                 {
-                    errorCounterNTP = 0;
-                    setTime(timeZone.toLocal(tempNtpTime));
-#ifdef DEBUG
-                    Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
-                    Serial.printf("Drift (ESP): %d sec.\r\n", tempNtpTime - timeZone.toUTC(now()));
-#endif
-#ifdef RTC_BACKUP
-                    RTC.set(timeZone.toLocal(tempNtpTime));
-#ifdef DEBUG
-                    Serial.printf("Drift (RTC): %d sec.\r\n", tempNtpTime - timeZone.toUTC(RTC.get()));
-#endif
-#endif
-                }
-                else
-                {
-                    if (errorCounterNTP < 255)
-                        errorCounterNTP++;
-#ifdef DEBUG
-                    Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
-#endif
-                }
-            }
-            else
-            {
-                WiFi.reconnect();
-            }
-        }
+                    if (WiFi.isConnected())
+                    {
+                        // Set ESP (and RTC) time from NTP
+                        time_t tempNtpTime = ntp.getTime(ntpServer);
+                        if (tempNtpTime)
+                        {
+                            errorCounterNTP = 0;
+        #ifdef DEBUG
+                            Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
+                            Serial.printf("Drift (ESP): %d sec.\r\n", tempNtpTime - timeZone.toUTC(now()));
+        #endif
+                            setTime(timeZone.toLocal(tempNtpTime));
+        #ifdef RTC_BACKUP
+        #ifdef DEBUG
+                            Serial.printf("Drift (RTC): %d sec.\r\n", tempNtpTime - timeZone.toUTC(RTC.get()));
+        #endif
+                            RTC.set(timeZone.toLocal(tempNtpTime));
+        #endif
+                        }
+                        else
+                        {
+                            if (errorCounterNTP < 255)
+                                errorCounterNTP++;
+        #ifdef DEBUG
+                            Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
+        #endif
+                        }
+                    }
+                    else
+                    {
+                        WiFi.reconnect();
+                    }
+                } */
 
         if (minute() == randomMinute)
         {
@@ -646,14 +680,8 @@ void loop()
             {
                 // Get weather from MeteoWeather
 #ifdef WEATHER
-#ifdef DEBUG
-                Serial.println("Getting outdoor weather for latitude " + String(LATITUDE) + " and longitude " + String(LONGITUDE) + ":");
-#endif
                 !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-                Serial.println("Latitude: " + String(LATITUDE));
-                Serial.println("Longitude: " + String(LONGITUDE));
-                Serial.println("Timezone: " + String(TIMEZONE));
                 Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + " �C");
                 Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity) + " %rH");
                 Serial.println("Sunrise: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
@@ -846,8 +874,12 @@ void loop()
         screenBufferNeedsUpdate = true;
 
     // Call HTTP- and OTA-handle
+#ifdef WEBSERVER
     webServer.handleClient();
+#endif
+#ifdef ARDUINO_OTA
     ArduinoOTA.handle();
+#endif
 
     // Set brightness from LDR and update display (not screenbuffer) at 40Hz.
 #ifdef LDR
@@ -1488,7 +1520,9 @@ void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], 
             screenBufferOld[i] = screenBufferOld[i + 1];
         screenBufferOld[9] = screenBufferNew[z];
         writeScreenBuffer(screenBufferOld, color, brightness);
-        webServer.handleClient();
+#ifdef WEBSERVER
+        // webServer.handleClient();
+#endif
         delay(50);
     }
 } // moveScreenBufferUp
@@ -1515,7 +1549,7 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
         {
             for (uint8_t x = 0; x <= 11; x++)
             {
-                ESP.wdtFeed();
+                // ESP.wdtFeed();
                 if (!(bitRead(screenBufferOld[y], 15 - x)) && (bitRead(screenBufferNew[y], 15 - x)))
                     brightnessBuffer[y][x]++;
                 if ((bitRead(screenBufferOld[y], 15 - x)) && !(bitRead(screenBufferNew[y], 15 - x)))
@@ -1543,7 +1577,9 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
         ledDriver.setPixel(114, color, brightnessBuffer[4][11]);
 #endif
 #endif
-        webServer.handleClient();
+#ifdef WEBSERVER
+        // webServer.handleClient();
+#endif
         ledDriver.show();
     }
 } // writeScreenBufferFade
@@ -1692,36 +1728,6 @@ uint8_t getBrightnessFromLDR()
 #endif
 
 //*****************************************************************************
-// Get update info from server
-//*****************************************************************************
-
-#ifdef UPDATE_INFOSERVER
-void getUpdateInfo()
-{
-    WiFiClient wifiClient;
-    HttpClient httpClient = HttpClient(wifiClient, UPDATE_INFOSERVER, 80);
-    httpClient.get(UPDATE_INFOFILE);
-    if (httpClient.responseStatusCode() == 200)
-    {
-        String response = httpClient.responseBody();
-        response.trim();
-        JSONVar updateArray = JSON.parse(response);
-        if (JSON.typeof(updateArray) == "undefined")
-        {
-#ifdef DEBUG
-            Serial.println("Parsing updateArray failed!");
-#endif
-            return;
-        }
-        updateInfo = (int)updateArray["channel"]["unstable"]["version"];
-    }
-#ifdef DEBUG
-    updateInfo > int(FIRMWARE_VERSION) ? Serial.println("Firmwareupdate available! (" + String(updateInfo) + ")") : Serial.println("Firmware is uptodate.");
-#endif
-}
-#endif
-
-//*****************************************************************************
 // Get room conditions
 //*****************************************************************************
 
@@ -1840,6 +1846,10 @@ int getMoonphase(int y, int m, int d)
 }
 #endif
 
+//*****************************************************************************
+// Debugging
+//*****************************************************************************
+
 // Write screenbuffer to console
 #ifdef DEBUG_MATRIX
 void debugScreenBuffer(uint16_t screenBuffer[])
@@ -1891,6 +1901,7 @@ void debugFps()
 // Webserver
 //*****************************************************************************
 
+#ifdef WEBSERVER
 void setupWebServer()
 {
     webServer.onNotFound(handleNotFound);
@@ -1994,10 +2005,6 @@ void handleRoot()
                "<br><br><a href=\"https://github.com/ch570512/Qlockwork\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
                "<br>Firmware: " +
                String(FIRMWARE_VERSION);
-#ifdef UPDATE_INFOSERVER
-    if (updateInfo > int(FIRMWARE_VERSION))
-        message += "<br><span style=\"color:red;\">Firmwareupdate available! (" + String(updateInfo) + ")</span>";
-#endif
 #ifdef DEBUG_WEB
     time_t tempEspTime = now();
     message += "<br><br>Time: " + String(hour(tempEspTime)) + ":";
@@ -2698,6 +2705,8 @@ void handleControl()
     setMode((Mode)webServer.arg("mode").toInt());
     webServer.send(200, "text/plain", "OK.");
 }
+
+#endif
 
 String padStringZeros(String input)
 {

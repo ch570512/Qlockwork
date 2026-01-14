@@ -42,11 +42,11 @@ public:
         boolean hourBeep;
     } mySettings;
 
+    void loadFromEEPROM();
     void saveToEEPROM();
 
-private:
+        private:
     void resetToDefault();
-    void loadFromEEPROM();
 };
 
 #endif

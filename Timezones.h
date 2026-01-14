@@ -107,6 +107,11 @@ TimeChangeRule PKT = { "PKT", First, Sun, Jan, 1, 300 };
 Timezone timeZone(PKT, PKT);
 #endif
 
+#ifdef TIMEZONE_IST
+TimeChangeRule IST = { "IST", First, Sun, Jan, 1, 330 };
+Timezone timeZone(IST, IST);
+#endif
+
 #ifdef TIMEZONE_BDT
 TimeChangeRule BDT = { "BDT", First, Sun, Jan, 1, 360 };
 Timezone timeZone(BDT, BDT);

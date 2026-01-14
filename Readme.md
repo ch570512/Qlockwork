@@ -82,24 +82,20 @@ You use the Qlockwork firmware at your own risk.
 - All LED "blue"
 - All LED "white"
 
-## Needed libraries: (recommended/tested versions in brackets)
+## Needed libraries (tested):
 ```
-Arduino IDE (1.8.19)
-esp8266 by ESP8266 Community (3.1.2)
-
-Adafruit NeoPixel by Adafruit (1.15.2)
-Adafruit Unified Sensor by Adafruit (1.1.15)
-Arduino_JSON by Arduino (0.2.0)
-ArduinoJson by bblanchon (7.4.2)
-ArduinoHttpClient by Arduino (0.6.1)
-DHT sensor library by Adafruit (1.4.6)
-DS3232RTC by Jack Christensen (2.0.0)
-IRremoteESP8266 by Sebastien Warin (2.8.1)
-Time by Michael Margolis (1.6.1)
+esp8266 by ESP8266 Community 3.1.2
+Adafruit NeoPixel by Adafruit Version 1.15.2
+Adafruit Unified Sensor by Adafruit <info@adafruit.com> Version 1.1.15
+ArduinoJson by Benoit Blanchon <http://blog.benoitblanchon.fr/> Version 7.4.2
+ArduinoHttpClient by Arduino Version 0.6.1
+DHT sensor library by Adafruit Version 1.4.6
+DS3232RTC by Jack Christensen <jack.christensen@outlook.com> Version 3.1.2
+IRremoteESP8266 by Sebastien Warin, Mark Szabo, Ken Shirriff, David Conran Version 2.8.6
+Time by Michael Margolis Version 1.6.1
+Timezone by Jack Christensen <jack.christensen@outlook.com> Version 1.2.6
+WiFiManager by tzapu Version 2.0.17
 ```
-
-Included in this source is the Timezone library from Jack Christensen
-and WiFiManager by AlexT.
 
 ## Compiler-Options: (recommended/tested)
 ```
@@ -134,7 +130,7 @@ Don't forget to install Python 2.7 and to select "Add python.exe to path" while 
 
 ### Modes:
 ```
-Time:                               The default mode of the clock. Shows the actual time. :)
+Time:                               The default mode. It shows the actual time. :)
 Display AM/PM:                      Indicates whether it is AM or PM.
 Seconds:                            Shows the seconds.
 Weekday:                            Shows the weekday in local language.
@@ -183,33 +179,6 @@ Set date/time:                      Date and time of the clock. The seconds are 
 ## Configuration.h
 ### Software settings
 ```
-#define HOSTNAME                    The name of the clock.
-#define WEBSITE_TITLE               Title on top of the clocks webpage.
-#define WIFI_SETUP_TIMEOUT          Time in seconds set up the WiFiManager or search for a WLAN.
-                                    If no WLAN is connected the clock enters AP mode.
-                                    You can control the clock if you connect your phone or tablet to this accesspoint.
-                                    On Android you have to tell the phone that it's ok to have no internet.
-#define WIFI_AP_PASS                The password for the AP. At least 8 characters. Default is "12345678".
-#define OTA_PASS                    Password for "Over the Air" updates. Default is "1234".
-#define NTP_SERVER                  NTP server to be queried.
-#define NTP_TIMEOUT                 Milliseconds to wait for NTP server to answer.
-#define WIFI_BEEPS                  Beep 3 times if WIFI is conneced, if not, beep one time on startup.
-#define SHOW_IP                     Show local IP at startup. Use this in the browser to access the clocks menue.
-#define NONE_TECHNICAL_ZERO         Displays the zero without the diagonal line.
-#define AUTO_MODECHANGE_TIME        Time in seconds to wait between switching from time to temperature.
-#define FEED_SPEED                  Feed delay in milliseconds. 120 is a good start.
-#define SUNSET_SUNRISE_SPEED        Milliseconds delay between sunrise screen -> sunrise time and sunset screen -> sunset time
-#define EVENT_TIME                  Time in seconds to wait between showing events. Comment to turn off events.
-#define ALARM_LED_COLOR             Color of the alarm LED. If not defined the display color will be used.
-                                    The possible colors are:
-                                    WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
-                                    GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
-                                    BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
-#define ABUSE_CORNER_LED_FOR_ALARM  Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
-                                    If no alarm or timer is set the LED is used as expected.
-#define DEDICATION                  Show a text on the clocks webpage.
-
-#define POWERON_SELFTEST            Test LEDs at startup. Colors are: white, red, green, blue. In this order.
 #define SHOW_MODE_AMPM              Show AM/PM.
 #define SHOW_MODE_SECONDS           Show seconds.
 #define SHOW_MODE_WEEKDAY           Show weekday.
@@ -230,12 +199,6 @@ Set date/time:                      Date and time of the clock. The seconds are 
 
 ### Hardware settings
 ```
-#define ESP_LED                     Displays the function using the LED on the ESP. It flashes once a second.
-
-#define ONOFF_BUTTON                Use a hardware on/off-button.
-#define MODE_BUTTON                 Use a hardware mode-button.
-#define TIME_BUTTON                 Use a hardware time-button. Debug to serial will not work if defined.
-
 #define SENSOR_DHT22                Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
 #define DHT_TEMPERATURE_OFFSET      Sets how many degrees the measured room temperature (+ or -) should be corrected.
 #define DHT_HUMIDITY_OFFSET         Sets how many degrees the measured room humidity (+ or -) should be corrected.
@@ -252,12 +215,6 @@ Set date/time:                      Date and time of the clock. The seconds are 
                                     Your powersupply has to support this brightness.
 #define BRIGHTNESS_SELFTEST         Brightness of the LEDs while in testmode to not overload the powersupply.
 
-#define BUZZER                      Use a buzzer to make noise for alarmtime and timer.
-                                    If not defined all alarmfunctions are disabled.
-#define BUZZTIME_ALARM_1            Maximum time in seconds for alarm 1 to be active when not turned off manually.
-#define BUZZTIME_ALARM_2            Maximum time in seconds for alarm 2 to be active when not turned off manually.
-#define BUZZTIME_TIMER              Maximum time in seconds for the timer alarm to be active when not turned off manually.
-
 #define IR_REMOTE                   Use an IR remote control.
 #define IR_LETTER_OFF               Turns off the LED behind the IR sensor permanently. This improves IR reception.
 #define IR_CODE_*                   Any remote control can be used. 6 keys are supported.
@@ -265,92 +222,6 @@ Set date/time:                      Date and time of the clock. The seconds are 
                                     Then write the code displayed in the serial console to the file "Configuration.h".
                                     If you see more than one try the code which is changing from button to button.
                                     DEBUG has to be defined to show you the code.
-
-#define NEOPIXEL_RGB                Select if your LEDs are RGB only.
-#define NEOPIXEL_RGBW               Select if your LEDs have a distinct white channel (RGBW).
-
-#define NEOPIXEL_TYPE               Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW, RGBW...
-                                    See \libraries\Adafruit_NeoPixel.h for help.
-
-#define LED_LAYOUT_HORIZONTAL_1     Horizontal and corner and alarm LEDs at the end of the strip. (As seen from the front.)
-
-111                    114                    112
-   000 001 002 003 004 005 006 007 008 009 010
-   021 020 019 018 017 016 015 014 013 012 011
-   022 023 024 025 026 027 028 029 030 031 032
-   043 042 041 040 039 038 037 036 035 034 033
-   044 045 046 047 048 049 050 051 052 053 054
-   065 064 063 062 061 060 059 058 057 056 055
-   066 067 068 069 070 071 072 073 074 075 076
-   087 086 085 084 083 082 081 080 079 078 077
-   088 089 090 091 092 093 094 095 096 097 098
-   109 108 107 106 105 104 103 102 101 100 099
-110                                           113
-
-#define LED_LAYOUT_VERTICAL_1       Vertical and corner and alarm LEDs (almost) within the strip. (As seen from the front.)
-
-000                    114                    102
-   001 021 022 041 042 061 062 081 082 101 103
-   002 020 023 040 043 060 063 080 083 100 104
-   003 019 024 039 044 059 064 079 084 099 105
-   004 018 025 038 045 058 065 078 085 098 106
-   005 017 026 037 046 057 066 077 086 097 107
-   006 016 027 036 047 056 067 076 087 096 108
-   007 015 028 035 048 055 068 075 088 095 109
-   008 014 029 034 049 054 069 074 089 094 110
-   009 013 030 033 050 053 070 073 090 093 111
-   010 012 031 032 051 052 071 072 091 092 112
-011                                           113
-
-#define LED_LAYOUT_VERTICAL_2       Vertical and corner and alarm LEDs at the end of the strip. (As seen from the front.)
-
-112                    111                    110
-   009 010 029 030 049 050 069 070 089 090 109
-   008 011 028 031 048 051 068 071 088 091 108
-   007 012 027 032 047 052 067 072 087 092 107
-   006 013 026 033 046 053 066 073 086 093 106
-   005 014 025 034 045 054 065 074 085 094 105
-   004 015 024 035 044 055 064 075 084 095 104
-   003 016 023 036 043 056 063 076 083 096 103
-   002 017 022 037 042 057 062 077 082 097 102
-   001 018 021 038 041 058 061 078 081 098 101
-   000 019 020 039 040 059 060 079 080 099 100
-113                                           114
-
-#define LED_LAYOUT_VERTICAL_3       Vertical and corner and alarm LEDs at the end of the strip. (As seen from the front.)
-
-111                    114                    110
-   009 010 029 030 049 050 069 070 089 090 109
-   008 011 028 031 048 051 068 071 088 091 108
-   007 012 027 032 047 052 067 072 087 092 107
-   006 013 026 033 046 053 066 073 086 093 106
-   005 014 025 034 045 054 065 074 085 094 105
-   004 015 024 035 044 055 064 075 084 095 104
-   003 016 023 036 043 056 063 076 083 096 103
-   002 017 022 037 042 057 062 077 082 097 102
-   001 018 021 038 041 058 061 078 081 098 101
-   000 019 020 039 040 059 060 079 080 099 100
-112                                           113
-```
-
-### Misc
-```
-#define DEBUG                       Show debug infos in the serial console.
-#define DEBUG_WEB                   Show debug infos on the web page.
-#define DEBUG_MATRIX                Renders the output of the matrix for the German front in the serial console.
-#define DEBUG_FPS                   Show number of loops per second in the serial console.
-
-#define SYSLOGSERVER                Turn logging to a syslogserver on/off.
-#define SYSLOGSERVER_SERVER         Address of the syslogserver.
-#define SYSLOGSERVER_PORT           Port of the syslogserver.
-
-#define UPDATE_INFO_*               The updateinfo-server is retired. This will not work anymore.
-                                    The update info periodically anonymously checks if there is a firmwareupdate
-                                    available. No user data is send to the host. Comment if you do not want this info.
-#define UPDATE_INFOSERVER           The Address of the updateinfo server.
-#define UPDATE_INFOFILE             Path and name of the updateinfo file.
-
-#define SERIAL_SPEED                Serial port speed for the console.
 ```
 
 ## Events.h
@@ -425,9 +296,11 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 
 ## Changelog:
 
-#### 20260112:
+#### 20260113:
 After all these years, it's time to tidy up a bit.
 Retired the updateinfo-server.
+Added IST timezone.
+Moved documentation from "Readme.md" to "Configuration.h".
 
 #### 20240908:
 Switch to MeteoWeather API for weather and sunrise/sunset information.
