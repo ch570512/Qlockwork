@@ -62,7 +62,7 @@ You use the Qlockwork firmware at your own risk.
 - Automatic adjustment of daylight saving time.
 - USB and Over-the-air firmware updates.
 
-## Pages:
+## Modes:
 - Time
 - AM/PM
 - Seconds
@@ -81,6 +81,9 @@ You use the Qlockwork firmware at your own risk.
 - All LED "green"
 - All LED "blue"
 - All LED "white"
+
+## Setup:
+Have a look at `Configuration.h` and `Events.h`.
 
 ## Needed libraries (tested):
 ```
@@ -111,18 +114,7 @@ Erase Flash: "Only Sketch"
 SSL Support: "All SSL ciphers"
 ```
 
-## Misc:
-
-For OTA and web-server updates check out:
-`http://esp8266.github.io/Arduino/versions/2.3.0/doc/ota_updates/readme.html`
-
-Don't forget to install Python 2.7 and to select "Add python.exe to path" while installing.
-
-- Visit `http://your_clocks_ip/update` to upload a new firmware via webbrowser.
-- Visit `http://your_clocks_ip/reset` to restart the ESP.
-
 ## Operation manual
-
 - Press "on/off" to switch the LEDs on and off.
 - Press "Settings" to configure the clock via web-site.
 - Press "Mode" to jump to the next page.
@@ -150,7 +142,7 @@ Blue:                               Set all LEDs to blue.
 White:                              Set all LEDs to white.
 ```
 
-### Settings:
+### Settings on Webpage:
 ```
 Alarm 1:                            Enable (on) or disable (off) alarm 1.
                                     Time for alarm 1.
@@ -174,70 +166,6 @@ Night off:                          Set the time the clocks turns itself off at 
 Day on:                             Set the time the clocks turns itself on at day.
 Show "It is":                       Enable (on) or disable (off) "It is". It will be shown every half and full hour anyway.
 Set date/time:                      Date and time of the clock. The seconds are set to zero if you press save.
-```
-
-## Configuration.h
-### Software settings
-```
-#define SHOW_MODE_AMPM              Show AM/PM.
-#define SHOW_MODE_SECONDS           Show seconds.
-#define SHOW_MODE_WEEKDAY           Show weekday.
-#define SHOW_MODE_DATE              Show date.
-#define SHOW_MODE_MOONPHASE         Show moonphase.
-#define SHOW_MODE_SUNRISE_SUNSET    Show sunrise and sunset times.
-#define SHOW_MODE_TEST              Show tests.
-
-#define WEATHER                     Enable MeteoWeather usage to display weather information from the internet.
-#define LATITUDE                    Your location latitude for MeteoWeather API.
-#define LONGITUDE                   Your location longitude for MeteoWeather API.
-#define TIMZONE                     Your location timezone for MeteoWeather API.
-
-#define TIMEZONE_*                  The time zone in which the clock is located. Important for the UTC offset and the
-                                    summer/winter time change.
-#define FRONTCOVER_*                Frontcover of the clock. This also sets the language of the menu and the website.
-```
-
-### Hardware settings
-```
-#define SENSOR_DHT22                Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
-#define DHT_TEMPERATURE_OFFSET      Sets how many degrees the measured room temperature (+ or -) should be corrected.
-#define DHT_HUMIDITY_OFFSET         Sets how many degrees the measured room humidity (+ or -) should be corrected.
-
-#define RTC_BACKUP                  Use an RTC as backup and room temperature.
-#define RTC_TEMPERATURE_OFFSET      Sets how many degrees the measured room temperature (+ or -) should be corrected.
-
-#define LDR                         Use an LDR for adaptive brightness control (ABC).
-#define LDR_IS_INVERSE              Combined with #define LDR inverses the value of the LDR.
-#define LDR_HYSTERESIS              Brightness control from a deviation in the range from 0 to 1023. Default: 40.
-                                    If your display is flickering increase this value.
-#define MIN_BRIGHTNESS              Minimum brightness of LEDs ranging from 0 to 255. Default: 20.
-#define MAX_BRIGHTNESS              Maximum brightness of LEDs ranging from 0 to 255. Default 255.
-                                    Your powersupply has to support this brightness.
-#define BRIGHTNESS_SELFTEST         Brightness of the LEDs while in testmode to not overload the powersupply.
-
-#define IR_REMOTE                   Use an IR remote control.
-#define IR_LETTER_OFF               Turns off the LED behind the IR sensor permanently. This improves IR reception.
-#define IR_CODE_*                   Any remote control can be used. 6 keys are supported.
-                                    Press a button on the remote control in front of the clock.
-                                    Then write the code displayed in the serial console to the file "Configuration.h".
-                                    If you see more than one try the code which is changing from button to button.
-                                    DEBUG has to be defined to show you the code.
-```
-
-## Events.h
-```
-event_t events[]                    Display a textfeed on a particular day of the year.
-                                    The format of an entry in the array is:
-                                    { month, day, "Text to display.", year, color },
-                                    The last entry has no comma at the end.
-                                    Year will be used to calculate an age. "present year" - year = age.
-                                    '0' will not show an age.
-                                    There can only be one event a day.
-                                    The possible colors are:
-                                    WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
-                                    GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
-                                    BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
-                                    Do not change the first entry.
 ```
 
 ## Web-API:
@@ -292,15 +220,19 @@ http://your_clocks_ip/control?
 mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), ...
                                     mode=17 (off, if all other modes are enabled) -- see modes.h and count.
                                     e.g.: http://192.168.1.10/control?mode=6
+
+http://your_clocks_ip/reset         Restart the clock.
 ```
 
 ## Changelog:
 
-#### 20260113:
+#### 20260115:
 After all these years, it's time to tidy up a bit.
+Web Server can now be disabled.
 Retired the updateinfo-server.
-Added IST timezone.
-Moved documentation from "Readme.md" to "Configuration.h".
+Retired Arduino-OTA in preperation of moving to PlatformIO.
+Added timezone Indian Standard Time (IST).
+Moved documentation to the files where they are needed. "Configuration.h" and "Events.h"
 
 #### 20240908:
 Switch to MeteoWeather API for weather and sunrise/sunset information.

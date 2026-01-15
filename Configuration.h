@@ -9,37 +9,42 @@
 // Software settings
 //*****************************************************************************
 
-#define WEBSERVER                               // Enable the webserver.
-#define ARDUINO_OTA                             // Enable OTA (Over The Air) updates.
 #define HOSTNAME "QLOCKWORK"                    // The hostname of the clock.
 #define WEBSITE_TITLE "QLOCKWORKs page"         // Title on top of the clocks webpage.
 //#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
                                                 // Show text on the clocks webpage.
+
+#define WEBSERVER                               // Enable the webserver.
+#define NTP_SERVER "pool.ntp.org"               // NTP server to be queried.
+
 #define WIFI_SETUP_TIMEOUT 120                  // Time in seconds the WiFiManager waits for your input.
                                                 // If no WiFi is connected the clock enters accesspoint mode.
                                                 // You can control the clock by connecting to this accesspoint.
 #define WIFI_AP_PASS "12345678"                 // The password for the AP. At least 8 characters.
-#define OTA_PASS "1234"                         // Password for "Over the Air" updates.
 #define SHOW_IP                                 // Show local IP at startup. Use this to access the clocks menue.
 //#define WIFI_BEEPS                            // Beep 3 times if WIFI is conneced, if not, beep one time on startup.
-#define NTP_SERVER "pool.ntp.org"               // NTP server to be queried.
+
 #define NONE_TECHNICAL_ZERO                     // Displays the digit zero without a diagonal line.
-#define AUTO_MODECHANGE_TIME 60                 // Time in seconds to wait between switching from time to temperature.
-#define EVENT_TIME 300                          // Time in seconds to wait between events. Comment to turn off events.
+
+#define AUTO_MODECHANGE_TIME 60                 // Time in seconds between switching from time to temperature and back.
+
+#define EVENT_TIME 300                          // Time in seconds between showing events. Comment to turn events off.
+
 #define ALARM_LED_COLOR RED                     // Color of the alarm LED. If not defined the display color will be used.
                                                 // Available colors are:
                                                 // WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
                                                 // GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
                                                 // BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
 //#define ABUSE_CORNER_LED_FOR_ALARM            // Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
+
 //#define POWERON_SELFTEST                      // Test LEDs at startup. Order is: white, red, green, blue.
-#define SHOW_MODE_AMPM
-#define SHOW_MODE_SECONDS
-#define SHOW_MODE_WEEKDAY
-#define SHOW_MODE_DATE
-#define SHOW_MODE_MOONPHASE
-//#define SHOW_MODE_SUNRISE_SUNSET
-#define SHOW_MODE_TEST
+#define SHOW_MODE_AMPM                          // Show AM/PM.
+#define SHOW_MODE_SECONDS                       // Show seconds.
+#define SHOW_MODE_WEEKDAY                       // Show weekday.
+#define SHOW_MODE_DATE                          // Show date.
+#define SHOW_MODE_MOONPHASE                     // Show moonphase.
+//#define SHOW_MODE_SUNRISE_SUNSET              // Show sunrise and sunset times.
+#define SHOW_MODE_TEST                          // Show tests.
 
 #define WEATHER                                 // Show weather data.
 #define LATITUDE "56.2345678"                   // Set the location for which you want the current weather data displayed
@@ -47,7 +52,8 @@
 #define TIMEZONE "Europe/Berlin"                // Check out https://open-meteo.com/ 
 
 //*****************************************************************************
-// Frontcover
+// Frontcover of the clock.
+// This also sets the language of the menu and website (where available).
 //*****************************************************************************
 
 //#define FRONTCOVER_EN
@@ -69,7 +75,8 @@
 //#define FRONTCOVER_BINARY
 
 //*****************************************************************************
-// Timezone
+// Timezone - The timezone in which the clock is located.
+// Important for the UTC offset and the summer/winter time (DST) change.
 //*****************************************************************************
 
 //#define TIMEZONE_IDLW                         // IDLW  International Date Line West UTC-12
@@ -110,43 +117,30 @@
 //*****************************************************************************
 
 #define SERIAL_SPEED 115200                     // Serial port speed for the console.
-#define NUMPIXELS 115
+#define ESP_LED                                 // Flash ESP LED once a second.
+#define NUMPIXELS 115                           // Number of LEDs in the strip.
+#define MIN_BRIGHTNESS 20                       // Minimum brightness of LEDs from 0 to 255.
+#define MAX_BRIGHTNESS 255                      // Maximum brightness of LEDs from 0 to 255.
+#define TEST_BRIGHTNESS 80                      // Brightness of the LEDs while in testmode to not overload the powersupply.
+
 //#define ONOFF_BUTTON                          // Use a hardware on/off-button.
 //#define MODE_BUTTON                           // Use a hardware mode-button.
 //#define TIME_BUTTON                           // Use a hardware time-button. Debug to serial will not work if defined.
-#define ESP_LED                                 // Flash ESP LED once a second.
 
-// Range is 0 to 255
-#define MIN_BRIGHTNESS 20
-#define MAX_BRIGHTNESS 255
-#define TEST_BRIGHTNESS 80
+//#define SENSOR_DHT22                          // Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
+#define DHT_TEMPERATURE_OFFSET 0.5              // Sets how many degrees the measured room temperature (+ or -) should be corrected.
+#define DHT_HUMIDITY_OFFSET -2.0                // Sets how many degrees the measured room humidity (+ or -) should be corrected.
 
-//#define SENSOR_DHT22
-#define DHT_TEMPERATURE_OFFSET 0.5
-#define DHT_HUMIDITY_OFFSET -2.0
+//#define RTC_BACKUP                            // Use an RTC as backup and room temperature.
+#define RTC_TEMPERATURE_OFFSET -1.15            // Sets how many degrees the measured room temperature (+ or -) should be corrected.
 
-//#define RTC_BACKUP
-#define RTC_TEMPERATURE_OFFSET -1.15
-
-//#define LDR
-//#define LDR_IS_INVERSE
+//#define LDR                                   // Use an LDR for adaptive brightness control (ABC).
+//#define LDR_IS_INVERSE                        // Inverses the value read from the LDR.
 
 //#define BUZZER                                // Use a buzzer to make noise for alarms and timer. If not defined alarms are disabled.
 #define BUZZTIME_ALARM_1 30                     // Maximum time in seconds for alarm 1 to be active if not turned off manually.
 #define BUZZTIME_ALARM_2 30                     // Maximum time in seconds for alarm 2 to be active if not turned off manually.
 #define BUZZTIME_TIMER 30                       // Maximum time in seconds for the timer alarm to be active if not turned off manually.
-
-//#define IR_RECEIVER
-//#define IR_CODE_ONOFF 16769565                // HX1838 Remote CH+
-//#define IR_CODE_TIME  16753245                // HX1838 Remote CH-
-//#define IR_CODE_MODE  16736925                // HX1838 Remote CH
-#define IR_CODE_ONOFF 0xFFE01F                  // CLT2 V1.1 Remote Power
-#define IR_CODE_TIME  0xFFA05F                  // CLT2 V1.1 Remote Time
-#define IR_CODE_MODE  0xFF20DF                  // CLT2 V1.1 Remote Region
-
-//#define IR_LETTER_OFF
-#define IR_LETTER_X 8
-#define IR_LETTER_Y 10
 
 #define NEOPIXEL_RGB                            // Enable if your LEDs are RGB only.
 //#define NEOPIXEL_RGBW                         // Enable if your LEDs have a distinct white channel (RGBW).
@@ -154,6 +148,25 @@
 #define NEOPIXEL_TYPE NEO_GRB + NEO_KHZ800      // Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW, RGBW...
 //#define NEOPIXEL_TYPE NEO_WRGB + NEO_KHZ800   // Check out "Adafruit_NeoPixel.h" for more information.
 //#define NEOPIXEL_TYPE NEO_GRBW + NEO_KHZ800
+
+//*****************************************************************************
+// IR remote control
+// Press a button on the remote control in front of the clock.
+// Then write down the code displayed in the serial console.
+// DEBUG has to be defined to show you the code.
+//*****************************************************************************
+
+//#define IR_RECEIVER                           // Use an IR remote control.
+//#define IR_CODE_ONOFF 16769565                // HX1838 Remote CH+
+//#define IR_CODE_TIME  16753245                // HX1838 Remote CH-
+//#define IR_CODE_MODE  16736925                // HX1838 Remote CH
+#define IR_CODE_ONOFF 0xFFE01F                  // CLT2 V1.1 Remote Power
+#define IR_CODE_TIME  0xFFA05F                  // CLT2 V1.1 Remote Time
+#define IR_CODE_MODE  0xFF20DF                  // CLT2 V1.1 Remote Region
+
+//#define IR_LETTER_OFF                         // Turns off the LED behind the IR sensor permanently.
+#define IR_LETTER_X 8                           // This improves IR reception.
+#define IR_LETTER_Y 10                          // X any Y coordinates
 
 //*****************************************************************************
 // LED layouts

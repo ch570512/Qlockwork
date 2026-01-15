@@ -24,11 +24,8 @@
 
 #include <Arduino.h>
 #include <ArduinoHttpClient.h>
-#include <ArduinoOTA.h>
 #include <DHT.h>
 #include <DS3232RTC.h>
-#include <ESP8266HTTPUpdateServer.h>
-#include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <IRremoteESP8266.h>
@@ -79,6 +76,11 @@ Syslog syslog(wifiUdp, SYSLOGSERVER_SERVER, SYSLOGSERVER_PORT, HOSTNAME, "QLOCKW
 // RTC
 #ifdef RTC_BACKUP
 DS3232RTC RTC;
+
+time_t getRTCTime()
+{
+    return RTC.get();
+}
 #endif
 
 // LED driver
@@ -306,31 +308,6 @@ void setup()
         delay(1000);
         myIP = WiFi.localIP();
 
-#ifdef ARDUINO_OTA
-        // mDNS is needed to see HOSTNAME in Arduino IDE
-        Serial.println("Starting mDNS responder.");
-        MDNS.begin(HOSTNAME);
-        // MDNS.addService("http", "tcp", 80);
-
-        Serial.println("Starting OTA service.");
-#ifdef DEBUG
-        ArduinoOTA.onStart([]()
-                           { Serial.println("Starting OTA update."); });
-        ArduinoOTA.onError([](ota_error_t error)
-                           {
-            Serial.println("OTA Error: " + String(error));
-            if (error == OTA_AUTH_ERROR) Serial.println("Auth failed.");
-            else if (error == OTA_BEGIN_ERROR) Serial.println("Begin failed.");
-            else if (error == OTA_CONNECT_ERROR) Serial.println("Connect failed.");
-            else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive failed.");
-            else if (error == OTA_END_ERROR) Serial.println("End failed."); });
-        ArduinoOTA.onEnd([]()
-                         { Serial.println("End OTA update."); });
-#endif
-        ArduinoOTA.setPassword(OTA_PASS);
-        ArduinoOTA.begin();
-#endif
-
 #ifdef SYSLOGSERVER_SERVER
         Serial.println("Starting syslog.");
 #ifdef APIKEY
@@ -375,7 +352,7 @@ void setup()
 
 #ifdef RTC_BACKUP
     RTC.begin();
-    setSyncProvider(RTC.get);
+    setSyncProvider(getRTCTime);
     Serial.print("RTC Sync.");
     if (timeStatus() != timeSet)
         Serial.print(" FAIL!");
@@ -876,9 +853,6 @@ void loop()
     // Call HTTP- and OTA-handle
 #ifdef WEBSERVER
     webServer.handleClient();
-#endif
-#ifdef ARDUINO_OTA
-    ArduinoOTA.handle();
 #endif
 
     // Set brightness from LDR and update display (not screenbuffer) at 40Hz.
