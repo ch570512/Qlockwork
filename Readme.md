@@ -91,10 +91,9 @@ esp8266 by ESP8266 Community 3.1.2
 Adafruit NeoPixel by Adafruit Version 1.15.2
 Adafruit Unified Sensor by Adafruit <info@adafruit.com> Version 1.1.15
 ArduinoJson by Benoit Blanchon <http://blog.benoitblanchon.fr/> Version 7.4.2
-ArduinoHttpClient by Arduino Version 0.6.1
 DHT sensor library by Adafruit Version 1.4.6
 DS3232RTC by Jack Christensen <jack.christensen@outlook.com> Version 3.1.2
-IRremoteESP8266 by Sebastien Warin, Mark Szabo, Ken Shirriff, David Conran Version 2.8.6
+IRremoteESP8266 by Sebastien Warin, Mark Szabo, Ken Shirriff, David Conran Version 2.9.0
 Time by Michael Margolis Version 1.6.1
 Timezone by Jack Christensen <jack.christensen@outlook.com> Version 1.2.6
 WiFiManager by tzapu Version 2.0.17
@@ -225,6 +224,9 @@ http://your_clocks_ip/reset         Restart the clock.
 ```
 
 ## Changelog:
+
+#### 20260116:
+Minor fixes.
 
 #### 20260115:
 After all these years, it's time to tidy up a bit.

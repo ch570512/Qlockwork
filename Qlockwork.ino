@@ -20,16 +20,14 @@
 //
 //*****************************************************************************
 
-#define FIRMWARE_VERSION 20260115
+#define FIRMWARE_VERSION 20260116
 
 #include <Arduino.h>
-#include <ArduinoHttpClient.h>
 #include <DHT.h>
 #include <DS3232RTC.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <IRremoteESP8266.h>
-#include <IRrecv.h>
 #include <IRutils.h>
 #include <TimeLib.h>
 #include <Timezone.h>
@@ -180,6 +178,7 @@ int updateInfo = 0;
 IPAddress myIP = {0, 0, 0, 0};
 uint32_t lastButtonPress = 0;
 bool testFlag = false;
+uint16_t fps = 0;
 
 //*****************************************************************************
 // Setup()
@@ -262,7 +261,7 @@ void setup()
     irrecv.enableIRIn();
 #endif
 
-    // Start WiFi and services
+    // Start WiFi
     renderer.clearScreenBuffer(matrix);
     renderer.setSmallText("WI", TEXT_POS_TOP, matrix);
     renderer.setSmallText("FI", TEXT_POS_BOTTOM, matrix);
@@ -451,6 +450,10 @@ void loop()
     {
         lastDay = day();
         screenBufferNeedsUpdate = true;
+#ifdef LDR
+        // reset because millis() will overflow at some time.
+        iBrightnessMillis = 0;
+#endif
 
 #ifdef SHOW_MODE_MOONPHASE
         moonphase = getMoonphase(year(), month(), day());
@@ -713,6 +716,11 @@ void loop()
         lastSecond = second();
         upTime++;
 
+#ifdef DEBUG_FPS
+        Serial.printf("FPS: %u\r\n", fps);
+        fps = 0;
+#endif
+
 #ifdef BUZZER
         // Make some noise
         if (alarmOn)
@@ -855,19 +863,24 @@ void loop()
     webServer.handleClient();
 #endif
 
-    // Set brightness from LDR and update display (not screenbuffer) at 40Hz.
+    // Set brightness from LDR and update display (not screenbuffer) at 20Hz.
 #ifdef LDR
     if (settings.mySettings.useAbc)
     {
-        if ((millis() > iBrightnessMillis + 25) && !testFlag)
+        if ((millis() > iBrightnessMillis + 50) && !testFlag)
         {
             iBrightnessMillis = millis();
             iTargetBrightness = getBrightnessFromLDR();
             if (brightness < iTargetBrightness)
+            {
                 brightness++;
+                writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+            }
             if (brightness > iTargetBrightness)
+            {
                 brightness--;
-            writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+                writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+            }
         }
     }
 #endif
@@ -1437,7 +1450,8 @@ void loop()
     }
 
 #ifdef DEBUG_FPS
-    debugFps();
+    // debugFps();
+    fps++;
 #endif
 } // loop()
 
@@ -1692,7 +1706,7 @@ uint8_t getBrightnessFromLDR()
         minLdrValue = ldrValue;
     if (ldrValue > maxLdrValue)
         maxLdrValue = ldrValue;
-    if ((ldrValue >= (lastLdrValue + 10)) || (ldrValue <= (lastLdrValue - 10))) // Hysteresis is 10
+    if ((ldrValue >= (lastLdrValue + 20)) || (ldrValue <= (lastLdrValue - 20))) // Hysteresis is 20
     {
         lastLdrValue = ldrValue;
         return (uint8_t)map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
