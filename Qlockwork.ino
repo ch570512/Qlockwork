@@ -1709,7 +1709,7 @@ uint8_t getBrightnessFromLDR()
     if ((ldrValue >= (lastLdrValue + 20)) || (ldrValue <= (lastLdrValue - 20))) // Hysteresis is 20
     {
         lastLdrValue = ldrValue;
-        return (uint8_t)map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
+        return map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
     }
     return iTargetBrightness;
 }
