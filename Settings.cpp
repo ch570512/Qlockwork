@@ -5,7 +5,7 @@
 #include "Settings.h"
 
 Settings::Settings() {
-    // loadFromEEPROM();
+    loadFromEEPROM();
 }
 
 Settings::~Settings() {
@@ -60,3 +60,4 @@ void Settings::saveToEEPROM() {
     Serial.println("Settings saved.");
 #endif
 }
+
