@@ -36,10 +36,7 @@ Do not power up the clock from USB only.
 This would blow up the ESP or even the USB port because of the high power demand of the LED stripe.
 Always (!) use an external 5V powersupply with at least 4A.
 
-**Disclaimer:**
-Qlockwork uses lots of third party libraries.
-I cannot guarantee the integrity of these libraries.
-You use the Qlockwork firmware at your own risk.
+<a href="https://www.buymeacoffee.com/ch570512" title="Donate to my work using BuyMeACoffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg?logo=buy-me-a-coffee&logoColor=FFDD00" style="height: 20px !important;width: 200px !important;"></a>
 
 ## Top features:
 - Almost no electronics needed. Only an ESP8266 and an LED-stripe.
@@ -411,4 +408,5 @@ New syslog logging.
 Code cleanup and bugfixes.
 
 #### 20170312:
+
 Inital release.
