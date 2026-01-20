@@ -1,42 +1,23 @@
 # QLOCKWORK
 ## An advanced firmware for a DIY "word-clock".
 
-Qlockwork is an ESP8266 (NodeMCU or WeMos D1 mini) firmware (under GPL license) for a so called "word-clock".
+Qlockwork is an ESP8266 firmware (under GPL license) for a so called "word-clock".
 You can find the latest version at: [Qlockwork on GitHub](https://github.com/ch570512/Qlockwork)
 
-The clock adjusts the time and date once every hour via NTP with a time server on the Internet.
-If an RTC is installed, the time of the ESP is also set from the RTC via the SyncProvider.
+The clock adjusts the time and date once every day via NTP with a time server on the Internet. If an RTC is installed, the time of the ESP is also kept from the RTC via the SyncProvider.
 
-At startup the clock performs a short self test.
-The sequence of the colors should be: red, green, blue and white. If not, your LED driver setup is wrong.
-The clock also shows the local IP address it received via DHCP.
-Use this address in a browser to access the clocks web site to set it up.
+At powerup the clock performs a quick self test. The sequence of the colors should be: red, green, blue then white. If not, you have to check the LED driver setup. Then the clock shows the local IP address it received via DHCP.
 
-WiFi manager: If the clock can not connect to any WLAN at startup, it turns on an access point.
-Connect a mobile phone or tablet to the AP and enter the WLAN credentials. A white "WiFi" is shown on the clock.
-On success there are three short beeps and "WiFi" will be green.
-If no WLAN is connected or the timeout has expired, there is a long beep and "WiFi" turns red.
-After the WLAN timeout the clock works without NTP but you can still control it via its AP.
-Without WLAN the clock uses the optional RTC to set the time or if no RTC is present has to be set manually.
-In either ways the clocks IP is shown as a textfeed.
+WiFi manager: If no WiFi is connected the clock will start a captive portal. On successfully connecting to a network the white "WiFi" will turn green. If no WiFi is connected "WiFi" turns red. Without WiFi (therefor no NTP) the clock uses the optional RTC to keep the time.
 
-Events can be shown every five minutes on a particular day of the year as a textfeed.
-You can set them in "Events.h". Expand the array with events as shown in the default values.
-You can set a color for every event. Do not change the first entry.
-There is no comma behind the last entry.
+Events can be shown every five minutes on a particular day of the year as a textfeed. You can set them in "Events.h". Expand the array with events as shown in the default values. You can set a color for every event.
 
-Updates of the firmware could be uploaded via USB, OTA or the clocks webserver.
-You will find more help and information on how to configure and compile the firmware in "Readme.md" in the zip-archive.
-You will also find a circuit diagram, a partslist and some pictures in the "/misc" directory.
-All sensors, the RTC and the buzzer are optional.
-The clock will run with the ESP8266 module only. No PCB needed.
+You will find the circuit diagram, a partslist and some pictures in the "/misc" directory. All sensors, buttons, the RTC and the buzzer are optional. It will even run without an LED stripe so you can get a fancy clock on the console.
 
 **Warning:**
-Do not power up the clock from USB only.
-This would blow up the ESP or even the USB port because of the high power demand of the LED stripe.
-Always (!) use an external 5V powersupply with at least 4A.
+Do not power up the clock from USB only. This will likely blow up your ESP or even the USB port due to the high power demand of the LED stripe.
 
-<a href="https://www.buymeacoffee.com/ch570512" title="Donate to my work using BuyMeACoffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg?logo=buy-me-a-coffee&logoColor=FFDD00" style="height: 20px !important;width: 200px !important;"></a>
+<a href="https://www.buymeacoffee.com/ch570512" title="Donate to my work using BuyMeACoffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg?logo=buy-me-a-coffee&logoColor=FFDD00"></a>
 
 ## Top features:
 - Almost no electronics needed. Only an ESP8266 and an LED-stripe.
@@ -410,3 +391,4 @@ Code cleanup and bugfixes.
 #### 20170312:
 
 Inital release.
+
