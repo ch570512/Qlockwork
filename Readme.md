@@ -1,23 +1,35 @@
 # QLOCKWORK
-## An advanced firmware for a DIY "word-clock".
+## An advanced ESP8266 firmware for a DIY "word-clock".
 
-Qlockwork is an ESP8266 firmware (under GPL license) for a so called "word-clock".
-You can find the latest version at: [Qlockwork on GitHub](https://github.com/ch570512/Qlockwork)
-
-The clock adjusts the time and date once every day via NTP with a time server on the Internet. If an RTC is installed, the time of the ESP is also kept from the RTC via the SyncProvider.
+```
+ -----------
+|ES IST FUNF|
+|           |
+|           | 
+|       NACH| 
+|           | 
+|           | 
+|DREI       | 
+|           | 
+|           | 
+|           | 
+ -----------
+```
 
 At powerup the clock performs a quick self test. The sequence of the colors should be: red, green, blue then white. If not, you have to check the LED driver setup. Then the clock shows the local IP address it received via DHCP.
 
-WiFi manager: If no WiFi is connected the clock will start a captive portal. On successfully connecting to a network the white "WiFi" will turn green. If no WiFi is connected "WiFi" turns red. Without WiFi (therefor no NTP) the clock uses the optional RTC to keep the time.
+QLOCKWORK adjusts the time and date via NTP with a time server on the Internet.
 
-Events can be shown every five minutes on a particular day of the year as a textfeed. You can set them in "Events.h". Expand the array with events as shown in the default values. You can set a color for every event.
+If no WiFi is connected the clock will start a captive portal. On successfully connecting to a network the white "WiFi" will turn green. If no WiFi is connected "WiFi" turns red. Without WiFi (therefor no NTP) the clock uses the optional RTC to keep the time.
 
-You will find the circuit diagram, a partslist and some pictures in the "/misc" directory. All sensors, buttons, the RTC and the buzzer are optional. It will even run without an LED stripe so you can get a fancy clock on the console.
+Events can be shown every five minutes on a particular day of the year as a textfeed. You can set them in "Events.h". Expand the array with events as shown in the default values. You can set a color for single events.
 
-**Warning:**
-Do not power up the clock from USB only. This will likely blow up your ESP or even the USB port due to the high power demand of the LED stripe.
+You will find the schematics on how to wire everthing up and a BOM in the "/misc" directory. All sensors, buttons, the RTC and the buzzer are optional. It will even run without the LED stripe so you can get a fancy clock on the console (using #DEBUG).
 
-<a href="https://www.buymeacoffee.com/ch570512" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 48px !important;width: 174px !important;"></a>
+> [!WARNING]
+> Do not power up the clock from USB only. This will likely blow up your ESP-board and/or the USB port because of the high powerdemand of the LED stripe.
+
+<a href="https://www.buymeacoffee.com/ch570512" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 42px !important;width: 152px !important;"></a>
 
 ## Top features:
 - Almost no electronics needed. Only an ESP8266 and an LED-stripe.
@@ -391,6 +403,7 @@ Code cleanup and bugfixes.
 #### 20170312:
 
 Inital release.
+
 
 
 
