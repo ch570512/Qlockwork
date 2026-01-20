@@ -19,6 +19,8 @@ Do not power up the clock from USB only. This will likely blow up your ESP or ev
 
 <a href="https://www.buymeacoffee.com/ch570512" title="Donate to my work using BuyMeACoffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg?logo=buy-me-a-coffee&logoColor=FFDD00"></a>
 
+<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ch570512" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+
 ## Top features:
 - Almost no electronics needed. Only an ESP8266 and an LED-stripe.
 - Optional support for LDR, Buzzer, temperature and humidity sensor, IR-remote and buttons.
@@ -391,4 +393,5 @@ Code cleanup and bugfixes.
 #### 20170312:
 
 Inital release.
+
 
