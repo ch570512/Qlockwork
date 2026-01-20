@@ -17,9 +17,7 @@ You will find the circuit diagram, a partslist and some pictures in the "/misc" 
 **Warning:**
 Do not power up the clock from USB only. This will likely blow up your ESP or even the USB port due to the high power demand of the LED stripe.
 
-<a href="https://www.buymeacoffee.com/ch570512" title="Donate to my work using BuyMeACoffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg?logo=buy-me-a-coffee&logoColor=FFDD00"></a>
-
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ch570512" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+<a href="https://www.buymeacoffee.com/ch570512" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 ## Top features:
 - Almost no electronics needed. Only an ESP8266 and an LED-stripe.
@@ -393,5 +391,6 @@ Code cleanup and bugfixes.
 #### 20170312:
 
 Inital release.
+
 
 
