@@ -1,4 +1,4 @@
-//*****************************************************************************
+//=============================================================================
 // QLOCKWORK
 // An advanced firmware for a DIY "word-clock"
 //
@@ -18,9 +18,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-//*****************************************************************************
+//=============================================================================
 
-#define FIRMWARE_VERSION 20260116
+#if !defined(ESP8266)
+#error This code is designed to run on ESP8266 and ESP8266-based boards! Please check your Tools->Board setting.
+#endif
+
+#define FIRMWARE_VERSION 20260122
 
 #include <Arduino.h>
 #include <DHT.h>
@@ -32,22 +36,50 @@
 #include <TimeLib.h>
 #include <Timezone.h>
 #include <WiFiManager.h>
-
 #include "Colors.h"
 #include "Configuration.h"
 #include "Events.h"
 #include "LedDriver.h"
+#include "MeteoWeather.h"
 #include "Modes.h"
 #include "Ntp.h"
-#include "MeteoWeather.h"
 #include "Renderer.h"
 #include "Settings.h"
 #include "Syslog.h"
 #include "Timezones.h"
 
-//*****************************************************************************
+void buttonModeInterrupt();
+void buttonModePressed();
+void buttonOnOffInterrupt();
+void buttonOnOffPressed();
+void buttonTimeInterrupt();
+void buttonTimePressed();
+void callRoot();
+void debugScreenBuffer(uint16_t screenBuffer[]);
+uint8_t getBrightnessFromLDR();
+int getMoonphase(int y, int m, int d);
+void getRoomConditions();
+time_t getRTCTime();
+void handleButtonSettings();
+void handleCommitSettings();
+void handleControl();
+void handleNotFound();
+void handleReset();
+void handleRoot();
+void handleSetEvent();
+void handleShowText();
+void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness);
+String padStringZeros(String input);
+void setLedsOff();
+void setLedsOn();
+void setMode(Mode newMode);
+void setupWebServer();
+void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightness);
+void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness);
+
+//=============================================================================
 // Init
-//*****************************************************************************
+//=============================================================================
 
 // HTTP-Server
 #ifdef WEBSERVER
@@ -74,11 +106,6 @@ Syslog syslog(wifiUdp, SYSLOGSERVER_SERVER, SYSLOGSERVER_PORT, HOSTNAME, "QLOCKW
 // RTC
 #ifdef RTC_BACKUP
 DS3232RTC RTC;
-
-time_t getRTCTime()
-{
-    return RTC.get();
-}
 #endif
 
 // LED driver
@@ -113,8 +140,6 @@ uint8_t lastDay = 0;
 uint8_t lastMinute = 0;
 uint8_t lastHour = 0;
 uint8_t lastSecond = 0;
-// uint32_t last500Millis = 0;
-// uint32_t last50Millis = 0;
 time_t upTime = 0;
 uint8_t randomHour = 0;
 uint8_t randomMinute = 0;
@@ -138,13 +163,13 @@ float roomHumidity = 0;
 uint8_t errorCounterDHT = 0;
 
 // Brightness and LDR
-uint8_t maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-uint8_t brightness = maxBrightness;
+uint8_t maxBrightness = 0;
+uint8_t brightness = 0;
 #ifdef LDR
-uint16_t ldrValue = 0;
-uint16_t lastLdrValue = 0;
-uint16_t minLdrValue = 511; // The ESP will crash if minLdrValue and maxLdrValue are equal due to an error in map()
-uint16_t maxLdrValue = 512;
+// uint16_t ldrValue = 0;
+// uint16_t lastLdrValue = 0;
+// uint16_t minLdrValue = 511;
+// uint16_t maxLdrValue = 512;
 uint8_t iTargetBrightness = 0;
 unsigned long iBrightnessMillis = 0;
 #endif
@@ -162,6 +187,7 @@ uint8_t alarmOn = false;
 uint32_t showEventTimer = EVENT_TIME;
 #endif
 
+// Sunrise and sunset
 #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
 bool sunrise_started = false;
 unsigned long sunrise_millis = 0;
@@ -173,91 +199,97 @@ int save_color_sunrise_sunset = settings.mySettings.color;
 #endif
 
 // Misc
-uint8_t testColumn = 0;
-int updateInfo = 0;
 IPAddress myIP = {0, 0, 0, 0};
 uint32_t lastButtonPress = 0;
 bool testFlag = false;
-uint16_t fps = 0;
+uint8_t testColumn = 0;
+#ifdef DEBUG_FPS
+int fps = 0;
+#endif
 
-//*****************************************************************************
+//=============================================================================
 // Setup()
-//*****************************************************************************
+//=============================================================================
 
 void setup()
 {
     // Init serial port
-    Serial.begin(SERIAL_SPEED);
-    while (!Serial)
+    Serial.begin(115200);
+    while (!Serial && millis() < 5000)
         ;
     delay(1000);
 
     // And the monkey flips the switch. (Akiva Goldsman)
-    Serial.println();
-    Serial.println("*** QLOCKWORK ***");
-    Serial.println("Firmware: " + String(FIRMWARE_VERSION));
+    Serial.println(F("\r\n*** QLOCKWORK ***"));
+    Serial.print(F("Firmware: ") + String(FIRMWARE_VERSION));
+    Serial.print(F("\r\nStarting on ") + String(ARDUINO_BOARD));
+    Serial.print(F("\r\nCPU Frequency = "));
+    Serial.print(F_CPU / 1000000);
+    Serial.println(F(" MHz"));
 
-    // Init settings
+    // Load settings
     settings.loadFromEEPROM();
+    maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+    brightness = maxBrightness;
 
 #ifdef POWERON_SELFTEST
     renderer.setAllScreenBuffer(matrix);
-    Serial.println("Set all LEDs to red.");
-    writeScreenBuffer(matrix, RED, TEST_BRIGHTNESS);
+    Serial.println(F("Set all LEDs to red."));
+    writeScreenBuffer(matrix, RED, brightness);
     delay(2500);
-    Serial.println("Set all LEDs to green.");
-    writeScreenBuffer(matrix, GREEN, TEST_BRIGHTNESS);
+    Serial.println(F("Set all LEDs to green."));
+    writeScreenBuffer(matrix, GREEN, brightness);
     delay(2500);
-    Serial.println("Set all LEDs to blue.");
-    writeScreenBuffer(matrix, BLUE, TEST_BRIGHTNESS);
+    Serial.println(F("Set all LEDs to blue."));
+    writeScreenBuffer(matrix, BLUE, brightness);
     delay(2500);
-    Serial.println("Set all LEDs to white.");
-    writeScreenBuffer(matrix, WHITE, TEST_BRIGHTNESS);
+    Serial.println(F("Set all LEDs to white."));
+    writeScreenBuffer(matrix, WHITE, brightness);
     delay(2500);
 #endif
 
 #ifdef ESP_LED
-    Serial.println("Setting up ESP-LED.");
+    Serial.println(F("Setting up ESP-LED."));
     pinMode(PIN_LED, OUTPUT);
     digitalWrite(PIN_LED, HIGH);
 #endif
 
 #ifdef MODE_BUTTON
-    Serial.println("Setting up Mode-Button.");
+    Serial.println(F("Setting up Mode-Button."));
     pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_MODE_BUTTON), buttonModeInterrupt, FALLING);
 #endif
 
 #ifdef ONOFF_BUTTON
-    Serial.println("Setting up Back-Button.");
+    Serial.println(F("Setting up Back-Button."));
     pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_ONOFF_BUTTON), buttonOnOffInterrupt, FALLING);
 #endif
 
 #ifdef TIME_BUTTON
-    Serial.println("Setting up Time-Button.");
+    Serial.println(F("Setting up Time-Button."));
     pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_TIME_BUTTON), buttonTimeInterrupt, FALLING);
 #endif
 
 #ifdef BUZZER
-    Serial.println("Setting up Buzzer.");
+    Serial.println(F("Setting up Buzzer."));
     pinMode(PIN_BUZZER, OUTPUT);
 #endif
 
 #ifdef SENSOR_DHT22
-    Serial.println("Setting up DHT22.");
+    Serial.println(F("Setting up DHT22."));
     dht.begin();
 #endif
 
 #ifdef LDR
-    Serial.print("Setting up LDR. ABC: ");
-    settings.mySettings.useAbc ? Serial.println("enabled") : Serial.println("disabled");
+    Serial.print(F("Setting up LDR. ABC: "));
+    settings.mySettings.useAbc ? Serial.println(F("enabled")) : Serial.println(F("disabled"));
     pinMode(PIN_LDR, INPUT);
 #endif
 
 #ifdef IR_RECEIVER
-    Serial.println("Setting up IR-Receiver.");
+    Serial.println(F("Setting up IR-Receiver."));
     irrecv.enableIRIn();
 #endif
 
@@ -268,48 +300,32 @@ void setup()
     writeScreenBuffer(matrix, WHITE, brightness);
     WiFiManager wifiManager;
     // wifiManager.resetSettings();
-    wifiManager.setTimeout(WIFI_SETUP_TIMEOUT);
+    wifiManager.setConnectTimeout(30);
+    wifiManager.setTimeout(120);
     wifiManager.autoConnect(HOSTNAME, WIFI_AP_PASS);
     WiFi.hostname(HOSTNAME);
-    WiFi.setAutoReconnect(true);
     WiFi.setAutoConnect(true);
+    WiFi.setAutoReconnect(true);
     if (!WiFi.isConnected())
     {
-        WiFi.mode(WIFI_AP);
-        Serial.println("No WiFi connected. AP mode.");
+        // WiFi.mode(WIFI_AP);
+        Serial.println(F("No WiFi connected."));
         writeScreenBuffer(matrix, RED, brightness);
-#if defined(BUZZER) && defined(WIFI_BEEPS)
-        digitalWrite(PIN_BUZZER, HIGH);
-        delay(1500);
-        digitalWrite(PIN_BUZZER, LOW);
-#endif
         delay(1000);
-        myIP = WiFi.softAPIP();
+        // myIP = WiFi.softAPIP();
     }
     else
     {
         WiFi.mode(WIFI_STA);
-        Serial.println("WiFi connected. STA mode.");
+        Serial.println(F("WiFi connected."));
         Serial.println("RSSI: " + String(WiFi.RSSI()));
         writeScreenBuffer(matrix, GREEN, brightness);
-#if defined(BUZZER) && defined(WIFI_BEEPS)
-        for (uint8_t i = 0; i <= 2; i++)
-        {
-#ifdef DEBUG
-            Serial.println("Beep!");
-#endif
-            digitalWrite(PIN_BUZZER, HIGH);
-            delay(100);
-            digitalWrite(PIN_BUZZER, LOW);
-            delay(100);
-        }
-#endif
         delay(1000);
         myIP = WiFi.localIP();
 
 #ifdef SYSLOGSERVER_SERVER
-        Serial.println("Starting syslog.");
-#ifdef APIKEY
+        Serial.println(F("Starting syslog."));
+#ifdef WEATHER
         syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;outdoorTemperature;outdoorHumidity;sunriseTime;sunsetTime;ldrValue;errorCounterNTP;errorCounterDHT;errorCounterOutdoorWeather;freeHeapSize;upTime");
 #else
         syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;ldrValue;errorCounterNTP;errorCounterDHT;freeHeapSize;upTime");
@@ -319,23 +335,24 @@ void setup()
         // Get weather from MeteoWeather
 #ifdef WEATHER
 #ifdef DEBUG
-        Serial.println("Getting outdoor weather:");
+        Serial.println(F("Getting weather..."));
 #endif
         !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-        Serial.println("Latitude: " + String(LATITUDE));
-        Serial.println("Longitude: " + String(LONGITUDE));
-        Serial.println("Timezone: " + String(TIMEZONE));
-        Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + " �C");
-        Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity) + " %rH");
-        Serial.println("Sunrise: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
-        Serial.println("Sunset: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
+        Serial.println(F("Latitude: ") + String(LATITUDE));
+        Serial.println(F("Longitude: ") + String(LONGITUDE));
+        Serial.println(F("Timezone: ") + String(TIMEZONE));
+        Serial.println(F("Outdoor temperature: ") + String(outdoorWeather.temperature) + F(" °C"));
+        Serial.println(F("Outdoor humidity: ") + String(outdoorWeather.humidity) + F(" %rH"));
+        Serial.println(F("Sunrise: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
+        Serial.println(F("Sunset: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
 #endif
 #endif
     }
 
 #ifdef SHOW_IP
-    WiFi.isConnected() ? feedText = "  IP: " : feedText = "  AP-IP: ";
+    // WiFi.isConnected() ? feedText = "  IP: " : feedText = "  AP-IP: ";
+    feedText = "  IP: ";
     feedText += String(myIP[0]) + "." + String(myIP[1]) + "." + String(myIP[2]) + "." + String(myIP[3]) + "   ";
     feedPosition = 0;
     feedColor = WHITE;
@@ -343,7 +360,7 @@ void setup()
 #endif
 
 #ifdef WEBSERVER
-    Serial.println("Starting webserver.");
+    Serial.println(F("Starting webserver."));
     setupWebServer();
 #endif
 
@@ -352,9 +369,9 @@ void setup()
 #ifdef RTC_BACKUP
     RTC.begin();
     setSyncProvider(getRTCTime);
-    Serial.print("RTC Sync.");
+    Serial.print(F("RTC Sync."));
     if (timeStatus() != timeSet)
-        Serial.print(" FAIL!");
+        Serial.print(F(" FAIL!"));
     Serial.println();
 #ifdef DEBUG
     time_t tempRtcTime = RTC.get();
@@ -373,12 +390,12 @@ void setup()
             setTime(timeZone.toLocal(tempNtpTime));
 #ifdef DEBUG
             Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
-            Serial.printf("Drift (ESP): %d sec.\r\n", tempNtpTime - timeZone.toUTC(now()));
+            Serial.printf("Drift (ESP): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(now())));
 #endif
 #ifdef RTC_BACKUP
             RTC.set(timeZone.toLocal(tempNtpTime));
 #ifdef DEBUG
-            Serial.printf("Drift (RTC): %d sec.\r\n", tempNtpTime - timeZone.toUTC(RTC.get()));
+            Serial.printf("Drift (RTC): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
 #endif
 #endif
         }
@@ -423,7 +440,7 @@ void setup()
     Serial.printf("Random time: %02u:%02u:%02u\r\n", randomHour, randomMinute, randomSecond);
     Serial.println("DEBUG enabled.");
 #else
-    Serial.println("DEBUG disabled.");
+    Serial.println(F("DEBUG disabled."));
 #endif
 
     lastDay = day() - 1;
@@ -432,27 +449,32 @@ void setup()
     lastSecond = second();
 
 #ifdef FRONTCOVER_BINARY
-    settings.setTransition(TRANSITION_NORMAL);
+    settings.mySettings.transition = TRANSITION_NORMAL;
 #endif
 } // setup()
 
-//*****************************************************************************
+//=============================================================================
 // Loop()
-//*****************************************************************************
+//=============================================================================
 
 void loop()
 {
-    //*************************************************************************
+    //=============================================================================
     // Run once a day
-    //*************************************************************************
+    //=============================================================================
 
     if (day() != lastDay)
     {
         lastDay = day();
         screenBufferNeedsUpdate = true;
+
+        // reset because millis() will overflow at some time
 #ifdef LDR
-        // reset because millis() will overflow at some time.
         iBrightnessMillis = 0;
+#endif
+#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
+        sunrise_millis = 0;
+        sunset_millis = 0;
 #endif
 
 #ifdef SHOW_MODE_MOONPHASE
@@ -479,9 +501,9 @@ void loop()
         }
     }
 
-    //*************************************************************************
+    //=============================================================================
     // Run once every hour
-    //*************************************************************************
+    //=============================================================================
 
     if (hour() != lastHour)
     {
@@ -510,9 +532,9 @@ void loop()
         }
 #endif
 
-        //*********************************************************************
+        //=============================================================================
         // Run once every random hour (once a day)
-        //*********************************************************************
+        //=============================================================================
 
         if (hour() == randomHour)
         {
@@ -525,12 +547,12 @@ void loop()
                     errorCounterNTP = 0;
 #ifdef DEBUG
                     Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
-                    Serial.printf("Drift (ESP): %d sec.\r\n", tempNtpTime - timeZone.toUTC(now()));
+                    Serial.printf("Drift (ESP): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(now())));
 #endif
                     setTime(timeZone.toLocal(tempNtpTime));
 #ifdef RTC_BACKUP
 #ifdef DEBUG
-                    Serial.printf("Drift (RTC): %d sec.\r\n", tempNtpTime - timeZone.toUTC(RTC.get()));
+                    Serial.printf("Drift (RTC): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
 #endif
                     RTC.set(timeZone.toLocal(tempNtpTime));
 #endif
@@ -551,9 +573,9 @@ void loop()
         }
     }
 
-    //*************************************************************************
+    //=============================================================================
     // Run once every minute
-    //*************************************************************************
+    //=============================================================================
 
     if (minute() != lastMinute)
     {
@@ -614,45 +636,45 @@ void loop()
                 ESP.restart();
         }
 
-        //*********************************************************************
+        //=============================================================================
         // Run once every random minute (once an hour) or if NTP has an error
-        //*********************************************************************
+        //=============================================================================
 
-        /*         if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10)))
-                {
-                    if (WiFi.isConnected())
-                    {
-                        // Set ESP (and RTC) time from NTP
-                        time_t tempNtpTime = ntp.getTime(ntpServer);
-                        if (tempNtpTime)
-                        {
-                            errorCounterNTP = 0;
-        #ifdef DEBUG
-                            Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
-                            Serial.printf("Drift (ESP): %d sec.\r\n", tempNtpTime - timeZone.toUTC(now()));
-        #endif
-                            setTime(timeZone.toLocal(tempNtpTime));
-        #ifdef RTC_BACKUP
-        #ifdef DEBUG
-                            Serial.printf("Drift (RTC): %d sec.\r\n", tempNtpTime - timeZone.toUTC(RTC.get()));
-        #endif
-                            RTC.set(timeZone.toLocal(tempNtpTime));
-        #endif
-                        }
-                        else
-                        {
-                            if (errorCounterNTP < 255)
-                                errorCounterNTP++;
-        #ifdef DEBUG
-                            Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
-        #endif
-                        }
-                    }
-                    else
-                    {
-                        WiFi.reconnect();
-                    }
-                } */
+        //         if ((minute() == randomMinute) || ((errorCounterNTP > 0) && (errorCounterNTP < 10)))
+        //         {
+        //             if (WiFi.isConnected())
+        //             {
+        //                 // Set ESP (and RTC) time from NTP
+        //                 time_t tempNtpTime = ntp.getTime(ntpServer);
+        //                 if (tempNtpTime)
+        //                 {
+        //                     errorCounterNTP = 0;
+        // #ifdef DEBUG
+        //                     Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
+        //                     Serial.printf("Drift (ESP): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(now())));
+        // #endif
+        //                     setTime(timeZone.toLocal(tempNtpTime));
+        // #ifdef RTC_BACKUP
+        // #ifdef DEBUG
+        //                     Serial.printf("Drift (RTC): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
+        // #endif
+        //                     RTC.set(timeZone.toLocal(tempNtpTime));
+        // #endif
+        //                 }
+        //                 else
+        //                 {
+        //                     if (errorCounterNTP < 255)
+        //                         errorCounterNTP++;
+        // #ifdef DEBUG
+        //                     Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
+        // #endif
+        //                 }
+        //             }
+        //             else
+        //             {
+        //                 WiFi.reconnect();
+        //             }
+        //         }
 
         if (minute() == randomMinute)
         {
@@ -662,7 +684,7 @@ void loop()
 #ifdef WEATHER
                 !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-                Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + " �C");
+                Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + " °C");
                 Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity) + " %rH");
                 Serial.println("Sunrise: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
                 Serial.println("Sunset: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
@@ -675,9 +697,9 @@ void loop()
             }
         }
 
-        //*********************************************************************
+        //=============================================================================
         // Run once every 5 minutes
-        //*********************************************************************
+        //=============================================================================
 
         if (minute() % 5 == 0)
         {
@@ -687,7 +709,7 @@ void loop()
             {
                 time_t tempEspTime = now();
 #ifdef WEATHER
-                syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(outdoorWeather.temperature) + ";" + String(outdoorWeather.humidity) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))) + ";" + String(ldrValue) + ";" + String(errorCounterNTP) + ";" + String(errorCounterDHT) + ";" + String(errorCounterOutdoorWeather) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
+                syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(outdoorWeather.temperature) + ";" + String(outdoorWeather.humidity) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))) + ";" + String(brightness) + ";" + String(errorCounterNTP) + ";" + String(errorCounterDHT) + ";" + String(errorCounterOutdoorWeather) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
 #else
                 syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(ldrValue) + ";" + String(errorCounterNTP) + ";" + String(errorCounterDHT) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
 #endif
@@ -696,6 +718,7 @@ void loop()
 #endif
             }
 #endif
+
             // Change color
             if (settings.mySettings.colorChange == COLORCHANGE_FIVE)
             {
@@ -707,9 +730,9 @@ void loop()
         }
     }
 
-    //*************************************************************************
+    //=============================================================================
     // Run once every second
-    //*************************************************************************
+    //=============================================================================
 
     if (second() != lastSecond)
     {
@@ -719,6 +742,10 @@ void loop()
 #ifdef DEBUG_FPS
         Serial.printf("FPS: %u\r\n", fps);
         fps = 0;
+#endif
+#ifdef DEBUG_LDR
+        // Serial.printf("LDR:        min: %d max: %d actual: %d\n\r", minLdrValue, maxLdrValue, ldrValue);
+        Serial.printf("Brightness: min: %d max: %d target: %d actual: %d\n\r", MIN_BRIGHTNESS, maxBrightness, iTargetBrightness, brightness);
 #endif
 
 #ifdef BUZZER
@@ -851,23 +878,24 @@ void loop()
 #endif
     }
 
-    //*************************************************************************
+    //=============================================================================
     // Run always
-    //*************************************************************************
-
-    if (mode == MODE_FEED)
-        screenBufferNeedsUpdate = true;
+    //=============================================================================
 
     // Call HTTP- and OTA-handle
 #ifdef WEBSERVER
     webServer.handleClient();
 #endif
 
-    // Set brightness from LDR and update display (not screenbuffer) at 20Hz.
+    // Make sure the textfeed is updated
+    if (mode == MODE_FEED)
+        screenBufferNeedsUpdate = true;
+
+    // Set brightness from LDR and update display at 25Hz
 #ifdef LDR
     if (settings.mySettings.useAbc)
     {
-        if ((millis() > iBrightnessMillis + 50) && !testFlag)
+        if ((millis() > iBrightnessMillis + 40) && !testFlag)
         {
             iBrightnessMillis = millis();
             iTargetBrightness = getBrightnessFromLDR();
@@ -885,8 +913,8 @@ void loop()
     }
 #endif
 
+    // Watch out for IR commands
 #ifdef IR_RECEIVER
-    // Look for IR commands
     if (irrecv.decode(&irDecodeResult))
     {
 #ifdef DEBUG_IR
@@ -955,12 +983,14 @@ void loop()
                 renderer.setAlarmLed(matrix);
 #endif
             break;
+
 #ifdef SHOW_MODE_AMPM
         case MODE_AMPM:
             renderer.clearScreenBuffer(matrix);
             isAM() ? renderer.setSmallText("AM", TEXT_POS_MIDDLE, matrix) : renderer.setSmallText("PM", TEXT_POS_MIDDLE, matrix);
             break;
 #endif
+
 #ifdef SHOW_MODE_SECONDS
         case MODE_SECONDS:
             renderer.clearScreenBuffer(matrix);
@@ -972,12 +1002,14 @@ void loop()
             }
             break;
 #endif
+
 #ifdef SHOW_MODE_WEEKDAY
         case MODE_WEEKDAY:
             renderer.clearScreenBuffer(matrix);
             renderer.setSmallText(String(sWeekday[weekday()][0]) + String(sWeekday[weekday()][1]), TEXT_POS_MIDDLE, matrix);
             break;
 #endif
+
 #ifdef SHOW_MODE_DATE
         case MODE_DATE:
             renderer.clearScreenBuffer(matrix);
@@ -993,6 +1025,7 @@ void loop()
             renderer.setPixelInScreenBuffer(5, 9, matrix);
             break;
 #endif
+
 #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
         case MODE_SUNRISE:
             if (!sunrise_started)
@@ -1248,6 +1281,7 @@ void loop()
             }
             break;
 #endif
+
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
         case MODE_TEMP:
 #ifdef DEBUG
@@ -1277,6 +1311,7 @@ void loop()
             }
             renderer.setSmallText(String(int(abs(roomTemperature) + 0.5)), TEXT_POS_BOTTOM, matrix);
             break;
+
 #ifdef SENSOR_DHT22
         case MODE_HUMIDITY:
 #ifdef DEBUG
@@ -1291,6 +1326,7 @@ void loop()
             break;
 #endif
 #endif
+
 #ifdef WEATHER
         case MODE_EXT_TEMP:
 #ifdef DEBUG
@@ -1328,6 +1364,7 @@ void loop()
             matrix[9] = 0b0100100000000000;
             break;
 #endif
+
 #ifdef BUZZER
         case MODE_TIMER:
             renderer.clearScreenBuffer(matrix);
@@ -1335,6 +1372,7 @@ void loop()
             renderer.setSmallText(String(alarmTimer), TEXT_POS_BOTTOM, matrix);
             break;
 #endif
+
 #ifdef SHOW_MODE_TEST
         case MODE_TEST:
             renderer.clearScreenBuffer(matrix);
@@ -1351,9 +1389,15 @@ void loop()
             testFlag = true;
             break;
 #endif
+
+        case MODE_COUNT:
+        {
+        }
+
         case MODE_BLANK:
             renderer.clearScreenBuffer(matrix);
             break;
+
         case MODE_FEED:
             for (uint8_t y = 0; y <= 5; y++)
             {
@@ -1405,16 +1449,16 @@ void loop()
             break;
 #ifdef SHOW_MODE_TEST
         case MODE_RED:
-            writeScreenBuffer(matrix, RED, TEST_BRIGHTNESS);
+            writeScreenBuffer(matrix, RED, brightness);
             break;
         case MODE_GREEN:
-            writeScreenBuffer(matrix, GREEN, TEST_BRIGHTNESS);
+            writeScreenBuffer(matrix, GREEN, brightness);
             break;
         case MODE_BLUE:
-            writeScreenBuffer(matrix, BLUE, TEST_BRIGHTNESS);
+            writeScreenBuffer(matrix, BLUE, brightness);
             break;
         case MODE_WHITE:
-            writeScreenBuffer(matrix, WHITE, TEST_BRIGHTNESS);
+            writeScreenBuffer(matrix, WHITE, brightness);
             break;
 #endif
         case MODE_FEED:
@@ -1423,13 +1467,13 @@ void loop()
         default:
             if (runTransitionOnce)
             {
-                if (settings.mySettings.transition == TRANSITION_NORMAL)
-                    writeScreenBuffer(matrix, settings.mySettings.color, brightness);
-                if (settings.mySettings.transition == TRANSITION_FADE)
-                    writeScreenBufferFade(matrixOld, matrix, settings.mySettings.color, brightness);
-                if (settings.mySettings.transition == TRANSITION_MOVEUP)
-                    moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
-                // moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
+                // if (settings.mySettings.transition == TRANSITION_NORMAL)
+                //     writeScreenBuffer(matrix, settings.mySettings.color, brightness);
+                // if (settings.mySettings.transition == TRANSITION_FADE)
+                //     writeScreenBufferFade(matrixOld, matrix, settings.mySettings.color, brightness);
+                // if (settings.mySettings.transition == TRANSITION_MOVEUP)
+                //     moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
+                moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
                 runTransitionOnce = false;
                 testColumn = 0;
             }
@@ -1442,7 +1486,7 @@ void loop()
     // Wait for mode timeout then switch back to time
     if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout)
     {
-        // #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(APIKEY)
+        // #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
         //        sunrise_started = false;
         //        sunset_started = false;
         // #endif
@@ -1455,9 +1499,9 @@ void loop()
 #endif
 } // loop()
 
-//*****************************************************************************
+//=============================================================================
 // Transitions
-//*****************************************************************************
+//=============================================================================
 
 void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightness)
 {
@@ -1508,9 +1552,6 @@ void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], 
             screenBufferOld[i] = screenBufferOld[i + 1];
         screenBufferOld[9] = screenBufferNew[z];
         writeScreenBuffer(screenBufferOld, color, brightness);
-#ifdef WEBSERVER
-        // webServer.handleClient();
-#endif
         delay(50);
     }
 } // moveScreenBufferUp
@@ -1537,7 +1578,6 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
         {
             for (uint8_t x = 0; x <= 11; x++)
             {
-                // ESP.wdtFeed();
                 if (!(bitRead(screenBufferOld[y], 15 - x)) && (bitRead(screenBufferNew[y], 15 - x)))
                     brightnessBuffer[y][x]++;
                 if ((bitRead(screenBufferOld[y], 15 - x)) && !(bitRead(screenBufferNew[y], 15 - x)))
@@ -1565,16 +1605,24 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
         ledDriver.setPixel(114, color, brightnessBuffer[4][11]);
 #endif
 #endif
-#ifdef WEBSERVER
-        // webServer.handleClient();
-#endif
         ledDriver.show();
     }
 } // writeScreenBufferFade
 
-//*****************************************************************************
+//=============================================================================
 // "On/off" pressed
-//*****************************************************************************
+//=============================================================================
+
+#ifdef ONOFF_BUTTON
+ICACHE_RAM_ATTR void buttonOnOffInterrupt()
+{
+    if (millis() > lastButtonPress + 250)
+    {
+        lastButtonPress = millis();
+        buttonOnOffPressed();
+    }
+}
+#endif
 
 void buttonOnOffPressed()
 {
@@ -1584,9 +1632,20 @@ void buttonOnOffPressed()
     mode == MODE_BLANK ? setLedsOn() : setLedsOff();
 }
 
-//*****************************************************************************
+//=============================================================================
 // "Time" pressed
-//*****************************************************************************
+//=============================================================================
+
+#ifdef TIME_BUTTON
+ICACHE_RAM_ATTR void buttonTimeInterrupt()
+{
+    if (millis() > lastButtonPress + 250)
+    {
+        lastButtonPress = millis();
+        buttonTimePressed();
+    }
+}
+#endif
 
 void buttonTimePressed()
 {
@@ -1612,9 +1671,20 @@ void buttonTimePressed()
     setMode(MODE_TIME);
 }
 
-//*****************************************************************************
+//=============================================================================
 // "Mode" pressed
-//*****************************************************************************
+//=============================================================================
+
+#ifdef MODE_BUTTON
+ICACHE_RAM_ATTR void buttonModeInterrupt()
+{
+    if (millis() > lastButtonPress + 250)
+    {
+        lastButtonPress = millis();
+        buttonModePressed();
+    }
+}
+#endif
 
 void buttonModePressed()
 {
@@ -1638,9 +1708,9 @@ void buttonModePressed()
     setMode(mode++);
 }
 
-//*****************************************************************************
+//=============================================================================
 // Set mode
-//*****************************************************************************
+//=============================================================================
 
 void setMode(Mode newMode)
 {
@@ -1690,23 +1760,29 @@ void setMode(Mode newMode)
     }
 }
 
-//*****************************************************************************
-// Get brightness from LDR
-//*****************************************************************************
+//=============================================================================
+// Get reading from LDR
+//=============================================================================
 
 #ifdef LDR
 uint8_t getBrightnessFromLDR()
 {
+    uint16_t ldrValue = 0;
+    static uint16_t lastLdrValue = 0;
+    static uint16_t minLdrValue = 511;
+    static uint16_t maxLdrValue = 512;
+
 #ifdef LDR_IS_INVERSE
-    ldrValue = 1024 - analogRead(PIN_LDR);
+    ldrValue = 1023 - analogRead(PIN_LDR);
 #else
     ldrValue = analogRead(PIN_LDR);
 #endif
+
     if (ldrValue < minLdrValue)
         minLdrValue = ldrValue;
     if (ldrValue > maxLdrValue)
         maxLdrValue = ldrValue;
-    if ((ldrValue >= (lastLdrValue + 20)) || (ldrValue <= (lastLdrValue - 20))) // Hysteresis is 20
+    if ((ldrValue >= (lastLdrValue + 30)) || (ldrValue <= (lastLdrValue - 30))) // Hysteresis
     {
         lastLdrValue = ldrValue;
         return map(ldrValue, minLdrValue, maxLdrValue, MIN_BRIGHTNESS, maxBrightness);
@@ -1715,9 +1791,9 @@ uint8_t getBrightnessFromLDR()
 }
 #endif
 
-//*****************************************************************************
+//=============================================================================
 // Get room conditions
-//*****************************************************************************
+//=============================================================================
 
 #if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
 void getRoomConditions()
@@ -1753,42 +1829,9 @@ void getRoomConditions()
 }
 #endif
 
-//*****************************************************************************
+//=============================================================================
 // Misc
-//*****************************************************************************
-
-#ifdef MODE_BUTTON
-ICACHE_RAM_ATTR void buttonModeInterrupt()
-{
-    if (millis() > lastButtonPress + 250)
-    {
-        lastButtonPress = millis();
-        buttonModePressed();
-    }
-}
-#endif
-
-#ifdef ONOFF_BUTTON
-ICACHE_RAM_ATTR void buttonOnOffInterrupt()
-{
-    if (millis() > lastButtonPress + 250)
-    {
-        lastButtonPress = millis();
-        buttonOnOffPressed();
-    }
-}
-#endif
-
-#ifdef TIME_BUTTON
-ICACHE_RAM_ATTR void buttonTimeInterrupt()
-{
-    if (millis() > lastButtonPress + 250)
-    {
-        lastButtonPress = millis();
-        buttonTimePressed();
-    }
-}
-#endif
+//=============================================================================
 
 // Switch off LEDs
 void setLedsOff()
@@ -1812,10 +1855,11 @@ void setLedsOn()
 #ifdef SHOW_MODE_MOONPHASE
 int getMoonphase(int y, int m, int d)
 {
-    int b;
-    int c;
-    int e;
-    double jd;
+    int b = 0;
+    int c = 0;
+    int e = 0;
+    double jd = 0;
+
     if (m < 3)
     {
         y--;
@@ -1834,9 +1878,21 @@ int getMoonphase(int y, int m, int d)
 }
 #endif
 
-//*****************************************************************************
+String padStringZeros(String input)
+{
+    return (input.length() > 1) ? input : "0" + input;
+}
+
+#ifdef RTC_BACKUP
+time_t getRTCTime()
+{
+    return RTC.get();
+}
+#endif
+
+//=============================================================================
 // Debugging
-//*****************************************************************************
+//=============================================================================
 
 // Write screenbuffer to console
 #ifdef DEBUG_MATRIX
@@ -1868,26 +1924,9 @@ void debugScreenBuffer(uint16_t screenBuffer[])
 }
 #endif
 
-// Write FPS to console
-#ifdef DEBUG_FPS
-void debugFps()
-{
-    static uint16_t frames;
-    static uint32_t lastFpsCheck;
-    frames++;
-    // if ((millis() % 1000 == 0) && (millis() != lastFpsCheck))
-    if (millis() % 1000 == 0)
-    {
-        // lastFpsCheck = millis();
-        Serial.printf("FPS: %u\r\n", frames);
-        frames = 0;
-    }
-}
-#endif
-
-//*****************************************************************************
+//=============================================================================
 // Webserver
-//*****************************************************************************
+//=============================================================================
 
 #ifdef WEBSERVER
 void setupWebServer()
@@ -2011,9 +2050,10 @@ void handleRoot()
     message += "<br>RSSI: " + String(WiFi.RSSI());
 #ifdef LDR
     message += "<br>Brightness: " + String(brightness) + " (ABC: ";
-    settings.mySettings.useAbc ? message += "enabled" : message += "disabled";
-    message += ", min: " + String(MIN_BRIGHTNESS) + ", max : " + String(maxBrightness) + ")";
-    message += "<br>LDR: " + String(ldrValue) + " (min: " + String(minLdrValue) + ", max: " + String(maxLdrValue) + ")";
+    settings.mySettings.useAbc ? message += "enabled)" : message += "disabled)";
+    // settings.mySettings.useAbc ? message += "enabled" : message += "disabled";
+    // message += ", min: " + String(MIN_BRIGHTNESS) + ", max : " + String(maxBrightness) + ")";
+    // message += "<br>LDR: " + String(ldrValue) + " (min: " + String(minLdrValue) + ", max: " + String(maxLdrValue) + ")";
 #endif
     message += "<br>Error (NTP): " + String(errorCounterNTP);
 #ifdef SENSOR_DHT22
@@ -2665,7 +2705,9 @@ void handleSetEvent()
 // Page showText
 void handleShowText()
 {
+#ifdef BUZZER
     uint8_t feedBuzzer = webServer.arg("buzzer").toInt();
+#endif
     feedColor = webServer.arg("color").toInt();
     feedText = "  " + webServer.arg("text").substring(0, 80) + "   ";
     feedPosition = 0;
@@ -2695,8 +2737,3 @@ void handleControl()
 }
 
 #endif
-
-String padStringZeros(String input)
-{
-    return (input.length() > 1) ? input : "0" + input;
-}

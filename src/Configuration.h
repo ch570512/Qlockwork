@@ -10,19 +10,20 @@
 //*****************************************************************************
 
 #define HOSTNAME "QLOCKWORK"                    // The hostname of the clock.
-#define WEBSITE_TITLE "QLOCKWORKs page"         // Title on top of the clocks webpage.
+#define WEBSITE_TITLE "QLOCKWORK"         // Title on top of the clocks webpage.
 //#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
                                                 // Show text on the clocks webpage.
 
 #define WEBSERVER                               // Enable the webserver.
+
 #define NTP_SERVER "pool.ntp.org"               // NTP server to be queried.
 
-#define WIFI_SETUP_TIMEOUT 120                  // Time in seconds the WiFiManager waits for your input.
-                                                // If no WiFi is connected the clock enters accesspoint mode.
-                                                // You can control the clock by connecting to this accesspoint.
-#define WIFI_AP_PASS "12345678"                 // The password for the AP. At least 8 characters.
-#define SHOW_IP                                 // Show local IP at startup. Use this to access the clocks menue.
-//#define WIFI_BEEPS                            // Beep 3 times if WIFI is conneced, if not, beep one time on startup.
+//#define SYSLOGSERVER_SERVER "192.168.0.1"     // Address and port of a syslogserver.
+//#define SYSLOGSERVER_PORT 514                 // Log temperature and more...
+
+#define WIFI_AP_PASS "12345678"                 // If no WiFi is connected the clock will start a captive portal.
+                                                // The password for the AP. At least 8 characters.
+#define SHOW_IP                                 // Show local IP at startup. Use this to access the clocks on WiFi or AP.
 
 #define NONE_TECHNICAL_ZERO                     // Displays the digit zero without a diagonal line.
 
@@ -37,7 +38,7 @@
                                                 // BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
 //#define ABUSE_CORNER_LED_FOR_ALARM            // Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
 
-//#define POWERON_SELFTEST                      // Test LEDs at startup. Order is: white, red, green, blue.
+//#define POWERON_SELFTEST                      // Test LEDs at startup. Order is: red, green, blue, white.
 #define SHOW_MODE_AMPM                          // Show AM/PM.
 #define SHOW_MODE_SECONDS                       // Show seconds.
 #define SHOW_MODE_WEEKDAY                       // Show weekday.
@@ -120,8 +121,7 @@
 #define ESP_LED                                 // Flash ESP LED once a second.
 #define NUMPIXELS 115                           // Number of LEDs in the strip.
 #define MIN_BRIGHTNESS 20                       // Minimum brightness of LEDs from 0 to 255.
-#define MAX_BRIGHTNESS 255                      // Maximum brightness of LEDs from 0 to 255.
-#define TEST_BRIGHTNESS 80                      // Brightness of the LEDs while in testmode to not overload the powersupply.
+#define MAX_BRIGHTNESS 240                      // Maximum brightness of LEDs from 0 to 255.
 
 //#define ONOFF_BUTTON                          // Use a hardware on/off-button.
 //#define MODE_BUTTON                           // Use a hardware mode-button.
@@ -157,12 +157,12 @@
 //*****************************************************************************
 
 //#define IR_RECEIVER                           // Use an IR remote control.
-//#define IR_CODE_ONOFF 16769565                // HX1838 Remote CH+
-//#define IR_CODE_TIME  16753245                // HX1838 Remote CH-
-//#define IR_CODE_MODE  16736925                // HX1838 Remote CH
-#define IR_CODE_ONOFF 0xFFE01F                  // CLT2 V1.1 Remote Power
-#define IR_CODE_TIME  0xFFA05F                  // CLT2 V1.1 Remote Time
-#define IR_CODE_MODE  0xFF20DF                  // CLT2 V1.1 Remote Region
+#define IR_CODE_ONOFF 16769565                // HX1838 Remote CH+
+#define IR_CODE_TIME  16753245                // HX1838 Remote CH-
+#define IR_CODE_MODE  16736925                // HX1838 Remote CH
+//#define IR_CODE_ONOFF 0xFFE01F                  // CLT2 V1.1 Remote Power
+//#define IR_CODE_TIME  0xFFA05F                  // CLT2 V1.1 Remote Time
+//#define IR_CODE_MODE  0xFF20DF                  // CLT2 V1.1 Remote Region
 
 //#define IR_LETTER_OFF                         // Turns off the LED behind the IR sensor permanently.
 #define IR_LETTER_X 8                           // This improves IR reception.
@@ -238,12 +238,10 @@
 
 //#define DEBUG                                 // Show debug infos in the serial console.
 //#define DEBUG_WEB                             // Show debug infos on the web page.
-//#define DEBUG_IR                              // Show debug infos from the IR remote.
 //#define DEBUG_MATRIX                          // Renders the LED matrix to serial console. German only.
+//#define DEBUG_IR                              // Show debug infos from the IR remote.
+//#define DEBUG_LDR                             // Show debug infos for the LDR.
 //#define DEBUG_FPS                             // Show number of loops per second in the serial console.
-
-//#define SYSLOGSERVER_SERVER "192.168.0.1"     // Address and port of a syslogserver.
-//#define SYSLOGSERVER_PORT 514                 // Log temperature and more...
 
 // WeMos D1 R2 & mini (Espressif 8266)
 #define PIN_IR_RECEIVER  16                     // D0 (no interrupt)

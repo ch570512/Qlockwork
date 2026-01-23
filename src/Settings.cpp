@@ -15,9 +15,13 @@ Settings::~Settings() {
 void Settings::resetToDefault() {
     mySettings.magicNumber = SETTINGS_MAGIC_NUMBER;
     mySettings.version = SETTINGS_VERSION;
+#ifdef LDR
     mySettings.useAbc = true;
+#else
+    mySettings.useAbc = false;
+#endif
     mySettings.brightness = 100;
-    mySettings.color = CYAN;
+    mySettings.color = WHITE;
     mySettings.colorChange = COLORCHANGE_NO;
     mySettings.transition = TRANSITION_FADE;
     mySettings.timeout = 10;
@@ -31,7 +35,7 @@ void Settings::resetToDefault() {
     mySettings.alarm2Weekdays = 0b11111110;
     mySettings.nightOffTime = 82800; // 23:00 * 3600
     mySettings.dayOnTime = 21600; // 06:00 * 3600
-    mySettings.hourBeep = true;
+    mySettings.hourBeep = false;
 #ifdef DEBUG
     Serial.println("Default settings set.");
 #endif

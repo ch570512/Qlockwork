@@ -3,6 +3,7 @@
 
 ```
  -----------
+<<<<<<< HEAD:Readme.md
 |ES IST FUNF|
 |           |
 |           | 
@@ -13,18 +14,38 @@
 |           | 
 |           | 
 |           | 
+=======
+|ES IST     |
+|    ZWANZIG|
+|           |
+|       NACH|
+|           |
+|           |
+|DREI       |
+|           |
+|           |
+|           |
+>>>>>>> 596e3bb (Moved to PlatformIO.):src/Readme.md
  -----------
 ```
 
 At powerup the clock performs a quick self test. The sequence of the colors should be: red, green, blue then white. If not, you have to check the LED driver setup. Then the clock shows the local IP address it received via DHCP.
 
+<<<<<<< HEAD:Readme.md
 QLOCKWORK adjusts the time and date via NTP with a time server on the Internet.
+=======
+QLOCKWORK adjusts the time and date using NTP with a time server on the Internet.
+>>>>>>> 596e3bb (Moved to PlatformIO.):src/Readme.md
 
 If no WiFi is connected the clock will start a captive portal. On successfully connecting to a network the white "WiFi" will turn green. If no WiFi is connected "WiFi" turns red. Without WiFi (therefor no NTP) the clock uses the optional RTC to keep the time.
 
 Events can be shown every five minutes on a particular day of the year as a textfeed. You can set them in "Events.h". Expand the array with events as shown in the default values. You can set a color for single events.
 
+<<<<<<< HEAD:Readme.md
 You will find the schematics on how to wire everthing up and a BOM in the "/misc" directory. All sensors, buttons, the RTC and the buzzer are optional. It will even run without the LED stripe so you can get a fancy clock on the console (using #DEBUG).
+=======
+You will find the schematics on how to wire everthing up and a BOM in the "/misc" directory. All sensors, buttons, the RTC and the buzzer are optional. It will even run without the LED stripe so you get a fancy clock on the console (using #DEBUG).
+>>>>>>> 596e3bb (Moved to PlatformIO.):src/Readme.md
 
 > [!WARNING]
 > Do not power up the clock from USB only. This will likely blow up your ESP-board and/or the USB port because of the high powerdemand of the LED stripe.
@@ -32,12 +53,12 @@ You will find the schematics on how to wire everthing up and a BOM in the "/misc
 <a href="https://www.buymeacoffee.com/ch570512" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 42px !important;width: 152px !important;"></a>
 
 ## Top features:
-- Almost no electronics needed. Only an ESP8266 and an LED-stripe.
+- Almost no hardware needed. Only an ESP8266 (and an LED-stripe).
 - Optional support for LDR, Buzzer, temperature and humidity sensor, IR-remote and buttons.
 - Support for NeoPixel (RGB and RGBW) LED-stripes.
-- Support for various horizontal and vertical LED layouts. 3 layouts included.
-- Webpage to control and configure the clock via WiFi.
-- Adaptive brightness control when using an LDR.
+- Support for various horizontal and vertical LED layouts. 4 layouts included.
+- Captive portal to configure WiFi.
+- Adaptive brightness control using an LDR.
 - 3 transitions for timechange.
 - Indoor temperature from RTC or temperature and humidity from DHT sensor.
 - Outdoor temperature and humidity from MeteoWeather.
@@ -50,85 +71,36 @@ You will find the schematics on how to wire everthing up and a BOM in the "/misc
 - 2 Alarms with weekday selection.
 - NTP timesync with timezone support.
 - Automatic adjustment of daylight saving time.
-- USB and Over-the-air firmware updates.
 
-## Modes:
-- Time
-- AM/PM
-- Seconds
-- Weekday
-- Date
-- Sunrise (needs MeteoWeather)
-- Sunset (needs MeteoWeather)
-- Moonphase
-- Room temperature (needs RTC or DHT22)
-- Room humidity (needs DHT22)
-- Outdoor temperature (needs MeteoWeather)
-- Outdoor humidity (needs MeteoWeather)
-- Timer
-- LED-address-test
-- All LED "red"
-- All LED "green"
-- All LED "blue"
-- All LED "white"
+> [!IMPORTANT]
+> Have a look at `Configuration.h` and `Events.h` to configure your hardware setup.
 
-## Setup:
-Have a look at `Configuration.h` and `Events.h`.
-
-## Needed libraries (tested):
-```
-esp8266 by ESP8266 Community 3.1.2
-Adafruit NeoPixel by Adafruit Version 1.15.2
-Adafruit Unified Sensor by Adafruit <info@adafruit.com> Version 1.1.15
-ArduinoJson by Benoit Blanchon <http://blog.benoitblanchon.fr/> Version 7.4.2
-DHT sensor library by Adafruit Version 1.4.6
-DS3232RTC by Jack Christensen <jack.christensen@outlook.com> Version 3.1.2
-IRremoteESP8266 by Sebastien Warin, Mark Szabo, Ken Shirriff, David Conran Version 2.9.0
-Time by Michael Margolis Version 1.6.1
-Timezone by Jack Christensen <jack.christensen@outlook.com> Version 1.2.6
-WiFiManager by tzapu Version 2.0.17
-```
-
-## Compiler-Options: (recommended/tested)
-```
-Board: "LOLIN(WEMOS) D1 R2 & mini"
-CPU Frequency: "80 MHz"
-Flash Size: "4M (3M SPIFFS)"
-Debug port: "Disabled"
-Debug Level: "None"
-IwIP Variant: "v2 Lower Memory"
-VTables: "Flash"
-Exceptions: "Disabled"
-Erase Flash: "Only Sketch"
-SSL Support: "All SSL ciphers"
-```
-
-## Operation manual
+## Button operations
 - Press "on/off" to switch the LEDs on and off.
 - Press "Settings" to configure the clock via web-site.
-- Press "Mode" to jump to the next page.
-- Press "Time" to always jump back to the time page.
+- Press "Mode" to jump to the next mode.
+- Press "Time" to jump back to the time mode.
 
 ### Modes:
 ```
-Time:                               The default mode. It shows the actual time. :)
+Time:                               The default mode. It shows the actual time.
 Display AM/PM:                      Indicates whether it is AM or PM.
-Seconds:                            Shows the seconds.
+Seconds:                            Counts the seconds.
 Weekday:                            Shows the weekday in local language.
 Date:                               Shows day and month.
-Sunrise:                            Time of sunrise.
-Sunset:                             Time of sunset.
-Moonphase:                          Shows the moonphase.
-Room temperature:                   Display of the measured temperature in the room (only with RTC or DHT22).
-Room humidity:                      Display of the measured humidity in the room (only with DHT22).
-Outdoor temperature:                Display the temperature for your location from MeteoWeather.
-Outdoor humidity:                   Display the humidity for your location from MeteoWeather.
-Timer:                              Display of the remaining time if a timer is set.
-LED-Test:                           Moves a horizontal bar across the display.
-Red:                                Set all LEDs to red.
-Green:                              Set all LEDs to green.
-Blue:                               Set all LEDs to blue.
-White:                              Set all LEDs to white.
+Sunrise:                            Time of sunrise. (needs MeteoWeather)
+Sunset:                             Time of sunset. (needs MeteoWeather)
+Moonphase:                          Displays the moonphase.
+Room temperature:                   Displays measured temperature in the room (only with RTC or DHT22).
+Room humidity:                      Displays measured humidity in the room (only with DHT22).
+Outdoor temperature:                Displays the temperature for your location from MeteoWeather.
+Outdoor humidity:                   Displays the humidity for your location from MeteoWeather.
+Timer:                              Displays of the remaining time if a timer is set.
+LED-adress-test:                    Moves a horizontal bar across the display.
+All LED "red":                      Set all LEDs to red.
+All LED "green":                    Set all LEDs to green.
+All LED "blue":                     Set all LEDs to blue.
+All LED "white":                    Set all LEDs to white.
 ```
 
 ### Settings on Webpage:
@@ -214,6 +186,10 @@ http://your_clocks_ip/reset         Restart the clock.
 ```
 
 ## Changelog:
+
+#### 20260122
+Moved to PlatformIO.
+Even more cleanup and fixes.
 
 #### 20260116:
 Minor fixes.

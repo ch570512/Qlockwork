@@ -12,7 +12,7 @@
 #include "Languages.h"
 #include "Modes.h"
 
-#define SETTINGS_MAGIC_NUMBER 0x2A
+#define SETTINGS_MAGIC_NUMBER 0x2B
 #define SETTINGS_VERSION 25
 
 class Settings {

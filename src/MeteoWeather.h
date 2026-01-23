@@ -5,11 +5,11 @@
 #ifndef METEOWEATHER_H
 #define METEOWEATHER_H
 
-// #include <Arduino_JSON.h>
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 
-class MeteoWeather {
+class MeteoWeather
+{
 public:
     MeteoWeather();
     ~MeteoWeather();
@@ -24,7 +24,6 @@ public:
     uint8_t getOutdoorConditions(String lat, String lon, String timezone);
 
 private:
-
 };
 
 #endif
