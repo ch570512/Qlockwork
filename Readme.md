@@ -166,7 +166,7 @@ http://your_clocks_ip/reset         Restart the clock.
 
 ## Changelog:
 
-#### 20260120
+#### 20260124
 Moved to PlatformIO.
 Even more cleanup and fixes.
 

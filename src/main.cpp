@@ -24,7 +24,7 @@
 #error This code is designed to run on ESP8266 and ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260122
+#define FIRMWARE_VERSION 20260124
 
 #include <Arduino.h>
 #include <DHT.h>

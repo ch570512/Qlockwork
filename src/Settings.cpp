@@ -5,7 +5,7 @@
 #include "Settings.h"
 
 Settings::Settings() {
-    loadFromEEPROM();
+    // loadFromEEPROM();
 }
 
 Settings::~Settings() {
