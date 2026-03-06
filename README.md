@@ -15,8 +15,7 @@
 |           |
  -----------
 ```
-QLOCKWORK is a free and open source (FOSS) "word-clock", written in C++ for the ESP8266 microcontroller.
-It maintains time and date using NTP from a time server on the Internet.
+QLOCKWORK is a free and open source (FOSS) "word-clock", written in C++ for the ESP8266 microcontroller. It drives an 11 by 10 RGB-LED matrix, easily made up from an LED strip, to light up words telling the time. It maintains date and time using NTP from a time server on the Internet.
 
 At powerup the clock performs a quick self test. The sequence of the colors should be: red, green, blue then white. If not, you have to check the LED driver setup. Then the clock shows the local IP address it received via DHCP.
 

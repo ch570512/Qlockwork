@@ -17,14 +17,13 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
 //=============================================================================
 
 #if !defined(ESP8266)
 #error This code is designed to run on ESP8266 and ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260124
+#define FIRMWARE_VERSION 20260216
 
 #include <Arduino.h>
 #include <DHT.h>
@@ -38,6 +37,7 @@
 #include <WiFiManager.h>
 #include "Colors.h"
 #include "Configuration.h"
+#include "Debug.h"
 #include "Events.h"
 #include "LedDriver.h"
 #include "MeteoWeather.h"
@@ -334,19 +334,15 @@ void setup()
 
         // Get weather from MeteoWeather
 #ifdef WEATHER
-#ifdef DEBUG
-        Serial.println(F("Getting weather..."));
-#endif
+        DEBUG_SERIAL_PRINTLN(F("Getting weather..."));
         !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
-#ifdef DEBUG
-        Serial.println(F("Latitude: ") + String(LATITUDE));
-        Serial.println(F("Longitude: ") + String(LONGITUDE));
-        Serial.println(F("Timezone: ") + String(TIMEZONE));
-        Serial.println(F("Outdoor temperature: ") + String(outdoorWeather.temperature) + F(" °C"));
-        Serial.println(F("Outdoor humidity: ") + String(outdoorWeather.humidity) + F(" %rH"));
-        Serial.println(F("Sunrise: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
-        Serial.println(F("Sunset: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
-#endif
+        DEBUG_SERIAL_PRINTLN(F("Latitude: ") + String(LATITUDE));
+        DEBUG_SERIAL_PRINTLN(F("Longitude: ") + String(LONGITUDE));
+        DEBUG_SERIAL_PRINTLN(F("Timezone: ") + String(TIMEZONE));
+        DEBUG_SERIAL_PRINTLN(F("Outdoor temperature: ") + String(outdoorWeather.temperature) + F(" °C"));
+        DEBUG_SERIAL_PRINTLN(F("Outdoor humidity: ") + String(outdoorWeather.humidity) + F(" %rH"));
+        DEBUG_SERIAL_PRINTLN(F("Sunrise: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
+        DEBUG_SERIAL_PRINTLN(F("Sunset: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
 #endif
     }
 
