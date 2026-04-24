@@ -1,6 +1,8 @@
 # QLOCKWORK
 ## An advanced ESP8266 firmware for a DIY "word-clock".
 
+<a href="https://www.buymeacoffee.com/ch570512" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 150px !important;"></a>
+
 ```
  -----------
 |ES IST     |
@@ -27,8 +29,6 @@ You can find the schematics on how to wire everthing up and a BOM in the "/misc"
 
 > [!WARNING]
 > Do not power up the clock from USB only. This will likely blow up your ESP-board and/or the USB port because of the high powerdemand of the LED stripe.
-
-<a href="https://www.buymeacoffee.com/ch570512" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 42px !important;width: 152px !important;"></a>
 
 ## Top features:
 - Almost no hardware needed. Only an ESP8266 (and an LED-stripe).
