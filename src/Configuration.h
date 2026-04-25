@@ -10,7 +10,7 @@
 //*****************************************************************************
 
 #define HOSTNAME "QLOCKWORK"                    // The hostname of the clock.
-#define WEBSITE_TITLE "QLOCKWORK"         // Title on top of the clocks webpage.
+#define WEBSITE_TITLE "QLOCKWORK"               // Title on top of the clocks webpage.
 //#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
                                                 // Show text on the clocks webpage.
 
@@ -157,12 +157,12 @@
 //*****************************************************************************
 
 //#define IR_RECEIVER                           // Use an IR remote control.
-#define IR_CODE_ONOFF 16769565                // HX1838 Remote CH+
-#define IR_CODE_TIME  16753245                // HX1838 Remote CH-
-#define IR_CODE_MODE  16736925                // HX1838 Remote CH
-//#define IR_CODE_ONOFF 0xFFE01F                  // CLT2 V1.1 Remote Power
-//#define IR_CODE_TIME  0xFFA05F                  // CLT2 V1.1 Remote Time
-//#define IR_CODE_MODE  0xFF20DF                  // CLT2 V1.1 Remote Region
+#define IR_CODE_ONOFF 16769565                  // HX1838 Remote CH+
+#define IR_CODE_TIME  16753245                  // HX1838 Remote CH-
+#define IR_CODE_MODE  16736925                  // HX1838 Remote CH
+//#define IR_CODE_ONOFF 0xFFE01F                // CLT2 V1.1 Remote Power
+//#define IR_CODE_TIME  0xFFA05F                // CLT2 V1.1 Remote Time
+//#define IR_CODE_MODE  0xFF20DF                // CLT2 V1.1 Remote Region
 
 //#define IR_LETTER_OFF                         // Turns off the LED behind the IR sensor permanently.
 #define IR_LETTER_X 8                           // This improves IR reception.
