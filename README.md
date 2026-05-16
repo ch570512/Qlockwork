@@ -175,6 +175,9 @@ http://your_clocks_ip/reset         Restart the clock.
 
 ## Changelog:
 
+#### 20260516
+* ArduinoOTA is back and works with PlatformIO. Set IP in platformio.ini.
+
 #### 20260425
 * google/gemma-4-26b-a4b improved README.md :-)
 

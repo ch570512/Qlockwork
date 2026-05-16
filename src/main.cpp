@@ -23,9 +23,10 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260511
+#define FIRMWARE_VERSION 20260516
 
 #include <Arduino.h>
+#include <ArduinoOTA.h>
 #include <DHT.h>
 #include <DS3232RTC.h>
 #include <ESP8266WebServer.h>
@@ -317,6 +318,7 @@ void setup()
     else
     {
         WiFi.mode(WIFI_STA);
+        Serial.println("Hostname: " + String(HOSTNAME));
         Serial.println(F("WiFi connected."));
         Serial.println("RSSI: " + String(WiFi.RSSI()));
         writeScreenBuffer(matrix, GREEN, brightness);
@@ -359,6 +361,19 @@ void setup()
     Serial.println(F("Starting webserver."));
     setupWebServer();
 #endif
+
+    ArduinoOTA.setHostname(HOSTNAME);
+    // ArduinoOTA.setPassword("admin");
+    ArduinoOTA.onStart([]()
+                       { Serial.println(F("OTA Update start.")); });
+    ArduinoOTA.onEnd([]()
+                     { Serial.println(F("\nOTA Update end.")); });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+                          { Serial.printf("Progress: %u%%\r", (progress / (total / 100))); });
+    ArduinoOTA.onError([](ota_error_t error)
+                       { Serial.printf("Error [%u]: ", error); });
+    Serial.println(F("Starting OTA."));
+    ArduinoOTA.begin();
 
     renderer.clearScreenBuffer(matrix);
 
@@ -457,6 +472,12 @@ void setup()
 
 void loop()
 {
+    // Call HTTP- and OTA-handle
+#ifdef WEBSERVER
+    webServer.handleClient();
+#endif
+    ArduinoOTA.handle();
+
     //=============================================================================
     // Run once a day
     //=============================================================================
@@ -891,11 +912,6 @@ void loop()
     //=============================================================================
     // Run always
     //=============================================================================
-
-    // Call HTTP- and OTA-handle
-#ifdef WEBSERVER
-    webServer.handleClient();
-#endif
 
     // Make sure the textfeed is updated
     if (mode == MODE_FEED)
