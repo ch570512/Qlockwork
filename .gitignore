@@ -3,4 +3,6 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+src/Configuration_CH570512.h
 src/Configuration_DEV.h
+src/Configuration_RELEASE.h
