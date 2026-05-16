@@ -362,6 +362,7 @@ void setup()
     setupWebServer();
 #endif
 
+#ifdef ARDUINO_OTA
     ArduinoOTA.setHostname(HOSTNAME);
     // ArduinoOTA.setPassword("admin");
     ArduinoOTA.onStart([]()
@@ -374,6 +375,7 @@ void setup()
                        { Serial.printf("Error [%u]: ", error); });
     Serial.println(F("Starting OTA."));
     ArduinoOTA.begin();
+#endif
 
     renderer.clearScreenBuffer(matrix);
 
@@ -472,11 +474,15 @@ void setup()
 
 void loop()
 {
-    // Call HTTP- and OTA-handle
+    // Call HTTP-handle
 #ifdef WEBSERVER
     webServer.handleClient();
 #endif
+
+    // Call OTA-handle
+#ifdef ARDUINO_OTA
     ArduinoOTA.handle();
+#endif
 
     //=============================================================================
     // Run once a day

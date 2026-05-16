@@ -11,6 +11,8 @@
 
 #define WEBSERVER                               // Enable the webserver.
 
+#define ARDUINO_OTA                             // Enable OTA updates.
+
 #define NTP_SERVER "pool.ntp.org"               // NTP server to be queried.
 
 //#define SYSLOGSERVER_SERVER "192.168.0.1"     // Address and port of a syslogserver.
