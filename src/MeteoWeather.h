@@ -1,9 +1,4 @@
-//*****************************************************************************
-// MeteoWeather.h - Get weather data and sunrise/sunset times from Open-Meteo
-//*****************************************************************************
-
-#ifndef METEOWEATHER_H
-#define METEOWEATHER_H
+#pragma once
 
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
@@ -25,5 +20,3 @@ public:
 
 private:
 };
-
-#endif

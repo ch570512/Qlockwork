@@ -1,9 +1,4 @@
-//*****************************************************************************
-// Settings.h
-//*****************************************************************************
-
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -48,5 +43,3 @@ public:
         private:
     void resetToDefault();
 };
-
-#endif

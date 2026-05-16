@@ -1,9 +1,4 @@
-/******************************************************************************
-Timezones.h
-******************************************************************************/
-
-#ifndef TIMEZONES_H
-#define TIMEZONES_H
+#pragma once
 
 #ifdef TIMEZONE_IDLW
 TimeChangeRule IDLW = { "IDLW", First, Sun, Jan, 1, -720 };
@@ -171,6 +166,4 @@ Timezone timeZone(SBT, SBT);
 #ifdef TIMEZONE_NZST
 TimeChangeRule NZST = { "NZST", First, Sun, Jan, 1, 720 };
 Timezone timeZone(NZST, NZST);
-#endif
-
 #endif

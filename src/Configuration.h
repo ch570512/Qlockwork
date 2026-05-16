@@ -1,9 +1,4 @@
-//*****************************************************************************
-// Configuration.h
-//*****************************************************************************
-
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#pragma once
 
 //*****************************************************************************
 // Software settings
@@ -258,5 +253,3 @@
 #define PIN_ONOFF_BUTTON 03                     // RXD0
 // GPIO 06 to GPIO 11 are
 // used for flash memory databus
-
-#endif

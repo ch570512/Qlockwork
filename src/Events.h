@@ -15,8 +15,7 @@ GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
 BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
 ******************************************************************************/
 
-#ifndef EVENTS_H
-#define EVENTS_H
+#pragma once
 
 #include "Colors.h"
 
@@ -34,5 +33,3 @@ event_t events[] = {
     { 3, 14, "Albert Einsteins birthday!", 1879, MAGENTA },
     { 12, 24, "Merry Christmas!", 0, RED }
 };
-
-#endif

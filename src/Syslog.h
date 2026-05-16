@@ -1,5 +1,4 @@
-#ifndef SYSLOG_H
-#define SYSLOG_H 
+#pragma once
 
 #include <stdarg.h>
 #include <inttypes.h>
@@ -125,5 +124,3 @@ class Syslog {
     bool log(const String &message);
     bool log(const char *message);
 };
-
-#endif

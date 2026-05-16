@@ -20,10 +20,10 @@
 //=============================================================================
 
 #if !defined(ESP8266)
-#error This code is designed to run on ESP8266 and ESP8266-based boards! Please check your Tools->Board setting.
+#error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260216
+#define FIRMWARE_VERSION 20260511
 
 #include <Arduino.h>
 #include <DHT.h>
@@ -367,7 +367,9 @@ void setup()
     setSyncProvider(getRTCTime);
     Serial.print(F("RTC Sync."));
     if (timeStatus() != timeSet)
+    {
         Serial.print(F(" FAIL!"));
+    }
     Serial.println();
 #ifdef DEBUG
     time_t tempRtcTime = RTC.get();
@@ -556,7 +558,9 @@ void loop()
                 else
                 {
                     if (errorCounterNTP < 255)
+                    {
                         errorCounterNTP++;
+                    }
 #ifdef DEBUG
                     Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
 #endif
@@ -629,7 +633,9 @@ void loop()
             setMode(lastMode);
 
             if (!WiFi.isConnected())
+            {
                 ESP.restart();
+            }
         }
 
         //=============================================================================
@@ -768,7 +774,9 @@ void loop()
         // General Screenbuffer-Update every second.
         // (not in MODE_TIME or MODE_BLANK because it will lock the ESP due to TRANSITION_FADE)
         if ((mode != MODE_TIME) && (mode != MODE_BLANK))
+        {
             screenBufferNeedsUpdate = true;
+        }
 #endif
 
         // Flash ESP LED
@@ -783,7 +791,9 @@ void loop()
             alarmTimer--;
 #ifdef DEBUG
             if (alarmTimer)
+            {
                 Serial.printf("Timeralarm in %u min.\r\n", alarmTimer);
+            }
 #endif
         }
         // Switch on buzzer for timer
@@ -858,9 +868,13 @@ void loop()
                     if ((day() == events[i].day) && (month() == events[i].month))
                     {
                         if (events[i].year)
+                        {
                             feedText = "  " + events[i].text + " (" + String(year() - events[i].year) + ")   ";
+                        }
                         else
+                        {
                             feedText = "  " + events[i].text + "   ";
+                        }
                         feedPosition = 0;
                         feedColor = events[i].color;
 #ifdef DEBUG
@@ -909,7 +923,7 @@ void loop()
     }
 #endif
 
-    // Watch out for IR commands
+    // Watch out for IR commands and handle them accordingly
 #ifdef IR_RECEIVER
     if (irrecv.decode(&irDecodeResult))
     {
@@ -1507,7 +1521,9 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
         for (uint8_t x = 0; x <= 10; x++)
         {
             if (bitRead(screenBuffer[y], 15 - x))
+            {
                 ledDriver.setPixel(x, y, color, brightness);
+            }
         }
     }
 
@@ -1515,7 +1531,9 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
     for (uint8_t y = 0; y <= 3; y++)
     {
         if (bitRead(screenBuffer[y], 4))
+        {
             ledDriver.setPixel(110 + y, color, brightness);
+        }
     }
 
     // Alarm LED
@@ -1525,9 +1543,13 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
 #ifdef ALARM_LED_COLOR
 #ifdef ABUSE_CORNER_LED_FOR_ALARM
         if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet)
+        {
             ledDriver.setPixel(111, ALARM_LED_COLOR, brightness);
+        }
         else if (bitRead(screenBuffer[1], 4))
+        {
             ledDriver.setPixel(111, color, brightness);
+        }
 #else
         ledDriver.setPixel(114, ALARM_LED_COLOR, brightness);
 #endif
@@ -1545,7 +1567,9 @@ void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], 
     for (uint8_t z = 0; z <= 9; z++)
     {
         for (uint8_t i = 0; i <= 8; i++)
+        {
             screenBufferOld[i] = screenBufferOld[i + 1];
+        }
         screenBufferOld[9] = screenBufferNew[z];
         writeScreenBuffer(screenBufferOld, color, brightness);
         delay(50);
@@ -1563,7 +1587,9 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
         for (uint8_t x = 0; x <= 11; x++)
         {
             if (bitRead(screenBufferOld[y], 15 - x))
+            {
                 brightnessBuffer[y][x] = brightness;
+            }
         }
     }
 
@@ -1575,25 +1601,35 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
             for (uint8_t x = 0; x <= 11; x++)
             {
                 if (!(bitRead(screenBufferOld[y], 15 - x)) && (bitRead(screenBufferNew[y], 15 - x)))
+                {
                     brightnessBuffer[y][x]++;
+                }
                 if ((bitRead(screenBufferOld[y], 15 - x)) && !(bitRead(screenBufferNew[y], 15 - x)))
+                {
                     brightnessBuffer[y][x]--;
+                }
                 ledDriver.setPixel(x, y, color, brightnessBuffer[y][x]);
             }
         }
 
         // Corner LEDs
         for (uint8_t y = 0; y <= 3; y++)
+        {
             ledDriver.setPixel(110 + y, color, brightnessBuffer[y][11]);
+        }
 
         // Alarm LED
 #ifdef BUZZER
 #ifdef ALARM_LED_COLOR
 #ifdef ABUSE_CORNER_LED_FOR_ALARM
         if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet)
+        {
             ledDriver.setPixel(111, ALARM_LED_COLOR, brightnessBuffer[4][11]);
+        }
         else
+        {
             ledDriver.setPixel(111, color, brightnessBuffer[1][11]);
+        }
 #else
         ledDriver.setPixel(114, ALARM_LED_COLOR, brightnessBuffer[4][11]);
 #endif
@@ -1775,9 +1811,13 @@ uint8_t getBrightnessFromLDR()
 #endif
 
     if (ldrValue < minLdrValue)
+    {
         minLdrValue = ldrValue;
+    }
     if (ldrValue > maxLdrValue)
+    {
         maxLdrValue = ldrValue;
+    }
     if ((ldrValue >= (lastLdrValue + 30)) || (ldrValue <= (lastLdrValue - 30))) // Hysteresis
     {
         lastLdrValue = ldrValue;
@@ -1816,7 +1856,9 @@ void getRoomConditions()
     else
     {
         if (errorCounterDHT < 255)
+        {
             errorCounterDHT++;
+        }
 #ifdef DEBUG
         Serial.printf("Error (DHT): %u\r\n", errorCounterDHT);
 #endif
@@ -1962,18 +2004,20 @@ void handleRoot()
                      "<html>"
                      "<head>"
                      "<title>" +
-                     String(WEBSITE_TITLE) + "</title>"
-                                             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-                                             "<meta http-equiv=\"refresh\" content=\"60\" charset=\"UTF-8\">"
-                                             "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">"
-                                             "<style>"
-                                             "body{background-color:#FFFFFF;text-align:center;color:#333333;font-family:Sans-serif;font-size:16px;}"
-                                             "button{background-color:#1FA3EC;text-align:center;color:#FFFFFF;width:200px;padding:10px;border:5px solid #FFFFFF;font-size:24px;border-radius:10px;}"
-                                             "</style>"
-                                             "</head>"
-                                             "<body>"
-                                             "<h1>" +
-                     String(WEBSITE_TITLE) + "</h1>";
+                     String(WEBSITE_TITLE) +
+                     "</title>"
+                     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+                     "<meta http-equiv=\"refresh\" content=\"60\" charset=\"UTF-8\">"
+                     "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">"
+                     "<style>"
+                     "body{background-color:#FFFFFF;text-align:center;color:#333333;font-family:Sans-serif;font-size:16px;}"
+                     "button{background-color:#1FA3EC;text-align:center;color:#FFFFFF;width:200px;padding:10px;border:5px solid #FFFFFF;font-size:24px;border-radius:10px;}"
+                     "</style>"
+                     "</head>"
+                     "<body>"
+                     "<h1>" +
+                     String(WEBSITE_TITLE) +
+                     "</h1>";
 #ifdef DEDICATION
     message += DEDICATION;
     message += "<br><br>";

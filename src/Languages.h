@@ -1,9 +1,4 @@
-//*****************************************************************************
-// Languages.h
-//*****************************************************************************
-
-#ifndef LANGUAGES_H
-#define LANGUAGES_H
+#pragma once
 
 #if defined(FRONTCOVER_EN) || defined(FRONTCOVER_BINARY)
 const char sWeekday[][2] = {
@@ -129,6 +124,4 @@ const char sWeekday[][2] = {
 #define TXT_HOURBEEP "Hourly beep"
 #define TXT_TIMER "Timer"
 #define TXT_MINUTES "minutes"
-#endif
-
 #endif

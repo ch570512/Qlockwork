@@ -1,9 +1,4 @@
-//******************************************************************************
-// Words.h
-//******************************************************************************
-
-#ifndef WORDS_H
-#define WORDS_H
+#pragma once
 
 #if defined(FRONTCOVER_CH) || defined(FRONTCOVER_CH_GS)
 
@@ -288,7 +283,5 @@
 #define NL_H_TIEN			matrix[8] |= 0b0000111100000000
 #define NL_H_ELF			matrix[8] |= 0b0000000011100000
 #define NL_H_TWAALF			matrix[9] |= 0b1111110000000000
-
-#endif
 
 #endif

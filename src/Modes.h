@@ -1,9 +1,4 @@
-//******************************************************************************
-// Modes.h
-//******************************************************************************
-
-#ifndef MODES_H
-#define MODES_H
+#pragma once
 
 typedef enum eMode : uint8_t
 {
@@ -66,5 +61,3 @@ enum eTransition
     TRANSITION_MOVEUP, // 1
     TRANSITION_FADE    // 2
 };
-
-#endif
