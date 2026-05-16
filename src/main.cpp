@@ -221,10 +221,10 @@ void setup()
     delay(1000);
 
     // And the monkey flips the switch. (Akiva Goldsman)
-    Serial.println(F("\r\n*** QLOCKWORK ***"));
+    Serial.println(F("\n\n*** QLOCKWORK ***"));
     Serial.print(F("Firmware: ") + String(FIRMWARE_VERSION));
-    Serial.print(F("\r\nStarting on ") + String(ARDUINO_BOARD));
-    Serial.print(F("\r\nCPU Frequency = "));
+    Serial.print(F("\nStarting on ") + String(ARDUINO_BOARD));
+    Serial.print(F("\nCPU Frequency = "));
     Serial.print(F_CPU / 1000000);
     Serial.println(F(" MHz"));
 
@@ -341,7 +341,7 @@ void setup()
         DEBUG_SERIAL_PRINTLN(F("Latitude: ") + String(LATITUDE));
         DEBUG_SERIAL_PRINTLN(F("Longitude: ") + String(LONGITUDE));
         DEBUG_SERIAL_PRINTLN(F("Timezone: ") + String(TIMEZONE));
-        DEBUG_SERIAL_PRINTLN(F("Outdoor temperature: ") + String(outdoorWeather.temperature) + F(" °C"));
+        DEBUG_SERIAL_PRINTLN(F("Outdoor temperature: ") + String(outdoorWeather.temperature) + F("°C"));
         DEBUG_SERIAL_PRINTLN(F("Outdoor humidity: ") + String(outdoorWeather.humidity) + F(" %rH"));
         DEBUG_SERIAL_PRINTLN(F("Sunrise: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
         DEBUG_SERIAL_PRINTLN(F("Sunset: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
@@ -363,16 +363,6 @@ void setup()
 #endif
 
 #ifdef ARDUINO_OTA
-    ArduinoOTA.setHostname(HOSTNAME);
-    // ArduinoOTA.setPassword("admin");
-    ArduinoOTA.onStart([]()
-                       { Serial.println(F("OTA Update start.")); });
-    ArduinoOTA.onEnd([]()
-                     { Serial.println(F("\nOTA Update end.")); });
-    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
-                          { Serial.printf("Progress: %u%%\r", (progress / (total / 100))); });
-    ArduinoOTA.onError([](ota_error_t error)
-                       { Serial.printf("Error [%u]: ", error); });
     Serial.println(F("Starting OTA."));
     ArduinoOTA.begin();
 #endif
@@ -390,7 +380,7 @@ void setup()
     Serial.println();
 #ifdef DEBUG
     time_t tempRtcTime = RTC.get();
-    Serial.printf("Time (RTC): %02u:%02u:%02u %02u.%02u.%04u\r\n", hour(tempRtcTime), minute(tempRtcTime), second(tempRtcTime), day(tempRtcTime), month(tempRtcTime), year(tempRtcTime));
+    Serial.printf("Time (RTC): %02u:%02u:%02u %02u.%02u.%04u\n", hour(tempRtcTime), minute(tempRtcTime), second(tempRtcTime), day(tempRtcTime), month(tempRtcTime), year(tempRtcTime));
 #endif
 #endif
 
@@ -404,13 +394,13 @@ void setup()
             errorCounterNTP = 0;
             setTime(timeZone.toLocal(tempNtpTime));
 #ifdef DEBUG
-            Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
-            Serial.printf("Drift (ESP): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(now())));
+            Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
+            Serial.printf("Drift (ESP): %d sec.\n", (int)(tempNtpTime - timeZone.toUTC(now())));
 #endif
 #ifdef RTC_BACKUP
             RTC.set(timeZone.toLocal(tempNtpTime));
 #ifdef DEBUG
-            Serial.printf("Drift (RTC): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
+            Serial.printf("Drift (RTC): %d sec.\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
 #endif
 #endif
         }
@@ -419,7 +409,7 @@ void setup()
             if (errorCounterNTP < 255)
                 errorCounterNTP++;
 #ifdef DEBUG
-            Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
+            Serial.printf("Error (NTP): %u\n", errorCounterNTP);
 #endif
         }
     }
@@ -442,17 +432,17 @@ void setup()
     // Print some infos
 #ifdef DEBUG
 #ifdef EVENT_TIME
-    Serial.printf("Defined events: %u\r\n", sizeof(events) / sizeof(event_t) - 1);
+    Serial.printf("Defined events: %u\n", sizeof(events) / sizeof(event_t) - 1);
 #endif
-    Serial.printf("Day on: %02u:%02u:00\r\n", hour(settings.mySettings.dayOnTime), minute(settings.mySettings.dayOnTime));
-    Serial.printf("Night off: %02u:%02u:00\r\n", hour(settings.mySettings.nightOffTime), minute(settings.mySettings.nightOffTime));
+    Serial.printf("Day on: %02u:%02u:00\n", hour(settings.mySettings.dayOnTime), minute(settings.mySettings.dayOnTime));
+    Serial.printf("Night off: %02u:%02u:00\n", hour(settings.mySettings.nightOffTime), minute(settings.mySettings.nightOffTime));
     Serial.printf("Alarm1: %02u:%02u:00 ", hour(settings.mySettings.alarm1Time), minute(settings.mySettings.alarm1Time));
     settings.mySettings.alarm1 ? Serial.print("on ") : Serial.print("off ");
     Serial.println(settings.mySettings.alarm1Weekdays, BIN);
     Serial.printf("Alarm2: %02u:%02u:00 ", hour(settings.mySettings.alarm2Time), minute(settings.mySettings.alarm2Time));
     settings.mySettings.alarm2 ? Serial.print("on ") : Serial.print("off ");
     Serial.println(settings.mySettings.alarm2Weekdays, BIN);
-    Serial.printf("Random time: %02u:%02u:%02u\r\n", randomHour, randomMinute, randomSecond);
+    Serial.printf("Random time: %02u:%02u:%02u\n", randomHour, randomMinute, randomSecond);
     Serial.println("DEBUG enabled.");
 #else
     Serial.println(F("DEBUG disabled."));
@@ -511,9 +501,9 @@ void loop()
         events[0].month = 0;
 
 #ifdef DEBUG
-        Serial.printf("Uptime: %u days, %02u:%02u\r\n", int(upTime / 86400), hour(upTime), minute(upTime));
-        Serial.printf("Free RAM: %u bytes\r\n", system_get_free_heap_size());
-        Serial.printf("Moonphase: %u\r\n", moonphase);
+        Serial.printf("Uptime: %u days, %02u:%02u\n", int(upTime / 86400), hour(upTime), minute(upTime));
+        Serial.printf("Free RAM: %u bytes\n", system_get_free_heap_size());
+        Serial.printf("Moonphase: %u\n", moonphase);
 #endif
 
         // Change color
@@ -521,7 +511,7 @@ void loop()
         {
             settings.mySettings.color = random(0, COLORCHANGE_COUNT + 1);
 #ifdef DEBUG
-            Serial.printf("Color changed to: %u\r\n", settings.mySettings.color);
+            Serial.printf("Color changed to: %u\n", settings.mySettings.color);
 #endif
         }
     }
@@ -540,7 +530,7 @@ void loop()
         {
             settings.mySettings.color = random(0, COLOR_COUNT + 1);
 #ifdef DEBUG
-            Serial.printf("Color changed to: %u\r\n", settings.mySettings.color);
+            Serial.printf("Color changed to: %d\n", (int)settings.mySettings.color);
 #endif
         }
 
@@ -571,13 +561,13 @@ void loop()
                 {
                     errorCounterNTP = 0;
 #ifdef DEBUG
-                    Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
-                    Serial.printf("Drift (ESP): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(now())));
+                    Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
+                    Serial.printf("Drift (ESP): %d sec.\n", (int)(tempNtpTime - timeZone.toUTC(now())));
 #endif
                     setTime(timeZone.toLocal(tempNtpTime));
 #ifdef RTC_BACKUP
 #ifdef DEBUG
-                    Serial.printf("Drift (RTC): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
+                    Serial.printf("Drift (RTC): %d sec.\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
 #endif
                     RTC.set(timeZone.toLocal(tempNtpTime));
 #endif
@@ -589,7 +579,7 @@ void loop()
                         errorCounterNTP++;
                     }
 #ifdef DEBUG
-                    Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
+                    Serial.printf("Error (NTP): %d\n", errorCounterNTP);
 #endif
                 }
             }
@@ -636,10 +626,10 @@ void loop()
 
 #ifdef DEBUG
         time_t tempEspTime = now();
-        Serial.printf("Time (ESP): %02u:%02u:%02u %02u.%02u.%04u\r\n", hour(tempEspTime), minute(tempEspTime), second(tempEspTime), day(tempEspTime), month(tempEspTime), year(tempEspTime));
+        Serial.printf("Time (ESP): %02u:%02u:%02u %02u.%02u.%04u\n", hour(tempEspTime), minute(tempEspTime), second(tempEspTime), day(tempEspTime), month(tempEspTime), year(tempEspTime));
 #ifdef RTC_BACKUP
         time_t tempRtcTime = RTC.get();
-        Serial.printf("Time (RTC): %02u:%02u:%02u %02u.%02u.%04u\r\n", hour(tempRtcTime), minute(tempRtcTime), second(tempRtcTime), day(tempRtcTime), month(tempRtcTime), year(tempRtcTime));
+        Serial.printf("Time (RTC): %02u:%02u:%02u %02u.%02u.%04u\n", hour(tempRtcTime), minute(tempRtcTime), second(tempRtcTime), day(tempRtcTime), month(tempRtcTime), year(tempRtcTime));
 #endif
 #endif
 
@@ -679,13 +669,13 @@ void loop()
         //                 {
         //                     errorCounterNTP = 0;
         // #ifdef DEBUG
-        //                     Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\r\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
-        //                     Serial.printf("Drift (ESP): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(now())));
+        //                     Serial.printf("Time (NTP): %02u:%02u:%02u %02u.%02u.%04u (UTC)\n", hour(tempNtpTime), minute(tempNtpTime), second(tempNtpTime), day(tempNtpTime), month(tempNtpTime), year(tempNtpTime));
+        //                     Serial.printf("Drift (ESP): %d sec.\n", (int)(tempNtpTime - timeZone.toUTC(now())));
         // #endif
         //                     setTime(timeZone.toLocal(tempNtpTime));
         // #ifdef RTC_BACKUP
         // #ifdef DEBUG
-        //                     Serial.printf("Drift (RTC): %d sec.\r\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
+        //                     Serial.printf("Drift (RTC): %d sec.\n", (int)(tempNtpTime - timeZone.toUTC(RTC.get())));
         // #endif
         //                     RTC.set(timeZone.toLocal(tempNtpTime));
         // #endif
@@ -695,7 +685,7 @@ void loop()
         //                     if (errorCounterNTP < 255)
         //                         errorCounterNTP++;
         // #ifdef DEBUG
-        //                     Serial.printf("Error (NTP): %u\r\n", errorCounterNTP);
+        //                     Serial.printf("Error (NTP): %u\n", errorCounterNTP);
         // #endif
         //                 }
         //             }
@@ -713,7 +703,7 @@ void loop()
 #ifdef WEATHER
                 !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-                Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + " °C");
+                Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + "°C");
                 Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity) + " %rH");
                 Serial.println("Sunrise: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
                 Serial.println("Sunset: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
@@ -753,7 +743,7 @@ void loop()
             {
                 settings.mySettings.color = random(0, COLOR_COUNT + 1);
 #ifdef DEBUG
-                Serial.printf("Color changed to: %u\r\n", settings.mySettings.color);
+                Serial.printf("Color changed to: %u\n", settings.mySettings.color);
 #endif
             }
         }
@@ -769,12 +759,12 @@ void loop()
         upTime++;
 
 #ifdef DEBUG_FPS
-        Serial.printf("FPS: %u\r\n", fps);
+        Serial.printf("FPS: %u\n", fps);
         fps = 0;
 #endif
 #ifdef DEBUG_LDR
-        // Serial.printf("LDR:        min: %d max: %d actual: %d\n\r", minLdrValue, maxLdrValue, ldrValue);
-        Serial.printf("Brightness: min: %d max: %d target: %d actual: %d\n\r", MIN_BRIGHTNESS, maxBrightness, iTargetBrightness, brightness);
+        // Serial.printf("LDR:        min: %d max: %d actual: %d\n", minLdrValue, maxLdrValue, ldrValue);
+        Serial.printf("Brightness: min: %d max: %d target: %d actual: %d\n", MIN_BRIGHTNESS, maxBrightness, iTargetBrightness, brightness);
 #endif
 
 #ifdef BUZZER
@@ -819,7 +809,7 @@ void loop()
 #ifdef DEBUG
             if (alarmTimer)
             {
-                Serial.printf("Timeralarm in %u min.\r\n", alarmTimer);
+                Serial.printf("Timeralarm in %u min.\n", alarmTimer);
             }
 #endif
         }
@@ -1362,7 +1352,7 @@ void loop()
 #ifdef WEATHER
         case MODE_EXT_TEMP:
 #ifdef DEBUG
-            Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + " �C");
+            Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + "°C");
 #endif
             renderer.clearScreenBuffer(matrix);
             if (outdoorWeather.temperature > 0)
@@ -1882,7 +1872,7 @@ void getRoomConditions()
             errorCounterDHT++;
         }
 #ifdef DEBUG
-        Serial.printf("Error (DHT): %u\r\n", errorCounterDHT);
+        Serial.printf("Error (DHT): %u\n", errorCounterDHT);
 #endif
     }
 #endif
