@@ -8,6 +8,10 @@
    @created  21.1.2013
 */
 
+#pragma once
+
+#include <cstdint>
+
 #ifdef DEBUG
 #define DEBUG_SERIAL_PRINT(x)       Serial.print(x)
 #define DEBUG_SERIAL_PRINTLN(x)     Serial.println(x)
@@ -17,3 +21,5 @@
 #define DEBUG_SERIAL_PRINTLN(x)
 #define DEBUG_SERIAL_FLUSH()
 #endif
+
+void debugScreenBuffer(uint16_t screenBuffer[]);

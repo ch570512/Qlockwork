@@ -23,7 +23,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260516
+#define FIRMWARE_VERSION 20260524
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -56,7 +56,6 @@ void buttonOnOffPressed();
 void buttonTimeInterrupt();
 void buttonTimePressed();
 void callRoot();
-void debugScreenBuffer(uint16_t screenBuffer[]);
 uint8_t getBrightnessFromLDR();
 int getMoonphase(int y, int m, int d);
 void getRoomConditions();
@@ -1447,8 +1446,8 @@ void loop()
         renderer.unsetPixelInScreenBuffer(IR_LETTER_X, IR_LETTER_Y - 1, matrix);
 #endif
 
-        // debugScreenBuffer(matrixOld);
 #ifdef DEBUG_MATRIX
+        // debugScreenBuffer(matrixOld);
         debugScreenBuffer(matrix);
 #endif
 
@@ -1937,40 +1936,6 @@ String padStringZeros(String input)
 time_t getRTCTime()
 {
     return RTC.get();
-}
-#endif
-
-//=============================================================================
-// Debugging
-//=============================================================================
-
-// Write screenbuffer to console
-#ifdef DEBUG_MATRIX
-void debugScreenBuffer(uint16_t screenBuffer[])
-{
-    const char buchstabensalat[][12] =
-        {
-            {'E', 'S', 'K', 'I', 'S', 'T', 'A', 'F', 'U', 'N', 'F', '1'},
-            {'Z', 'E', 'H', 'N', 'Z', 'W', 'A', 'N', 'Z', 'I', 'G', '2'},
-            {'D', 'R', 'E', 'I', 'V', 'I', 'E', 'R', 'T', 'E', 'L', '3'},
-            {'V', 'O', 'R', 'F', 'U', 'N', 'K', 'N', 'A', 'C', 'H', '4'},
-            {'H', 'A', 'L', 'B', 'A', 'E', 'L', 'F', 'U', 'N', 'F', 'A'},
-            {'E', 'I', 'N', 'S', 'X', 'A', 'M', 'Z', 'W', 'E', 'I', ' '},
-            {'D', 'R', 'E', 'I', 'P', 'M', 'J', 'V', 'I', 'E', 'R', ' '},
-            {'S', 'E', 'C', 'H', 'S', 'N', 'L', 'A', 'C', 'H', 'T', ' '},
-            {'S', 'I', 'E', 'B', 'E', 'N', 'Z', 'W', 'O', 'L', 'F', ' '},
-            {'Z', 'E', 'H', 'N', 'E', 'U', 'N', 'K', 'U', 'H', 'R', ' '}};
-    // Serial.println("\033[0;0H"); // set cursor to 0, 0 position
-    Serial.println(" -----------");
-    for (uint8_t y = 0; y <= 9; y++)
-    {
-        Serial.print('|');
-        for (uint8_t x = 0; x <= 10; x++)
-            Serial.print((bitRead(screenBuffer[y], 15 - x) ? buchstabensalat[y][x] : ' '));
-        Serial.print('|');
-        Serial.println((bitRead(screenBuffer[y], 4) ? buchstabensalat[y][11] : ' '));
-    }
-    Serial.println(" -----------");
 }
 #endif
 
