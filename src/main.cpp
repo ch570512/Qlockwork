@@ -27,6 +27,7 @@
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
+#include <cstdint>
 #include <DHT.h>
 #include <DS3232RTC.h>
 #include <ESP8266WebServer.h>
@@ -48,6 +49,7 @@
 #include "Settings.h"
 #include "Syslog.h"
 #include "Timezones.h"
+#include "WebServer.h"
 
 void buttonModeInterrupt();
 void buttonModePressed();
@@ -63,8 +65,7 @@ time_t getRTCTime();
 void handleButtonSettings();
 void handleCommitSettings();
 void handleControl();
-void handleNotFound();
-void handleReset();
+// void handleNotFound();
 void handleRoot();
 void handleSetEvent();
 void handleShowText();
@@ -1946,7 +1947,8 @@ time_t getRTCTime()
 #ifdef WEBSERVER
 void setupWebServer()
 {
-    webServer.onNotFound(handleNotFound);
+    webServer.onNotFound([]()
+                         { handleNotFound(webServer); });
     webServer.on("/", handleRoot);
     webServer.on("/handleButtonOnOff", []()
                  { buttonOnOffPressed(); callRoot(); });
@@ -1956,7 +1958,8 @@ void setupWebServer()
     webServer.on("/handleButtonTime", []()
                  {    buttonTimePressed(); callRoot(); });
     webServer.on("/commitSettings", handleCommitSettings);
-    webServer.on("/reset", handleReset);
+    webServer.on("/reset", []()
+                 { handleReset(webServer); });
     webServer.on("/setEvent", handleSetEvent);
     webServer.on("/showText", handleShowText);
     webServer.on("/control", handleControl);
@@ -1966,12 +1969,6 @@ void setupWebServer()
 void callRoot()
 {
     webServer.send(200, "text/html", "<!doctype html><html><head><script>window.onload=function(){window.location.replace('/');}</script></head></html>");
-}
-
-// Page 404
-void handleNotFound()
-{
-    webServer.send(404, "text/plain", "404 - File Not Found.");
 }
 
 // Page /
@@ -2697,12 +2694,12 @@ void handleCommitSettings()
     screenBufferNeedsUpdate = true;
 }
 
-// Page reset
-void handleReset()
-{
-    webServer.send(200, "text/plain", "RESET. I'll be back!");
-    ESP.restart();
-}
+// // Page reset
+// void handleReset()
+// {
+//     webServer.send(200, "text/plain", "RESET. I'll be back!");
+//     ESP.restart();
+// }
 
 // Page setEvent
 void handleSetEvent()

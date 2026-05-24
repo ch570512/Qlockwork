@@ -22,7 +22,9 @@ void debugScreenBuffer(uint16_t screenBuffer[])
     {
         Serial.print('|');
         for (uint8_t x = 0; x <= 10; x++)
+        {
             Serial.print((bitRead(screenBuffer[y], 15 - x) ? buchstabensalat[y][x] : ' '));
+        }
         Serial.print('|');
         Serial.println((bitRead(screenBuffer[y], 4) ? buchstabensalat[y][11] : ' '));
     }
