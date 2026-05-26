@@ -325,15 +325,6 @@ void setup()
         delay(1000);
         myIP = WiFi.localIP();
 
-#ifdef SYSLOGSERVER_SERVER
-        Serial.println(F("Starting syslog."));
-#ifdef WEATHER
-        syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;outdoorTemperature;outdoorHumidity;sunriseTime;sunsetTime;ldrValue;errorCounterNTP;errorCounterDHT;errorCounterOutdoorWeather;freeHeapSize;upTime");
-#else
-        syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;ldrValue;errorCounterNTP;errorCounterDHT;freeHeapSize;upTime");
-#endif
-#endif
-
         // Get weather from MeteoWeather
 #ifdef WEATHER
         DEBUG_SERIAL_PRINTLN(F("Getting weather..."));
@@ -345,6 +336,16 @@ void setup()
         DEBUG_SERIAL_PRINTLN(F("Outdoor humidity: ") + String(outdoorWeather.humidity) + F(" %rH"));
         DEBUG_SERIAL_PRINTLN(F("Sunrise: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
         DEBUG_SERIAL_PRINTLN(F("Sunset: ") + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
+
+#endif
+
+#ifdef SYSLOGSERVER_SERVER
+        Serial.println(F("Starting syslog."));
+#ifdef WEATHER
+        syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;outdoorTemperature;outdoorHumidity;sunriseTime;sunsetTime;ldrValue;errorCounterNTP;errorCounterDHT;errorCounterOutdoorWeather;freeHeapSize;upTime");
+#else
+        syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;ldrValue;errorCounterNTP;errorCounterDHT;freeHeapSize;upTime");
+#endif
 #endif
     }
 
