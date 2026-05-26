@@ -1,9 +1,7 @@
 //=============================================================================
 // QLOCKWORK
-// An advanced firmware for a DIY "word-clock"
-//
-// @mc ESP8266
 // @created 12.03.2017
+// @mc ESP8266
 //
 // This source file is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -23,7 +21,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260524
+#define FIRMWARE_VERSION 20260526
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
