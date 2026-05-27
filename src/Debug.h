@@ -11,6 +11,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "helpers.h"
 
 #ifdef DEBUG
 #define DEBUG_SERIAL_PRINT(x)       Serial.print(x)

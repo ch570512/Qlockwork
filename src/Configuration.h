@@ -15,8 +15,6 @@
 
 #define WIFI_AP_PASS "12345678"                 // If no WiFi is connected the clock will start a captive portal.
                                                 // The password for the AP. At least 8 characters.
-#define SHOW_IP                                 // Show local IP at startup. Use this to access the clocks on WiFi or AP.
-
 #define NONE_TECHNICAL_ZERO                     // Displays the digit zero without a diagonal line.
 
 #define AUTO_MODECHANGE_TIME 60                 // Time in seconds between switching from time to temperature and back.
@@ -30,6 +28,7 @@
                                                 // BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
 // #define ABUSE_CORNER_LED_FOR_ALARM           // Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
 
+#define SHOW_IP                                 // Show local IP at startup. Use this to access the clocks on WiFi or AP.
 // #define POWERON_SELFTEST                     // Test LEDs at startup. Order is: red, green, blue, white.
 #define SHOW_MODE_AMPM                          // Show AM/PM.
 #define SHOW_MODE_SECONDS                       // Show seconds.

@@ -32,7 +32,6 @@
 #include <IRremoteESP8266.h>
 #include <IRutils.h>
 #include <time.h>
-#include <sys/time.h>
 #include "Colors.h"
 #include "Configuration.h"
 #include "Debug.h"
@@ -170,101 +169,6 @@ uint8_t testColumn = 0;
 int fps = 0;
 #endif
 
-struct tm getTime()
-{
-    time_t now = time(nullptr);
-    struct tm *tmNow = localtime(&now);
-
-    // Return by value (this creates a local copy so it's thread-safe)
-    if (tmNow == nullptr)
-    {
-        return {}; // Return empty struct if error
-    }
-    return *tmNow;
-}
-
-uint8_t getHour(time_t zeit)
-{
-    return zeit / 3600;
-}
-
-uint8_t getMinute(time_t zeit)
-{
-    return (zeit % 3600) / 60;
-}
-
-void handleTimeSetting(String input) // 2026-05-01T17:58
-{
-    int year, month, day, hour, minute, second = 0;
-
-    int parsed = sscanf(input.c_str(), "%d-%d-%dT%d:%d",
-                        &year, &month, &day, &hour, &minute);
-
-    if (parsed == 5)
-    {
-        struct tm t;
-        t.tm_year = year - 1900;
-        t.tm_mon = month - 1;
-        t.tm_mday = day;
-        t.tm_hour = hour;
-        t.tm_min = minute;
-        t.tm_sec = second;
-        t.tm_isdst = -1;
-
-        time_t epoch = mktime(&t);
-
-        if (epoch != -1)
-        {
-            struct timeval tv;
-            tv.tv_sec = epoch;
-            tv.tv_usec = 0;
-            settimeofday(&tv, NULL);
-
-            Serial.println(F("Manual time set"));
-        }
-        else
-        {
-            Serial.println(F("[ERROR] Wrong date"));
-        }
-    }
-    else
-    {
-        Serial.println(F("[ERROR] Wrong format"));
-    }
-}
-
-// Calculate moonphase
-#ifdef SHOW_MODE_MOONPHASE
-int getMoonphase(int y, int m, int d)
-{
-    int b = 0;
-    int c = 0;
-    int e = 0;
-    double jd = 0;
-
-    if (m < 3)
-    {
-        y--;
-        m += 12;
-    }
-    ++m;
-    c = 365.25 * y;
-    e = 30.6 * m;
-    jd = c + e + d - 694039.09; // jd is total days elapsed
-    jd /= 29.53;                // divide by the moon cycle (29.53 days)
-    b = jd;                     // int(jd) -> b, take integer part of jd
-    jd -= b;                    // subtract integer part to leave fractional part of original jd
-    b = jd * 8 + 0.5;           // scale fraction from 0-8 and round by adding 0.5
-    b = b & 7;                  // 0 and 8 are the same so turn 8 into 0
-    return b;
-}
-#endif
-
-String padStringZeros(String input)
-{
-    return (input.length() > 1) ? input : "0" + input;
-}
-
 //=============================================================================
 // Setup()
 //=============================================================================
@@ -280,12 +184,13 @@ void setup()
     // And the monkey flips the switch. (Akiva Goldsman)
     Serial.println(F("\n\n*** QLOCKWORK ***"));
     Serial.println(F("Firmware: ") + String(FIRMWARE_VERSION));
-    Serial.println(F("Starting on ") + String(ARDUINO_BOARD));
-    Serial.print(F("CPU Frequency = "));
-    Serial.print(F_CPU / 1000000);
-    Serial.println(F(" MHz"));
+    DEBUG_SERIAL_PRINTLN(F("Starting on ") + String(ARDUINO_BOARD));
+    DEBUG_SERIAL_PRINT(F("CPU Frequency = "));
+    DEBUG_SERIAL_PRINT(F_CPU / 1000000);
+    DEBUG_SERIAL_PRINTLN(F(" MHz"));
 
     // Load settings
+    DEBUG_SERIAL_PRINTLN(F("Loading settings"));
     settings.loadFromEEPROM();
     maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
     brightness = maxBrightness;
@@ -365,11 +270,20 @@ void setup()
     WiFi.setAutoReconnect(true);
     if (!WiFi.isConnected())
     {
-        // WiFi.mode(WIFI_AP);
-        DEBUG_SERIAL_PRINTLN(F("No WiFi connected"));
+        WiFi.mode(WIFI_AP);
+        DEBUG_SERIAL_PRINTLN(F("[ERROR] No WiFi"));
         writeScreenBuffer(matrix, RED, brightness);
         delay(1000);
-        // myIP = WiFi.softAPIP();
+        if (WiFi.softAP(String(HOSTNAME) + " AP", WIFI_AP_PASS))
+        {
+            DEBUG_SERIAL_PRINT(F("AP started with IP: "));
+            myIP = WiFi.softAPIP();
+            DEBUG_SERIAL_PRINTLN(myIP);
+        }
+        else
+        {
+            DEBUG_SERIAL_PRINTLN("[ERROR] No AP");
+        }
     }
     else
     {
@@ -381,7 +295,46 @@ void setup()
         writeScreenBuffer(matrix, GREEN, brightness);
         delay(1000);
         myIP = WiFi.localIP();
+
+        // Configure NTP-Client
+        configTime(NTP_TIMEZONE, NTP_SERVER);
+        DEBUG_SERIAL_PRINTLN(F("NTP Server: ") + String(NTP_SERVER));
+        DEBUG_SERIAL_PRINTLN(F("NTP Timezone: ") + String(NTP_TIMEZONE));
+        time_t now_time_t = time(nullptr);
+        while (now_time_t < 8 * 3600 * 2)
+        {
+            delay(500);
+            now_time_t = time(nullptr);
+            DEBUG_SERIAL_PRINT(".");
+        }
+
+#ifdef ARDUINO_OTA
+        DEBUG_SERIAL_PRINTLN(F("Starting OTA"));
+        ArduinoOTA.begin();
+#endif
+
+        // Get weather from MeteoWeather
+#ifdef WEATHER
+        !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
+#ifdef DEBUG
+        Serial.print(F("Outdoor temperature: "));
+        Serial.print(outdoorWeather.temperature);
+        Serial.println(F(" °C"));
+        Serial.print(F("Outdoor humidity: "));
+        Serial.print(outdoorWeather.humidity);
+        Serial.println(F(" %rH"));
+        struct tm *sunriseTime = localtime(&outdoorWeather.sunrise);
+        Serial.printf("Sunrise: %02u:%02u\n", sunriseTime->tm_hour, sunriseTime->tm_min);
+        struct tm *sunsetTime = localtime(&outdoorWeather.sunset);
+        Serial.printf("Sunset: %02u:%02u\n", sunsetTime->tm_hour, sunsetTime->tm_min);
+#endif
+#endif
     }
+
+#ifdef WEBSERVER
+    DEBUG_SERIAL_PRINTLN(F("Starting webserver"));
+    setupWebServer();
+#endif
 
 #ifdef SHOW_IP
     // WiFi.isConnected() ? feedText = "  IP: " : feedText = "  AP-IP: ";
@@ -392,47 +345,7 @@ void setup()
     mode = MODE_FEED;
 #endif
 
-#ifdef WEBSERVER
-    DEBUG_SERIAL_PRINTLN(F("Starting webserver"));
-    setupWebServer();
-#endif
-
-#ifdef ARDUINO_OTA
-    DEBUG_SERIAL_PRINTLN(F("Starting OTA"));
-    ArduinoOTA.begin();
-#endif
-
     renderer.clearScreenBuffer(matrix);
-
-    // Configure NTP
-    configTime(NTP_TIMEZONE, NTP_SERVER);
-    DEBUG_SERIAL_PRINTLN(F("NTP Server: ") + String(NTP_SERVER));
-    DEBUG_SERIAL_PRINTLN(F("NTP Timezone: ") + String(NTP_TIMEZONE));
-    time_t now_time_t = time(nullptr);
-    while (now_time_t < 8 * 3600 * 2)
-    {
-        delay(500);
-        now_time_t = time(nullptr);
-    }
-    struct tm tmNow = getTime();
-    Serial.printf("Time (ESP): %02d:%02d:%02d %02d.%02d.%02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
-
-    // Get weather from MeteoWeather
-#ifdef WEATHER
-    !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
-#ifdef DEBUG
-    Serial.print(F("Outdoor temperature: "));
-    Serial.print(outdoorWeather.temperature);
-    Serial.println(F(" °C"));
-    Serial.print(F("Outdoor humidity: "));
-    Serial.print(outdoorWeather.humidity);
-    Serial.println(F(" %rH"));
-    struct tm *sunriseTime = localtime(&outdoorWeather.sunrise);
-    Serial.printf("Sunrise: %02u:%02u\n", sunriseTime->tm_hour, sunriseTime->tm_min);
-    struct tm *sunsetTime = localtime(&outdoorWeather.sunset);
-    Serial.printf("Sunset: %02u:%02u\n", sunsetTime->tm_hour, sunsetTime->tm_min);
-#endif
-#endif
 
     // Define a random time
     randomSeed(analogRead(A0));
@@ -555,10 +468,6 @@ void loop()
     {
         lastMinute = tmNow.tm_min;
         screenBufferNeedsUpdate = true;
-
-#ifdef DEBUG
-        Serial.printf("\nTime (ESP): %02d:%02d:%02d %02d.%02d.%02d\n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
-#endif
 
 #if defined(SENSOR_DHT22)
         // Update room conditions
@@ -1561,13 +1470,7 @@ void getRoomConditions()
     }
     else
     {
-        if (errorCounterDHT < 255)
-        {
-            errorCounterDHT++;
-        }
-#ifdef DEBUG
-        Serial.printf("Error (DHT): %u\n", errorCounterDHT);
-#endif
+        errorCounterDHT++;
     }
 }
 #endif
@@ -1722,12 +1625,11 @@ void handleRoot()
     // message += ", min: " + String(MIN_BRIGHTNESS) + ", max : " + String(maxBrightness) + ")";
     // message += "<br>LDR: " + String(ldrValue) + " (min: " + String(minLdrValue) + ", max: " + String(maxLdrValue) + ")";
 #endif
-    // message += "<br>Error (NTP): " + String(errorCounterNTP);
 #ifdef SENSOR_DHT22
-    message += "<br>Error (DHT): " + String(errorCounterDHT);
+    message += "<br>[ERROR] DHT: " + String(errorCounterDHT);
 #endif
 #ifdef WEATHER
-    message += "<br>Error (MeteoWeather): " + String(errorCounterOutdoorWeather);
+    message += "<br>[ERROR] MeteoWeather: " + String(errorCounterOutdoorWeather);
 #endif
     message += "<br>Reset reason: " + ESP.getResetReason();
     message += "<br>Flags: ";
@@ -2331,7 +2233,6 @@ void handleCommitSettings()
     // ------------------------------------------------------------------------
     if (webServer.arg("st").length())
     {
-        Serial.println(webServer.arg("st"));
         handleTimeSetting(webServer.arg("st"));
     }
     // ------------------------------------------------------------------------
@@ -2347,12 +2248,11 @@ void handleSetEvent()
     events[0].month = webServer.arg("month").toInt();
     events[0].text = webServer.arg("text").substring(0, 40);
     events[0].color = (eColor)webServer.arg("color").toInt();
-    ;
     webServer.send(200, "text/plain", "OK.");
-
-#ifdef DEBUG
-    Serial.println("Event set: " + String(events[0].day) + "." + String(events[0].month) + ". " + events[0].text);
-#endif
+    DEBUG_SERIAL_PRINT(F("Event set: "));
+    DEBUG_SERIAL_PRINT(String(events[0].day) + "." + String(events[0].month));
+    DEBUG_SERIAL_PRINT(F(". "));
+    DEBUG_SERIAL_PRINTLN(events[0].text);
 }
 
 // Page showText
@@ -2365,10 +2265,8 @@ void handleShowText()
     feedText = "  " + webServer.arg("text").substring(0, 80) + "   ";
     feedPosition = 0;
     webServer.send(200, "text/plain", "OK.");
-
-#ifdef DEBUG
-    Serial.println("Show text: " + webServer.arg("text").substring(0, 80));
-#endif
+    DEBUG_SERIAL_PRINT(F("Show text: "));
+    DEBUG_SERIAL_PRINTLN(webServer.arg("text").substring(0, 80));
 
 #ifdef BUZZER
     for (uint8_t i = 0; i < feedBuzzer; i++)

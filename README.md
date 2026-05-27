@@ -57,6 +57,8 @@ If no WiFi network is detected, the clock initiates a captive portal for easy co
 
 In the absence of WiFi (and therefore NTP access), the clock utilizes an optional RTC (Real-Time Clock) module to maintain time accuracy.
 
+If you wish to use the clock without an internet connection, it will automatically launch an Access Point after the WiFi timeout period. You can then access the configuration page via this network to set the time and other settings.
+
 ## Documentation
 
 Schematics and a Bill of Materials (BOM) can be found in the [`/misc`](./misc) directory.
