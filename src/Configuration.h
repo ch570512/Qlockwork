@@ -75,40 +75,10 @@
 //*****************************************************************************
 // Timezone - The timezone in which the clock is located.
 // Important for the UTC offset and the summer/winter time (DST) change.
+// https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
 //*****************************************************************************
 
-//#define TIMEZONE_IDLW                         // IDLW  International Date Line West UTC-12
-//#define TIMEZONE_SST                          // SST   Samoa Standard Time UTC-11
-//#define TIMEZONE_HST                          // HST   Hawaiian Standard Time UTC-10
-//#define TIMEZONE_AKST                         // AKST  Alaska Standard Time UTC-9
-//#define TIMEZONE_USPST                        // USPST Pacific Standard Time (USA) UTC-8
-//#define TIMEZONE_USMST                        // USMST Mountain Standard Time (USA) UTC-7
-//#define TIMEZONE_USAZ                         // USAZ  Mountain Standard Time (USA) UTC-7 (no DST)
-//#define TIMEZONE_USCST                        // USCST Central Standard Time (USA) UTC-6
-//#define TIMEZONE_USEST                        // USEST Eastern Standard Time (USA) UTC-5
-//#define TIMEZONE_AST                          // AST   Atlantic Standard Time UTC-4
-//#define TIMEZONE_BST                          // BST   Eastern Brazil Standard Time UTC-3
-//#define TIMEZONE_VTZ                          // VTZ   Greenland Eastern Standard Time UTC-2
-//#define TIMEZONE_AZOT                         // AZOT  Azores Time UTC-1
-//#define TIMEZONE_GMT                          // GMT   Greenwich Mean Time UTC (no DST)
-#define TIMEZONE_CET                            // CET   Central Europe Time UTC+1
-//#define TIMEZONE_EST                          // EST   Eastern Europe Time UTC+2
-//#define TIMEZONE_MSK                          // MSK   Moscow Time UTC+3 (no DST)
-//#define TIMEZONE_GST                          // GST   Gulf Standard Time UTC+4
-//#define TIMEZONE_PKT                          // PKT   Pakistan Time UTC+5
-//#define TIMEZONE_IST                          // IST   Indian Standard Time UTC+5.5 (no DST)
-//#define TIMEZONE_BDT                          // BDT   Bangladesh Time UTC+6
-//#define TIMEZONE_JT                           // JT    Java Time UTC+7
-//#define TIMEZONE_CNST                         // CNST  China Standard Time UTC+8
-//#define TIMEZONE_HKT                          // HKT   Hong Kong Time UTC+8
-//#define TIMEZONE_PYT                          // PYT   Pyongyang Time (North Korea) UTC+8.5
-//#define TIMEZONE_CWT                          // CWT   Central West Time (Australia) UTC+8.75
-//#define TIMEZONE_JST                          // JST   Japan Standard Time UTC+9
-//#define TIMEZONE_ACST                         // ACST  Australian Central Standard Time UTC+9.5
-//#define TIMEZONE_AEST                         // AEST  Australian Eastern Standard Time UTC+10
-//#define TIMEZONE_LHST                         // LHST  Lord Howe Standard Time UTC+10.5
-//#define TIMEZONE_SBT                          // SBT   Solomon Islands Time UTC+11
-//#define TIMEZONE_NZST                         // NZST  New Zealand Standard Time UTC+12
+#define NTP_TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 //*****************************************************************************
 // Hardware settings
