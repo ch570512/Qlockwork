@@ -1940,7 +1940,6 @@ void handleRoot()
 #else
     message += "<s>BUTTONS</s> ";
 #endif
-#endif
     message += "</span></body></html>";
     webServer.send(200, "text/html", message);
 }
@@ -2449,6 +2448,7 @@ void handleCommitSettings()
 #endif
         }
     }
+#endif
     // ------------------------------------------------------------------------
 #ifdef SENSOR_DHT22
     webServer.arg("mc") == "0" ? settings.mySettings.modeChange = false : settings.mySettings.modeChange = true;
