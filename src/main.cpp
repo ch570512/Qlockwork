@@ -31,7 +31,6 @@
 #include <ESP8266WiFi.h>
 #include <IRremoteESP8266.h>
 #include <IRutils.h>
-#include <time.h>
 #include <WiFiManager.h>
 #include "Colors.h"
 #include "Configuration.h"
@@ -381,7 +380,7 @@ void setup()
         delay(500);
         now_time_t = time(nullptr);
     }
-    Serial.printf("Time (ESP): %02d:%02d:%02d %02u.%02u.%04u\n", p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec, p_tm->tm_mday, p_tm->tm_mon, p_tm->tm_year);
+    Serial.printf("Time (ESP): %02d:%02d:%02d\n", p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec);
 
     // Define a random time
     randomSeed(analogRead(A0));

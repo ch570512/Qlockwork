@@ -1,8 +1,8 @@
+#include "Syslog.h"
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <Arduino.h>
-
-#include "Syslog.h"
 
 // Public Methods //////////////////////////////////////////////////////////////
 

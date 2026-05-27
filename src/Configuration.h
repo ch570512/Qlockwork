@@ -13,8 +13,6 @@
 
 #define ARDUINO_OTA                             // Enable OTA updates.
 
-#define NTP_SERVER "pool.ntp.org"               // NTP server to be queried.
-
 //#define SYSLOGSERVER_SERVER "192.168.0.1"     // Address and port of a syslogserver.
 //#define SYSLOGSERVER_PORT 514                 // Log temperature and more...
 
@@ -73,11 +71,12 @@
 //#define FRONTCOVER_BINARY
 
 //*****************************************************************************
-// Timezone - The timezone in which the clock is located.
+// NTP and Timezone - The timezone in which the clock is located.
 // Important for the UTC offset and the summer/winter time (DST) change.
 // https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
 //*****************************************************************************
 
+#define NTP_SERVER "pool.ntp.org"
 #define NTP_TIMEZONE "CET-1CEST,M3.5.0,M10.5.0/3"
 
 //*****************************************************************************
