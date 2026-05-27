@@ -174,6 +174,8 @@ http://your_clocks_ip/reset         Restart the clock.
 ```
 
 ## Changelog:
+#### 20260527
+* Moved to ESP Core (LwIP) timekeeping and NTP.
 
 #### 20260516
 * ArduinoOTA is back and works with PlatformIO. Set IP in platformio.ini.
