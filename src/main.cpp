@@ -42,7 +42,6 @@
 #include "Modes.h"
 #include "Renderer.h"
 #include "Settings.h"
-#include "Syslog.h"
 #include "WebServer.h"
 
 void buttonModeInterrupt();
@@ -88,12 +87,6 @@ DHT dht(PIN_DHT22, DHT22);
 #ifdef IR_RECEIVER
 IRrecv irrecv(PIN_IR_RECEIVER);
 decode_results irDecodeResult;
-#endif
-
-// Syslog
-#ifdef SYSLOGSERVER_SERVER
-WiFiUDP wifiUdp;
-Syslog syslog(wifiUdp, SYSLOGSERVER_SERVER, SYSLOGSERVER_PORT, HOSTNAME, "QLOCKWORK", LOG_INFO);
 #endif
 
 // LED driver
@@ -153,10 +146,6 @@ uint8_t errorCounterDHT = 0;
 uint8_t maxBrightness = 0;
 uint8_t brightness = 0;
 #ifdef LDR
-// uint16_t ldrValue = 0;
-// uint16_t lastLdrValue = 0;
-// uint16_t minLdrValue = 511;
-// uint16_t maxLdrValue = 512;
 uint8_t iTargetBrightness = 0;
 unsigned long iBrightnessMillis = 0;
 #endif
@@ -172,17 +161,6 @@ uint8_t alarmOn = false;
 // Events
 #ifdef EVENT_TIME
 uint32_t showEventTimer = EVENT_TIME;
-#endif
-
-// Sunrise and sunset
-#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-bool sunrise_started = false;
-unsigned long sunrise_millis = 0;
-bool sunset_started = false;
-unsigned long sunset_millis = 0;
-time_t sunset_unix = 0;
-time_t sunrise_unix = 0;
-int save_color_sunrise_sunset = settings.mySettings.color;
 #endif
 
 // Misc
@@ -205,6 +183,16 @@ struct tm getTime()
         return {}; // Return empty struct if error
     }
     return *tmNow;
+}
+
+uint8_t getHour(time_t zeit)
+{
+    return zeit / 3600;
+}
+
+uint8_t getMinute(time_t zeit)
+{
+    return (zeit % 3600) / 60;
 }
 
 //=============================================================================
@@ -322,15 +310,6 @@ void setup()
         writeScreenBuffer(matrix, GREEN, brightness);
         delay(1000);
         myIP = WiFi.localIP();
-
-#ifdef SYSLOGSERVER_SERVER
-        Serial.println(F("Starting syslog."));
-#ifdef WEATHER
-        syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;outdoorTemperature;outdoorHumidity;sunriseTime;sunsetTime;ldrValue;errorCounterNTP;errorCounterDHT;errorCounterOutdoorWeather;freeHeapSize;upTime");
-#else
-        syslog.log(LOG_INFO, ";#;dateTime;roomTemperature;roomHumidity;ldrValue;errorCounterNTP;errorCounterDHT;freeHeapSize;upTime");
-#endif
-#endif
     }
 
 #ifdef SHOW_IP
@@ -377,6 +356,11 @@ void setup()
     Serial.print(F("Outdoor humidity: "));
     Serial.print(outdoorWeather.humidity);
     Serial.println(F(" %rH"));
+    struct tm *sunriseTime = localtime(&outdoorWeather.sunrise);
+    Serial.printf("Sunrise: %02u:%02u\n", sunriseTime->tm_hour, sunriseTime->tm_min);
+    struct tm *sunsetTime = localtime(&outdoorWeather.sunset);
+    Serial.printf("Sunset: %02u:%02u\n", sunsetTime->tm_hour, sunsetTime->tm_min);
+
 #endif
 #endif
 
@@ -390,12 +374,12 @@ void setup()
 #ifdef EVENT_TIME
     Serial.printf("Events: %u\n", sizeof(events) / sizeof(event_t) - 1);
 #endif
-    Serial.printf("Day on: %02u:%02u:00\n", hour(settings.mySettings.dayOnTime), minute(settings.mySettings.dayOnTime));
-    Serial.printf("Night off: %02u:%02u:00\n", hour(settings.mySettings.nightOffTime), minute(settings.mySettings.nightOffTime));
-    Serial.printf("Alarm1: %02u:%02u:00 ", hour(settings.mySettings.alarm1Time), minute(settings.mySettings.alarm1Time));
+    Serial.printf("Day on: %02u:%02u\n", getHour(settings.mySettings.dayOnTime), getMinute(settings.mySettings.dayOnTime));
+    Serial.printf("Night off: %02u:%02u\n", getHour(settings.mySettings.nightOffTime), getMinute(settings.mySettings.nightOffTime));
+    Serial.printf("Alarm1: %02u:%02u\n", getHour(settings.mySettings.alarm1Time), getMinute(settings.mySettings.alarm1Time));
     settings.mySettings.alarm1 ? Serial.print("on ") : Serial.print("off ");
     Serial.println(settings.mySettings.alarm1Weekdays, BIN);
-    Serial.printf("Alarm2: %02u:%02u:00 ", hour(settings.mySettings.alarm2Time), minute(settings.mySettings.alarm2Time));
+    Serial.printf("Alarm2: %02u:%02u\n", getHour(settings.mySettings.alarm2Time), getMinute(settings.mySettings.alarm2Time));
     settings.mySettings.alarm2 ? Serial.print("on ") : Serial.print("off ");
     Serial.println(settings.mySettings.alarm2Weekdays, BIN);
     Serial.printf("Random time: %02u:%02u\n", randomHour, randomMinute);
@@ -515,7 +499,7 @@ void loop()
 
 #ifdef BUZZER
         // Switch on buzzer for alarm 1
-        if (settings.mySettings.alarm1 && (tmNow.tm_hour == hour(settings.mySettings.alarm1Time)) && (tmNow.tm_min == minute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, tmNow.tm_wday))
+        if (settings.mySettings.alarm1 && (tmNow.tm_hour == getHour(settings.mySettings.alarm1Time)) && (tmNow.tm_min == getMinute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, tmNow.tm_wday))
         {
             alarmOn = BUZZTIME_ALARM_1;
 #ifdef DEBUG
@@ -524,7 +508,7 @@ void loop()
         }
 
         // Switch on buzzer for alarm 2
-        if (settings.mySettings.alarm2 && (tmNow.tm_hour == hour(settings.mySettings.alarm2Time)) && (tmNow.tm_min == minute(settings.mySettings.alarm2Time)) && bitRead(settings.mySettings.alarm2Weekdays, tmNow.tm_wday))
+        if (settings.mySettings.alarm2 && (tmNow.tm_hour == getHour(settings.mySettings.alarm2Time)) && (tmNow.tm_min == getMinute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm2Weekdays, tmNow.tm_wday))
         {
             alarmOn = BUZZTIME_ALARM_2;
 #ifdef DEBUG
@@ -534,15 +518,14 @@ void loop()
 #endif
 
         // Set night- and daymode
-        if ((tmNow.tm_hour == hour(settings.mySettings.nightOffTime)) && (tmNow.tm_min == minute(settings.mySettings.nightOffTime)))
+        if ((tmNow.tm_hour == getHour(settings.mySettings.nightOffTime)) && (tmNow.tm_min == getMinute(settings.mySettings.nightOffTime)))
         {
 #ifdef DEBUG
             Serial.println("Night off.");
 #endif
             setMode(MODE_BLANK);
         }
-
-        if ((tmNow.tm_hour == hour(settings.mySettings.dayOnTime)) && (tmNow.tm_min == minute(settings.mySettings.dayOnTime)))
+        if ((tmNow.tm_hour == getHour(settings.mySettings.dayOnTime)) && (tmNow.tm_min == getMinute(settings.mySettings.dayOnTime)))
         {
 #ifdef DEBUG
             Serial.println("Day on.");
@@ -551,7 +534,7 @@ void loop()
         }
 
         //=============================================================================
-        // Run once every random minute (once an hour) or if NTP has an error
+        // Run once every random minute (once an hour)
         //=============================================================================
 
         if (tmNow.tm_min == randomMinute)
@@ -579,24 +562,6 @@ void loop()
 
         if (tmNow.tm_min % 5 == 0)
         {
-#ifdef SYSLOGSERVER_SERVER
-            // Write some data to syslog
-            if (WiFi.isConnected())
-            {
-                time_t tempEspTime = time(nullptr);
-#ifdef WEATHER
-                // syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(outdoorWeather.temperature) + ";" + String(outdoorWeather.humidity) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))) + ";" + String(brightness) + ";" + String(errorCounterNTP) + ";" + String(errorCounterDHT) + ";" + String(errorCounterOutdoorWeather) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
-                syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(outdoorWeather.temperature) + ";" + String(outdoorWeather.humidity) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))) + ";" + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))) + ";" + String(brightness) + ";" + ";" + String(errorCounterDHT) + ";" + String(errorCounterOutdoorWeather) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
-#else
-                // syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(ldrValue) + ";" + String(errorCounterNTP) + ";" + String(errorCounterDHT) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
-                syslog.log(LOG_INFO, ";D;" + String(tempEspTime) + ";" + String(roomTemperature) + ";" + String(roomHumidity) + ";" + String(ldrValue) + ";" + ";" + String(errorCounterDHT) + ";" + String(ESP.getFreeHeap()) + ";" + String(upTime));
-#endif
-#ifdef DEBUG
-                Serial.println("Data written to syslog.");
-#endif
-            }
-#endif
-
             // Change color
             if (settings.mySettings.colorChange == COLORCHANGE_FIVE)
             {
@@ -838,10 +803,6 @@ void loop()
         switch (mode)
         {
         case MODE_TIME:
-#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-            sunrise_started = false;
-            sunset_started = false;
-#endif
             renderer.clearScreenBuffer(matrix);
 
 #ifdef FRONTCOVER_BINARY
@@ -907,150 +868,8 @@ void loop()
             break;
 #endif
 
-#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-        case MODE_SUNRISE:
-            if (!sunrise_started)
-            {
-                // sunrise_unix = timeZone.toLocal(outdoorWeather.sunrise);
-                sunrise_started = true;
-                sunrise_millis = millis();
-                save_color_sunrise_sunset = settings.mySettings.color;
-            }
-            if (millis() < sunrise_millis + 1000)
-            {
-                settings.mySettings.color = YELLOW;
-                renderer.clearScreenBuffer(matrix);
-                // Sunrise screen
-                matrix[0] = 0b0000000000000000;
-                matrix[1] = 0b0000000000000000;
-                matrix[2] = 0b0000000000000000;
-                matrix[3] = 0b0000000000000000;
-                matrix[4] = 0b0000000000000000;
-                matrix[5] = 0b0000111000000000;
-                matrix[6] = 0b0011111110000000;
-                matrix[7] = 0b0111111111000000;
-                matrix[8] = 0b0111111111000000;
-                matrix[9] = 0b1111111111100000;
-            }
-            else if (millis() < sunrise_millis + 2000)
-            {
-                renderer.clearScreenBuffer(matrix);
-                // Sunrise screen
-                matrix[0] = 0b0000000000000000;
-                matrix[1] = 0b0000000000000000;
-                matrix[2] = 0b0000111000000000;
-                matrix[3] = 0b0011111110000000;
-                matrix[4] = 0b0111111111000000;
-                matrix[5] = 0b0111111111000000;
-                matrix[6] = 0b1111111111100000;
-                matrix[7] = 0b1111111111100000;
-                matrix[8] = 0b0111111111000000;
-                matrix[9] = 0b0111111111000000;
-            }
-            else if (millis() < sunrise_millis + 3000)
-            {
-                renderer.clearScreenBuffer(matrix);
-                // Sunrise screen
-                matrix[0] = 0b0000111000000000;
-                matrix[1] = 0b0011111110000000;
-                matrix[2] = 0b0111111111000000;
-                matrix[3] = 0b0111111111000000;
-                matrix[4] = 0b1111111111100000;
-                matrix[5] = 0b1111111111100000;
-                matrix[6] = 0b0111111111000000;
-                matrix[7] = 0b0111111111000000;
-                matrix[8] = 0b0011111110000000;
-                matrix[9] = 0b0000111000000000;
-            }
-            else if (millis() < sunrise_millis + 4000 + settings.mySettings.timeout * 1000)
-            {
-                renderer.clearScreenBuffer(matrix);
-                renderer.setTime(hour(sunrise_unix), minute(sunrise_unix), matrix);
-                renderer.setCorners(minute(sunrise_unix), matrix);
-                renderer.clearEntryWords(matrix);
-            }
-            else
-            {
-                sunrise_started = false;
-                settings.mySettings.color = save_color_sunrise_sunset;
-                setMode(MODE_TIME);
-            }
-            break;
-
-        case MODE_SUNSET:
-            if (!sunset_started)
-            {
-                sunset_started = true;
-                sunset_millis = millis();
-            }
-
-            // Matrix is only updatet every second.
-            if (millis() < sunset_millis + 1000)
-            {
-                settings.mySettings.color = ORANGE;
-                renderer.clearScreenBuffer(matrix);
-                // Sunset screen
-                matrix[0] = 0b0000111000000000;
-                matrix[1] = 0b0011111110000000;
-                matrix[2] = 0b0111111111000000;
-                matrix[3] = 0b0111111111000000;
-                matrix[4] = 0b1111111111100000;
-                matrix[5] = 0b1111111111100000;
-                matrix[6] = 0b0111111111000000;
-                matrix[7] = 0b0111111111000000;
-                matrix[8] = 0b0011111110000000;
-                matrix[9] = 0b0000111000000000;
-            }
-            else if (millis() < sunset_millis + 2000)
-            {
-                renderer.clearScreenBuffer(matrix);
-                // Sunset screen
-                matrix[0] = 0b0000000000000000;
-                matrix[1] = 0b0000000000000000;
-                matrix[2] = 0b0000111000000000;
-                matrix[3] = 0b0011111110000000;
-                matrix[4] = 0b0111111111000000;
-                matrix[5] = 0b0111111111000000;
-                matrix[6] = 0b1111111111100000;
-                matrix[7] = 0b1111111111100000;
-                matrix[8] = 0b0111111111000000;
-                matrix[9] = 0b0111111111000000;
-            }
-            else if (millis() < sunset_millis + 3000)
-            {
-                renderer.clearScreenBuffer(matrix);
-                // Sunset screen
-                matrix[0] = 0b0000000000000000;
-                matrix[1] = 0b0000000000000000;
-                matrix[2] = 0b0000000000000000;
-                matrix[3] = 0b0000000000000000;
-                matrix[4] = 0b0000000000000000;
-                matrix[5] = 0b0000111000000000;
-                matrix[6] = 0b0011111110000000;
-                matrix[7] = 0b0111111111000000;
-                matrix[8] = 0b0111111111000000;
-                matrix[9] = 0b1111111111100000;
-            }
-            else if (millis() < sunset_millis + 4000 + settings.mySettings.timeout * 1000)
-            {
-                renderer.clearScreenBuffer(matrix);
-                renderer.setTime(hour(sunset_unix), minute(sunset_unix), matrix);
-                renderer.setCorners(minute(sunset_unix), matrix);
-                renderer.clearEntryWords(matrix);
-            }
-            else
-            {
-                sunset_started = false;
-                settings.mySettings.color = save_color_sunrise_sunset;
-                setMode(MODE_TIME);
-            }
-            break;
-#endif
 #ifdef SHOW_MODE_MOONPHASE
         case MODE_MOONPHASE:
-#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-            settings.mySettings.color = save_color_sunrise_sunset;
-#endif
             renderer.clearScreenBuffer(matrix);
             switch (moonphase)
             {
@@ -1358,10 +1177,6 @@ void loop()
     // Wait for mode timeout then switch back to time
     if ((millis() > (modeTimeout + settings.mySettings.timeout * 1000)) && modeTimeout)
     {
-        // #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-        //        sunrise_started = false;
-        //        sunset_started = false;
-        // #endif
         setMode(MODE_TIME);
     }
 
@@ -1558,9 +1373,6 @@ void buttonTimePressed()
         alarmOn = false;
     }
 #endif
-#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-    settings.mySettings.color = save_color_sunrise_sunset;
-#endif
     modeTimeout = 0;
     setMode(MODE_TIME);
 }
@@ -1628,10 +1440,6 @@ void setMode(Mode newMode)
 #ifdef SHOW_MODE_DATE
     case MODE_DATE:
 #endif
-// #if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-//     case MODE_SUNRISE:
-//     case MODE_SUNSET:
-// #endif
 #ifdef SHOW_MODE_MOONPHASE
     case MODE_MOONPHASE:
 #endif
@@ -1868,9 +1676,13 @@ void handleRoot()
                "<br><i class = \"fa fa-thermometer\" style=\"font-size:20px;\"></i> " +
                String(outdoorWeather.temperature) + "&deg;C / " + String(outdoorWeather.temperature * 1.8 + 32.0) + "&deg;F" +
                "<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "%rH" +
-               "<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg" +
-               "<br><i class = \"fa fa-sun-o\" style=\"font-size:20px;\"></i> " + padStringZeros(String("")) + ":" + padStringZeros(String("")) +
-               " <i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + padStringZeros(String("")) + ":" + padStringZeros(String(""));
+               "<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg";
+
+    struct tm *sunriseTime = localtime(&outdoorWeather.sunrise);
+    message += "<br><i class = \"fa fa-sun-o\" style=\"font-size:20px;\"></i> " + String(sunriseTime->tm_hour) + ":" + String(sunriseTime->tm_min);
+
+    struct tm *sunsetTime = localtime(&outdoorWeather.sunset);
+    message += " <i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + String(sunsetTime->tm_hour) + ":" + String(sunsetTime->tm_min);
 #endif
     message += "<span style=\"font-size:12px;\">"
                "<br><br><a href=\"https://github.com/ch570512/Qlockwork\">Qlockwork</a> was <i class=\"fa fa-code\"></i> with <i class=\"fa fa-heart\"></i> by ch570512"
