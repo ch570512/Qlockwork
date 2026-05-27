@@ -21,7 +21,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260528
+#define FIRMWARE_VERSION 20260529
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -32,7 +32,7 @@
 #include <IRremoteESP8266.h>
 #include <IRutils.h>
 #include <time.h>
-#include <TimeLib.h> // we need to get rid of it
+#include <sys/time.h>
 #include "Colors.h"
 #include "Configuration.h"
 #include "Debug.h"
@@ -195,6 +195,46 @@ uint8_t getMinute(time_t zeit)
     return (zeit % 3600) / 60;
 }
 
+void handleTimeSetting(String input) // 2026-05-01T17:58
+{
+    int year, month, day, hour, minute, second = 0;
+
+    int parsed = sscanf(input.c_str(), "%d-%d-%dT%d:%d",
+                        &year, &month, &day, &hour, &minute);
+
+    if (parsed == 5)
+    {
+        struct tm t;
+        t.tm_year = year - 1900;
+        t.tm_mon = month - 1;
+        t.tm_mday = day;
+        t.tm_hour = hour;
+        t.tm_min = minute;
+        t.tm_sec = second;
+        t.tm_isdst = -1;
+
+        time_t epoch = mktime(&t);
+
+        if (epoch != -1)
+        {
+            struct timeval tv;
+            tv.tv_sec = epoch;
+            tv.tv_usec = 0;
+            settimeofday(&tv, NULL);
+
+            Serial.println(F("Manual time set"));
+        }
+        else
+        {
+            Serial.println(F("[ERROR] Wrong date"));
+        }
+    }
+    else
+    {
+        Serial.println(F("[ERROR] Wrong format"));
+    }
+}
+
 //=============================================================================
 // Setup()
 //=============================================================================
@@ -237,7 +277,7 @@ void setup()
 #endif
 
 #ifdef ESP_LED
-    Serial.println(F("Setting up ESP-LED."));
+    Serial.println(F("Setting up ESP-LED"));
     pinMode(PIN_LED, OUTPUT);
     digitalWrite(PIN_LED, HIGH);
 #endif
@@ -261,12 +301,12 @@ void setup()
 #endif
 
 #ifdef BUZZER
-    Serial.println(F("Setting up Buzzer."));
+    Serial.println(F("Setting up Buzzer"));
     pinMode(PIN_BUZZER, OUTPUT);
 #endif
 
 #ifdef SENSOR_DHT22
-    Serial.println(F("Setting up DHT22."));
+    Serial.println(F("Setting up DHT22"));
     dht.begin();
 #endif
 
@@ -277,7 +317,7 @@ void setup()
 #endif
 
 #ifdef IR_RECEIVER
-    Serial.println(F("Setting up IR-Receiver."));
+    Serial.println(F("Setting up IR-Receiver"));
     irrecv.enableIRIn();
 #endif
 
@@ -297,7 +337,7 @@ void setup()
     if (!WiFi.isConnected())
     {
         // WiFi.mode(WIFI_AP);
-        Serial.println(F("No WiFi connected."));
+        Serial.println(F("No WiFi connected"));
         writeScreenBuffer(matrix, RED, brightness);
         delay(1000);
         // myIP = WiFi.softAPIP();
@@ -322,12 +362,12 @@ void setup()
 #endif
 
 #ifdef WEBSERVER
-    Serial.println(F("Starting webserver."));
+    Serial.println(F("Starting webserver"));
     setupWebServer();
 #endif
 
 #ifdef ARDUINO_OTA
-    Serial.println(F("Starting OTA."));
+    Serial.println(F("Starting OTA"));
     ArduinoOTA.begin();
 #endif
 
@@ -503,7 +543,7 @@ void loop()
         {
             alarmOn = BUZZTIME_ALARM_1;
 #ifdef DEBUG
-            Serial.println("Alarm1 on.");
+            Serial.println("Alarm1 on");
 #endif
         }
 
@@ -512,7 +552,7 @@ void loop()
         {
             alarmOn = BUZZTIME_ALARM_2;
 #ifdef DEBUG
-            Serial.println("Alarm2 on.");
+            Serial.println("Alarm2 on");
 #endif
         }
 #endif
@@ -521,14 +561,14 @@ void loop()
         if ((tmNow.tm_hour == getHour(settings.mySettings.nightOffTime)) && (tmNow.tm_min == getMinute(settings.mySettings.nightOffTime)))
         {
 #ifdef DEBUG
-            Serial.println("Night off.");
+            Serial.println("Night off");
 #endif
             setMode(MODE_BLANK);
         }
         if ((tmNow.tm_hour == getHour(settings.mySettings.dayOnTime)) && (tmNow.tm_min == getMinute(settings.mySettings.dayOnTime)))
         {
 #ifdef DEBUG
-            Serial.println("Day on.");
+            Serial.println("Day on");
 #endif
             setMode(lastMode);
         }
@@ -655,7 +695,7 @@ void loop()
             if (!autoModeChangeTimer)
             {
 #ifdef DEBUG
-                Serial.println("Auto modechange. (" + String(autoMode) + ")");
+                Serial.println("Auto modechange (" + String(autoMode) + ")");
 #endif
                 autoModeChangeTimer = AUTO_MODECHANGE_TIME;
                 switch (autoMode)
@@ -829,7 +869,7 @@ void loop()
 #ifdef SHOW_MODE_AMPM
         case MODE_AMPM:
             renderer.clearScreenBuffer(matrix);
-            isAM() ? renderer.setSmallText("AM", TEXT_POS_MIDDLE, matrix) : renderer.setSmallText("PM", TEXT_POS_MIDDLE, matrix);
+            tmNow.tm_hour < 12 ? renderer.setSmallText("AM", TEXT_POS_MIDDLE, matrix) : renderer.setSmallText("PM", TEXT_POS_MIDDLE, matrix);
             break;
 #endif
 
@@ -1336,7 +1376,7 @@ ICACHE_RAM_ATTR void buttonOnOffInterrupt()
 void buttonOnOffPressed()
 {
 #ifdef DEBUG
-    Serial.println("On/off pressed.");
+    Serial.println("On/off pressed");
 #endif
     mode == MODE_BLANK ? setLedsOn() : setLedsOff();
 }
@@ -1359,7 +1399,7 @@ ICACHE_RAM_ATTR void buttonTimeInterrupt()
 void buttonTimePressed()
 {
 #ifdef DEBUG
-    Serial.println("Time pressed.");
+    Serial.println("Time pressed");
 #endif
 
     // Switch off alarm
@@ -1395,7 +1435,7 @@ ICACHE_RAM_ATTR void buttonModeInterrupt()
 void buttonModePressed()
 {
 #ifdef DEBUG
-    Serial.println("Mode pressed.");
+    Serial.println("Mode pressed");
 #endif
 
     // Switch off alarm
@@ -1796,14 +1836,14 @@ void handleButtonSettings()
         message += " checked";
     message += "> " TXT_OFF "&nbsp;&nbsp;&nbsp;"
                "<input type=\"time\" name=\"a1t\" value=\"";
-    if (hour(settings.mySettings.alarm1Time) < 10)
+    if (getHour(settings.mySettings.alarm1Time) < 10)
         message += "0";
-    message += String(hour(settings.mySettings.alarm1Time)) + ":";
-    if (minute(settings.mySettings.alarm1Time) < 10)
+    message += String(getHour(settings.mySettings.alarm1Time)) + ":";
+    if (getMinute(settings.mySettings.alarm1Time) < 10)
         message += "0";
-    message += String(minute(settings.mySettings.alarm1Time)) + "\">"
-                                                                " h<br><br>"
-                                                                "<input type=\"checkbox\" name=\"a1w2\" value=\"4\"";
+    message += String(getMinute(settings.mySettings.alarm1Time)) + "\">"
+                                                                   " h<br><br>"
+                                                                   "<input type=\"checkbox\" name=\"a1w2\" value=\"4\"";
     if (bitRead(settings.mySettings.alarm1Weekdays, 2))
         message += " checked";
     message += "> Mo. "
@@ -1844,14 +1884,14 @@ void handleButtonSettings()
         message += " checked";
     message += "> " TXT_OFF "&nbsp;&nbsp;&nbsp;"
                "<input type=\"time\" name=\"a2t\" value=\"";
-    if (hour(settings.mySettings.alarm2Time) < 10)
+    if (getHour(settings.mySettings.alarm2Time) < 10)
         message += "0";
-    message += String(hour(settings.mySettings.alarm2Time)) + ":";
-    if (minute(settings.mySettings.alarm2Time) < 10)
+    message += String(getHour(settings.mySettings.alarm2Time)) + ":";
+    if (getMinute(settings.mySettings.alarm2Time) < 10)
         message += "0";
-    message += String(minute(settings.mySettings.alarm2Time)) + "\">"
-                                                                " h<br><br>"
-                                                                "<input type=\"checkbox\" name=\"a2w2\" value=\"4\"";
+    message += String(getMinute(settings.mySettings.alarm2Time)) + "\">"
+                                                                   " h<br><br>"
+                                                                   "<input type=\"checkbox\" name=\"a2w2\" value=\"4\"";
     if (bitRead(settings.mySettings.alarm2Weekdays, 2))
         message += " checked";
     message += "> Mo. "
@@ -2151,27 +2191,27 @@ void handleButtonSettings()
                "Night off"
                "</td><td>"
                "<input type=\"time\" name=\"no\" value=\"";
-    if (hour(settings.mySettings.nightOffTime) < 10)
+    if (getHour(settings.mySettings.nightOffTime) < 10)
         message += "0";
-    message += String(hour(settings.mySettings.nightOffTime)) + ":";
-    if (minute(settings.mySettings.nightOffTime) < 10)
+    message += String(getHour(settings.mySettings.nightOffTime)) + ":";
+    if (getMinute(settings.mySettings.nightOffTime) < 10)
         message += "0";
-    message += String(minute(settings.mySettings.nightOffTime)) + "\">"
-                                                                  " h"
-                                                                  "</td></tr>";
+    message += String(getMinute(settings.mySettings.nightOffTime)) + "\">"
+                                                                     " h"
+                                                                     "</td></tr>";
     // ------------------------------------------------------------------------
     message += "<tr><td>"
                "Day on"
                "</td><td>"
                "<input type=\"time\" name=\"do\" value=\"";
-    if (hour(settings.mySettings.dayOnTime) < 10)
+    if (getHour(settings.mySettings.dayOnTime) < 10)
         message += "0";
-    message += String(hour(settings.mySettings.dayOnTime)) + ":";
-    if (minute(settings.mySettings.dayOnTime) < 10)
+    message += String(getHour(settings.mySettings.dayOnTime)) + ":";
+    if (getMinute(settings.mySettings.dayOnTime) < 10)
         message += "0";
-    message += String(minute(settings.mySettings.dayOnTime)) + "\">"
-                                                               " h"
-                                                               "</td></tr>";
+    message += String(getMinute(settings.mySettings.dayOnTime)) + "\">"
+                                                                  " h"
+                                                                  "</td></tr>";
     // ------------------------------------------------------------------------
     message += "<tr><td>"
                "Show \"It is\""
@@ -2322,7 +2362,7 @@ void handleCommitSettings()
     if (webServer.arg("st").length())
     {
         Serial.println(webServer.arg("st"));
-        setTime(webServer.arg("st").substring(11, 13).toInt(), webServer.arg("st").substring(14, 16).toInt(), 0, webServer.arg("st").substring(8, 10).toInt(), webServer.arg("st").substring(5, 7).toInt(), webServer.arg("st").substring(0, 4).toInt());
+        handleTimeSetting(webServer.arg("st"));
     }
     // ------------------------------------------------------------------------
     settings.saveToEEPROM();
