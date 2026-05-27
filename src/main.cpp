@@ -21,17 +21,18 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260527
+#define FIRMWARE_VERSION 20260528
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <DHT.h>
-#include <DS3232RTC.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
+#include <WiFiManager.h>
 #include <IRremoteESP8266.h>
 #include <IRutils.h>
-#include <WiFiManager.h>
+#include <time.h>
+#include <TimeLib.h> // we need to get rid of it
 #include "Colors.h"
 #include "Configuration.h"
 #include "Debug.h"
@@ -54,11 +55,9 @@ void callRoot();
 uint8_t getBrightnessFromLDR();
 int getMoonphase(int y, int m, int d);
 void getRoomConditions();
-time_t getRTCTime();
 void handleButtonSettings();
 void handleCommitSettings();
 void handleControl();
-// void handleNotFound();
 void handleRoot();
 void handleSetEvent();
 void handleShowText();
@@ -97,11 +96,6 @@ WiFiUDP wifiUdp;
 Syslog syslog(wifiUdp, SYSLOGSERVER_SERVER, SYSLOGSERVER_PORT, HOSTNAME, "QLOCKWORK", LOG_INFO);
 #endif
 
-// RTC
-#ifdef RTC_BACKUP
-DS3232RTC RTC;
-#endif
-
 // LED driver
 LedDriver ledDriver;
 
@@ -133,6 +127,11 @@ uint8_t randomHour = 0;
 uint8_t randomMinute = 0;
 uint8_t moonphase = 0;
 time_t upTime = 0;
+const String dayOfWeek[] = {
+    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+const String monthOfYear[] = {
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"};
 
 // Feed
 String feedText = "";
@@ -194,6 +193,19 @@ uint8_t testColumn = 0;
 #ifdef DEBUG_FPS
 int fps = 0;
 #endif
+
+struct tm getTime()
+{
+    time_t now = time(nullptr);
+    struct tm *tmNow = localtime(&now);
+
+    // Return by value (this creates a local copy so it's thread-safe)
+    if (tmNow == nullptr)
+    {
+        return {}; // Return empty struct if error
+    }
+    return *tmNow;
+}
 
 //=============================================================================
 // Setup()
@@ -311,17 +323,6 @@ void setup()
         delay(1000);
         myIP = WiFi.localIP();
 
-        // Get weather from MeteoWeather
-#ifdef WEATHER
-        DEBUG_SERIAL_PRINTLN(F("Weather Latitude: ") + String(LATITUDE));
-        DEBUG_SERIAL_PRINTLN(F("Weather Longitude: ") + String(LONGITUDE));
-        DEBUG_SERIAL_PRINTLN(F("Weather Timezone: ") + String(TIMEZONE));
-        DEBUG_SERIAL_PRINTLN(F("Getting weather..."));
-        !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
-        DEBUG_SERIAL_PRINTLN(F("Outdoor temperature: ") + String(outdoorWeather.temperature) + F(" °C"));
-        DEBUG_SERIAL_PRINTLN(F("Outdoor humidity: ") + String(outdoorWeather.humidity) + F(" %rH"));
-#endif
-
 #ifdef SYSLOGSERVER_SERVER
         Serial.println(F("Starting syslog."));
 #ifdef WEATHER
@@ -353,49 +354,41 @@ void setup()
 
     renderer.clearScreenBuffer(matrix);
 
-#ifdef RTC_BACKUP
-    RTC.begin();
-    setSyncProvider(getRTCTime);
-    Serial.print(F("RTC sync."));
-    if (timeStatus() != timeSet)
-    {
-        Serial.print(F(" FAIL!"));
-    }
-    Serial.println();
-#ifdef DEBUG
-    time_t tempRtcTime = RTC.get();
-    Serial.printf("Time (RTC): %02u:%02u:%02u %02u.%02u.%04u\n", hour(tempRtcTime), minute(tempRtcTime), second(tempRtcTime), day(tempRtcTime), month(tempRtcTime), year(tempRtcTime));
-#endif
-#endif
-
     // Configure NTP
     configTime(NTP_TIMEZONE, NTP_SERVER);
-    DEBUG_SERIAL_PRINTLN(F("NTP Timezone: ") + String(NTP_TIMEZONE));
     DEBUG_SERIAL_PRINTLN(F("NTP Server: ") + String(NTP_SERVER));
-    Serial.println(F("NTP sync."));
+    DEBUG_SERIAL_PRINTLN(F("NTP Timezone: ") + String(NTP_TIMEZONE));
     time_t now_time_t = time(nullptr);
-    struct tm *p_tm = localtime(&now_time_t);
     while (now_time_t < 8 * 3600 * 2)
     {
         delay(500);
         now_time_t = time(nullptr);
     }
-    Serial.printf("Time (ESP): %02d:%02d:%02d\n", p_tm->tm_hour, p_tm->tm_min, p_tm->tm_sec);
+    struct tm tmNow = getTime();
+    Serial.printf("Time (ESP): %02d:%02d:%02d %02d.%02d.%02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
+
+    // Get weather from MeteoWeather
+#ifdef WEATHER
+    !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
+#ifdef DEBUG
+    Serial.print(F("Outdoor temperature: "));
+    Serial.print(outdoorWeather.temperature);
+    Serial.println(F(" °C"));
+    Serial.print(F("Outdoor humidity: "));
+    Serial.print(outdoorWeather.humidity);
+    Serial.println(F(" %rH"));
+#endif
+#endif
 
     // Define a random time
     randomSeed(analogRead(A0));
     randomHour = random(0, 24);
     randomMinute = random(5, 56);
 
-    // Update room conditions
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
-    getRoomConditions();
-#endif
-
     // Print some infos
 #ifdef DEBUG
 #ifdef EVENT_TIME
-    Serial.printf("Defined events: %u\n", sizeof(events) / sizeof(event_t) - 1);
+    Serial.printf("Events: %u\n", sizeof(events) / sizeof(event_t) - 1);
 #endif
     Serial.printf("Day on: %02u:%02u:00\n", hour(settings.mySettings.dayOnTime), minute(settings.mySettings.dayOnTime));
     Serial.printf("Night off: %02u:%02u:00\n", hour(settings.mySettings.nightOffTime), minute(settings.mySettings.nightOffTime));
@@ -410,11 +403,6 @@ void setup()
 #else
     Serial.println(F("DEBUG disabled."));
 #endif
-
-    lastDay = p_tm->tm_mday - 1;
-    lastHour = p_tm->tm_hour;
-    lastMinute = p_tm->tm_min;
-    lastSecond = p_tm->tm_sec;
 
 #ifdef FRONTCOVER_BINARY
     settings.mySettings.transition = TRANSITION_NORMAL;
@@ -437,40 +425,25 @@ void loop()
     ArduinoOTA.handle();
 #endif
 
-    time_t now_time_t = time(nullptr);
-    struct tm *p_tm = localtime(&now_time_t);
+    // Get the time from ESP
+    struct tm tmNow = getTime();
 
     //=============================================================================
     // Run once a day
     //=============================================================================
 
-    if (p_tm->tm_mday != lastDay)
+    if (tmNow.tm_mday != lastDay)
     {
-        lastDay = p_tm->tm_mday;
+        lastDay = tmNow.tm_mday;
         screenBufferNeedsUpdate = true;
 
-        // reset millis() because they will overflow at some time
-#ifdef LDR
-        iBrightnessMillis = 0;
-#endif
-#if defined(SHOW_MODE_SUNRISE_SUNSET) && defined(WEATHER)
-        sunrise_millis = 0;
-        sunset_millis = 0;
-#endif
-
 #ifdef SHOW_MODE_MOONPHASE
-        moonphase = getMoonphase(p_tm->tm_year, p_tm->tm_mon, p_tm->tm_mday);
+        moonphase = getMoonphase(tmNow.tm_year, tmNow.tm_mon, tmNow.tm_mday);
 #endif
 
         // Reset URL event 0
         events[0].day = 0;
         events[0].month = 0;
-
-#ifdef DEBUG
-        Serial.printf("Uptime: %u days, %02u:%02u\n", int(upTime / 86400), hour(upTime), minute(upTime));
-        Serial.printf("Free RAM: %u bytes\n", system_get_free_heap_size());
-        Serial.printf("Moonphase: %u\n", moonphase);
-#endif
 
         // Change color
         if (settings.mySettings.colorChange == COLORCHANGE_DAY)
@@ -486,9 +459,9 @@ void loop()
     // Run once every hour
     //=============================================================================
 
-    if (p_tm->tm_hour != lastHour)
+    if (tmNow.tm_hour != lastHour)
     {
-        lastHour = p_tm->tm_hour;
+        lastHour = tmNow.tm_hour;
         screenBufferNeedsUpdate = true;
 
         // Change color
@@ -514,10 +487,10 @@ void loop()
 #endif
 
         //=============================================================================
-        // Run once every random hour (once a day)
+        // Run once every random hour (therefore once a day)
         //=============================================================================
 
-        if (p_tm->tm_hour == randomHour)
+        if (tmNow.tm_hour == randomHour)
         {
         }
     }
@@ -526,19 +499,23 @@ void loop()
     // Run once every minute
     //=============================================================================
 
-    if (p_tm->tm_min != lastMinute)
+    if (tmNow.tm_min != lastMinute)
     {
-        lastMinute = p_tm->tm_min;
+        lastMinute = tmNow.tm_min;
         screenBufferNeedsUpdate = true;
 
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
+#ifdef DEBUG
+        Serial.printf("\nTime (ESP): %02d:%02d:%02d %02d.%02d.%02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
+#endif
+
+#if defined(SENSOR_DHT22)
         // Update room conditions
         getRoomConditions();
 #endif
 
 #ifdef BUZZER
         // Switch on buzzer for alarm 1
-        if (settings.mySettings.alarm1 && (p_tm->tm_hour == hour(settings.mySettings.alarm1Time)) && (p_tm->tm_min == minute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, p_tm->tm_wday))
+        if (settings.mySettings.alarm1 && (tmNow.tm_hour == hour(settings.mySettings.alarm1Time)) && (tmNow.tm_min == minute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, tmNow.tm_wday))
         {
             alarmOn = BUZZTIME_ALARM_1;
 #ifdef DEBUG
@@ -547,7 +524,7 @@ void loop()
         }
 
         // Switch on buzzer for alarm 2
-        if (settings.mySettings.alarm2 && (p_tm->tm_hour == hour(settings.mySettings.alarm2Time)) && (p_tm->tm_min == minute(settings.mySettings.alarm2Time)) && bitRead(settings.mySettings.alarm2Weekdays, p_tm->tm_wday))
+        if (settings.mySettings.alarm2 && (tmNow.tm_hour == hour(settings.mySettings.alarm2Time)) && (tmNow.tm_min == minute(settings.mySettings.alarm2Time)) && bitRead(settings.mySettings.alarm2Weekdays, tmNow.tm_wday))
         {
             alarmOn = BUZZTIME_ALARM_2;
 #ifdef DEBUG
@@ -557,7 +534,7 @@ void loop()
 #endif
 
         // Set night- and daymode
-        if ((p_tm->tm_hour == hour(settings.mySettings.nightOffTime)) && (p_tm->tm_min == minute(settings.mySettings.nightOffTime)))
+        if ((tmNow.tm_hour == hour(settings.mySettings.nightOffTime)) && (tmNow.tm_min == minute(settings.mySettings.nightOffTime)))
         {
 #ifdef DEBUG
             Serial.println("Night off.");
@@ -565,24 +542,19 @@ void loop()
             setMode(MODE_BLANK);
         }
 
-        if ((p_tm->tm_hour == hour(settings.mySettings.dayOnTime)) && (p_tm->tm_min == minute(settings.mySettings.dayOnTime)))
+        if ((tmNow.tm_hour == hour(settings.mySettings.dayOnTime)) && (tmNow.tm_min == minute(settings.mySettings.dayOnTime)))
         {
 #ifdef DEBUG
             Serial.println("Day on.");
 #endif
             setMode(lastMode);
-
-            if (!WiFi.isConnected())
-            {
-                ESP.restart();
-            }
         }
 
         //=============================================================================
         // Run once every random minute (once an hour) or if NTP has an error
         //=============================================================================
 
-        if (p_tm->tm_min == randomMinute)
+        if (tmNow.tm_min == randomMinute)
         {
             if (WiFi.isConnected())
             {
@@ -590,16 +562,14 @@ void loop()
 #ifdef WEATHER
                 !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
 #ifdef DEBUG
-                Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + "°C");
-                Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity) + " %rH");
-                // Serial.println("Sunrise: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunrise)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunrise)))));
-                // Serial.println("Sunset: " + padStringZeros(String(hour(timeZone.toLocal(outdoorWeather.sunset)))) + ":" + padStringZeros(String(minute(timeZone.toLocal(outdoorWeather.sunset)))));
+                Serial.print(F("Outdoor temperature: "));
+                Serial.print(outdoorWeather.temperature);
+                Serial.println(F(" °C"));
+                Serial.print(F("Outdoor humidity: "));
+                Serial.print(outdoorWeather.humidity);
+                Serial.println(F(" %rH"));
 #endif
 #endif
-            }
-            else
-            {
-                WiFi.reconnect();
             }
         }
 
@@ -607,7 +577,7 @@ void loop()
         // Run once every 5 minutes
         //=============================================================================
 
-        if (p_tm->tm_min % 5 == 0)
+        if (tmNow.tm_min % 5 == 0)
         {
 #ifdef SYSLOGSERVER_SERVER
             // Write some data to syslog
@@ -642,9 +612,9 @@ void loop()
     // Run once every second
     //=============================================================================
 
-    if (p_tm->tm_sec != lastSecond)
+    if (tmNow.tm_sec != lastSecond)
     {
-        lastSecond = p_tm->tm_sec;
+        lastSecond = tmNow.tm_sec;
         upTime++;
 
 #ifdef DEBUG_FPS
@@ -692,7 +662,7 @@ void loop()
 
         // Countdown timeralarm by one minute in the second it was activated
 #ifdef BUZZER
-        if (alarmTimer && alarmTimerSet && (alarmTimerSecond == p_tm->tm_sec))
+        if (alarmTimer && alarmTimerSet && (alarmTimerSecond == tmNow.tm_sec))
         {
             alarmTimer--;
 #ifdef DEBUG
@@ -740,7 +710,7 @@ void loop()
                     autoMode = 1;
                     break;
                 case 1:
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
+#if defined(SENSOR_DHT22)
                     setMode(MODE_TEMP);
 #else
 #ifdef WEATHER
@@ -771,11 +741,11 @@ void loop()
                 showEventTimer = EVENT_TIME;
                 for (uint8_t i = 0; i < (sizeof(events) / sizeof(event_t)); i++)
                 {
-                    if ((p_tm->tm_mday == events[i].day) && (p_tm->tm_mon == events[i].month))
+                    if ((tmNow.tm_mday == events[i].day) && (tmNow.tm_mon == events[i].month))
                     {
                         if (events[i].year)
                         {
-                            feedText = "  " + events[i].text + " (" + String(p_tm->tm_year - events[i].year) + ")   ";
+                            feedText = "  " + events[i].text + " (" + String(tmNow.tm_year - events[i].year) + ")   ";
                         }
                         else
                         {
@@ -806,7 +776,7 @@ void loop()
 #ifdef LDR
     if (settings.mySettings.useAbc)
     {
-        if ((millis() > iBrightnessMillis + 40) && !testFlag)
+        if ((millis() - iBrightnessMillis >= 40) && !testFlag)
         {
             iBrightnessMillis = millis();
             iTargetBrightness = getBrightnessFromLDR();
@@ -876,22 +846,18 @@ void loop()
 
 #ifdef FRONTCOVER_BINARY
             matrix[0] = 0b1111000000000000;
-            matrix[1] = p_tm->tm_hour << 5;
-            matrix[2] = p_tm->tm_min << 5;
-            matrix[3] = p_tm->tm_sec << 5;
+            matrix[1] = tmNow.tm_hour << 5;
+            matrix[2] = tmNow.tm_min << 5;
+            matrix[3] = tmNow.tm_sec << 5;
             matrix[5] = 0b1111000000000000;
-            matrix[6] = p_tm->tm_mday << 5;
-            matrix[7] = p_tm->tm_mon << 5;
-            matrix[8] = p_tm->tm_year - 2000 << 5;
+            matrix[6] = tmNow.tm_mday << 5;
+            matrix[7] = tmNow.tm_mon << 5;
+            matrix[8] = tmNow.tm_year - 2000 << 5;
 #else
-            renderer.setTime(p_tm->tm_hour, p_tm->tm_min, matrix);
-            renderer.setCorners(p_tm->tm_min, matrix);
-            if (!settings.mySettings.itIs && ((p_tm->tm_min / 5) % 6))
+            renderer.setTime(tmNow.tm_hour, tmNow.tm_min, matrix);
+            renderer.setCorners(tmNow.tm_min, matrix);
+            if (!settings.mySettings.itIs && ((tmNow.tm_min / 5) % 6))
                 renderer.clearEntryWords(matrix);
-            // renderer.setTime(hour(), minute(), matrix);
-            // renderer.setCorners(minute(), matrix);
-            // if (!settings.mySettings.itIs && ((minute() / 5) % 6))
-            //     renderer.clearEntryWords(matrix);
 #endif
 #ifdef BUZZER
             if (settings.mySettings.alarm1 || settings.mySettings.alarm2 || alarmTimerSet)
@@ -909,11 +875,11 @@ void loop()
 #ifdef SHOW_MODE_SECONDS
         case MODE_SECONDS:
             renderer.clearScreenBuffer(matrix);
-            renderer.setCorners(p_tm->tm_min, matrix);
+            renderer.setCorners(tmNow.tm_min, matrix);
             for (uint8_t i = 0; i <= 6; i++)
             {
-                matrix[1 + i] |= numbersBig[p_tm->tm_sec / 10][i] << 11;
-                matrix[1 + i] |= numbersBig[p_tm->tm_sec % 10][i] << 5;
+                matrix[1 + i] |= numbersBig[tmNow.tm_sec / 10][i] << 11;
+                matrix[1 + i] |= numbersBig[tmNow.tm_sec % 10][i] << 5;
             }
             break;
 #endif
@@ -921,21 +887,21 @@ void loop()
 #ifdef SHOW_MODE_WEEKDAY
         case MODE_WEEKDAY:
             renderer.clearScreenBuffer(matrix);
-            renderer.setSmallText(String(sWeekday[p_tm->tm_wday][0]) + String(sWeekday[p_tm->tm_wday][1]), TEXT_POS_MIDDLE, matrix);
+            renderer.setSmallText(String(sWeekday[tmNow.tm_wday][0]) + String(sWeekday[tmNow.tm_wday][1]), TEXT_POS_MIDDLE, matrix);
             break;
 #endif
 
 #ifdef SHOW_MODE_DATE
         case MODE_DATE:
             renderer.clearScreenBuffer(matrix);
-            if (p_tm->tm_mday < 10)
-                renderer.setSmallText(("0" + String(p_tm->tm_mday)), TEXT_POS_TOP, matrix);
+            if (tmNow.tm_mday < 10)
+                renderer.setSmallText(("0" + String(tmNow.tm_mday)), TEXT_POS_TOP, matrix);
             else
-                renderer.setSmallText(String(p_tm->tm_mday), TEXT_POS_TOP, matrix);
-            if (p_tm->tm_mday < 10)
-                renderer.setSmallText(("0" + String(p_tm->tm_mday)), TEXT_POS_BOTTOM, matrix);
+                renderer.setSmallText(String(tmNow.tm_mday), TEXT_POS_TOP, matrix);
+            if (tmNow.tm_mday < 10)
+                renderer.setSmallText(("0" + String(tmNow.tm_mday)), TEXT_POS_BOTTOM, matrix);
             else
-                renderer.setSmallText(String(p_tm->tm_mday), TEXT_POS_BOTTOM, matrix);
+                renderer.setSmallText(String(tmNow.tm_mday), TEXT_POS_BOTTOM, matrix);
             renderer.setPixelInScreenBuffer(5, 4, matrix);
             renderer.setPixelInScreenBuffer(5, 9, matrix);
             break;
@@ -950,7 +916,6 @@ void loop()
                 sunrise_millis = millis();
                 save_color_sunrise_sunset = settings.mySettings.color;
             }
-            // if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333)
             if (millis() < sunrise_millis + 1000)
             {
                 settings.mySettings.color = YELLOW;
@@ -967,7 +932,6 @@ void loop()
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b1111111111100000;
             }
-            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666)
             else if (millis() < sunrise_millis + 2000)
             {
                 renderer.clearScreenBuffer(matrix);
@@ -983,7 +947,6 @@ void loop()
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b0111111111000000;
             }
-            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 0.5)
             else if (millis() < sunrise_millis + 3000)
             {
                 renderer.clearScreenBuffer(matrix);
@@ -999,7 +962,6 @@ void loop()
                 matrix[8] = 0b0011111110000000;
                 matrix[9] = 0b0000111000000000;
             }
-            // else if (millis() < sunrise_millis + SUNSET_SUNRISE_SPEED * 1.5)
             else if (millis() < sunrise_millis + 4000 + settings.mySettings.timeout * 1000)
             {
                 renderer.clearScreenBuffer(matrix);
@@ -1018,13 +980,11 @@ void loop()
         case MODE_SUNSET:
             if (!sunset_started)
             {
-                // sunset_unix = timeZone.toLocal(outdoorWeather.sunset);
                 sunset_started = true;
                 sunset_millis = millis();
             }
 
             // Matrix is only updatet every second.
-            // if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.333)
             if (millis() < sunset_millis + 1000)
             {
                 settings.mySettings.color = ORANGE;
@@ -1041,7 +1001,6 @@ void loop()
                 matrix[8] = 0b0011111110000000;
                 matrix[9] = 0b0000111000000000;
             }
-            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5 * 0.666)
             else if (millis() < sunset_millis + 2000)
             {
                 renderer.clearScreenBuffer(matrix);
@@ -1057,7 +1016,6 @@ void loop()
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b0111111111000000;
             }
-            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 0.5)
             else if (millis() < sunset_millis + 3000)
             {
                 renderer.clearScreenBuffer(matrix);
@@ -1073,7 +1031,6 @@ void loop()
                 matrix[8] = 0b0111111111000000;
                 matrix[9] = 0b1111111111100000;
             }
-            // else if (millis() < sunset_millis + SUNSET_SUNRISE_SPEED * 1.5)
             else if (millis() < sunset_millis + 4000 + settings.mySettings.timeout * 1000)
             {
                 renderer.clearScreenBuffer(matrix);
@@ -1197,7 +1154,7 @@ void loop()
             break;
 #endif
 
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
+#if defined(SENSOR_DHT22)
         case MODE_TEMP:
 #ifdef DEBUG
             Serial.println("Room Temperature: " + String(roomTemperature) + " �C");
@@ -1356,7 +1313,7 @@ void loop()
                 writeScreenBufferFade(matrixOld, matrix, settings.mySettings.color, brightness);
             if (settings.mySettings.transition == TRANSITION_MOVEUP)
             {
-                if (p_tm->tm_min % 5 == 0)
+                if (tmNow.tm_min % 5 == 0)
                     moveScreenBufferUp(matrixOld, matrix, settings.mySettings.color, brightness);
                 else
                     writeScreenBuffer(matrix, settings.mySettings.color, brightness);
@@ -1678,9 +1635,6 @@ void setMode(Mode newMode)
 #ifdef SHOW_MODE_MOONPHASE
     case MODE_MOONPHASE:
 #endif
-#if defined(RTC_BACKUP) && !defined(SENSOR_DHT22)
-    case MODE_TEMP:
-#endif
 #ifdef SENSOR_DHT22
     case MODE_TEMP:
     case MODE_HUMIDITY:
@@ -1736,16 +1690,9 @@ uint8_t getBrightnessFromLDR()
 // Get room conditions
 //=============================================================================
 
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
+#if defined(SENSOR_DHT22)
 void getRoomConditions()
 {
-#if defined(RTC_BACKUP) && !defined(SENSOR_DHT22)
-    roomTemperature = RTC.temperature() / 4.0 + RTC_TEMPERATURE_OFFSET;
-#ifdef DEBUG
-    Serial.println("Temperature (RTC): " + String(roomTemperature) + " °C");
-#endif
-#endif
-#ifdef SENSOR_DHT22
     float dhtTemperature = dht.readTemperature();
     float dhtHumidity = dht.readHumidity();
     if (!isnan(dhtTemperature) && !isnan(dhtHumidity))
@@ -1768,7 +1715,6 @@ void getRoomConditions()
         Serial.printf("Error (DHT): %u\n", errorCounterDHT);
 #endif
     }
-#endif
 }
 #endif
 
@@ -1825,13 +1771,6 @@ String padStringZeros(String input)
 {
     return (input.length() > 1) ? input : "0" + input;
 }
-
-#ifdef RTC_BACKUP
-time_t getRTCTime()
-{
-    return RTC.get();
-}
-#endif
 
 //=============================================================================
 // Webserver
@@ -1897,11 +1836,9 @@ void handleRoot()
                "<br><br>"
                "<button title=\"Switch modes\" onclick=\"window.location.href='/handleButtonMode'\"><i class=\"fa fa-bars\"></i></button>"
                "<button title=\"Return to time\" onclick=\"window.location.href='/handleButtonTime'\"><i class=\"fa fa-clock-o\"></i></button>";
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
+#ifdef SENSOR_DHT22
     message += "<br><br><i class = \"fa fa-home\" style=\"font-size:20px;\"></i>";
     message += "<br><i class=\"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(roomTemperature) + "&deg;C / " + String(roomTemperature * 1.8 + 32.0) + "&deg;F";
-#endif
-#ifdef SENSOR_DHT22
     message += "<br><i class=\"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(roomHumidity) + "%rH"
                                                                                                       "<br><span style=\"font-size:20px;\">";
     if (roomHumidity < 30)
@@ -1940,18 +1877,19 @@ void handleRoot()
                "<br>Firmware: " +
                String(FIRMWARE_VERSION);
 #ifdef DEBUG_WEB
-    time_t tempEspTime = time(nullptr);
-    message += "<br><br>Time: " + String(hour(tempEspTime)) + ":";
-    if (minute(tempEspTime) < 10)
+    struct tm tmNow = getTime();
+    message += "<br><br>Time: " + String(tmNow.tm_hour) + ":";
+    if (tmNow.tm_min < 10)
         message += "0";
-    message += String(minute(tempEspTime));
-    // if (timeZone.locIsDST(now()))
-    //     message += " (DST)";
-    message += " up " + String(int(upTime / 86400)) + " days, " + String(hour(upTime)) + ":";
-    if (minute(upTime) < 10)
+    message += String(tmNow.tm_min);
+    if (tmNow.tm_isdst)
+        message += " (DST)";
+    tm *tm_uptime = gmtime(&upTime);
+    message += " up " + String(tm_uptime->tm_yday) + " days, " + String(tm_uptime->tm_hour) + ":";
+    if (tm_uptime->tm_min < 10)
         message += "0";
-    message += String(minute(upTime));
-    message += "<br>" + String(dayStr(weekday(tempEspTime))) + ", " + String(monthStr(month(tempEspTime))) + " " + String(day(tempEspTime)) + ". " + String(year(tempEspTime));
+    message += String(tm_uptime->tm_min);
+    message += "<br>" + dayOfWeek[tmNow.tm_wday] + ", " + monthOfYear[tmNow.tm_mon] + " " + String(tmNow.tm_mday) + ". " + String(1900 + tmNow.tm_year);
     message += "<br>Moonphase: " + String(moonphase);
     message += "<br>Free RAM: " + String(ESP.getFreeHeap()) + " bytes";
     message += "<br>RSSI: " + String(WiFi.RSSI());
@@ -1971,10 +1909,6 @@ void handleRoot()
 #endif
     message += "<br>Reset reason: " + ESP.getResetReason();
     message += "<br>Flags: ";
-#ifdef RTC_BACKUP
-    message += "RTC ";
-#else
-    message += "<s>RTC</s> ";
 #endif
 #ifdef SENSOR_DHT22
     message += "DHT22 ";
@@ -2168,7 +2102,7 @@ void handleButtonSettings()
                "</td></tr>";
 #endif
     // ------------------------------------------------------------------------
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
+#ifdef SENSOR_DHT22
     message += "<tr><td>"
                "Show temperature"
                "</td><td>"
@@ -2515,9 +2449,8 @@ void handleCommitSettings()
 #endif
         }
     }
-#endif
     // ------------------------------------------------------------------------
-#if defined(RTC_BACKUP) || defined(SENSOR_DHT22)
+#ifdef SENSOR_DHT22
     webServer.arg("mc") == "0" ? settings.mySettings.modeChange = false : settings.mySettings.modeChange = true;
 #endif
     // ------------------------------------------------------------------------
@@ -2578,22 +2511,12 @@ void handleCommitSettings()
     {
         Serial.println(webServer.arg("st"));
         setTime(webServer.arg("st").substring(11, 13).toInt(), webServer.arg("st").substring(14, 16).toInt(), 0, webServer.arg("st").substring(8, 10).toInt(), webServer.arg("st").substring(5, 7).toInt(), webServer.arg("st").substring(0, 4).toInt());
-#ifdef RTC_BACKUP
-        // RTC.set(time(nullptr));
-#endif
     }
     // ------------------------------------------------------------------------
     settings.saveToEEPROM();
     callRoot();
     screenBufferNeedsUpdate = true;
 }
-
-// // Page reset
-// void handleReset()
-// {
-//     webServer.send(200, "text/plain", "RESET. I'll be back!");
-//     ESP.restart();
-// }
 
 // Page setEvent
 void handleSetEvent()

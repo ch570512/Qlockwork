@@ -6,15 +6,15 @@
 
 #define HOSTNAME "QLOCKWORK"                    // The hostname of the clock.
 #define WEBSITE_TITLE "QLOCKWORK"               // Title on top of the clocks webpage.
-//#define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
+// #define DEDICATION "The only reason for time is so that everything doesn't happen at once.<br>(Albert Einstein)"
                                                 // Show text on the clocks webpage.
 
 #define WEBSERVER                               // Enable the webserver.
 
 #define ARDUINO_OTA                             // Enable OTA updates.
 
-//#define SYSLOGSERVER_SERVER "192.168.0.1"     // Address and port of a syslogserver.
-//#define SYSLOGSERVER_PORT 514                 // Log temperature and more...
+// #define SYSLOGSERVER_SERVER "192.168.0.1"    // Address and port of a syslogserver.
+// #define SYSLOGSERVER_PORT 514                // Log temperature and more...
 
 #define WIFI_AP_PASS "12345678"                 // If no WiFi is connected the clock will start a captive portal.
                                                 // The password for the AP. At least 8 characters.
@@ -31,15 +31,15 @@
                                                 // WHITE, RED, RED_25, RED_50, ORANGE, YELLOW, YELLOW_25, YELLOW_50, GREENYELLOW,
                                                 // GREEN, GREEN_25, GREEN_50, MINTGREEN, CYAN, CYAN_25, CYAN_50, LIGHTBLUE, BLUE,
                                                 // BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
-//#define ABUSE_CORNER_LED_FOR_ALARM            // Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
+// #define ABUSE_CORNER_LED_FOR_ALARM           // Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
 
-//#define POWERON_SELFTEST                      // Test LEDs at startup. Order is: red, green, blue, white.
+// #define POWERON_SELFTEST                     // Test LEDs at startup. Order is: red, green, blue, white.
 #define SHOW_MODE_AMPM                          // Show AM/PM.
 #define SHOW_MODE_SECONDS                       // Show seconds.
 #define SHOW_MODE_WEEKDAY                       // Show weekday.
 #define SHOW_MODE_DATE                          // Show date.
 #define SHOW_MODE_MOONPHASE                     // Show moonphase.
-//#define SHOW_MODE_SUNRISE_SUNSET              // Show sunrise and sunset times.
+// #define SHOW_MODE_SUNRISE_SUNSET             // Show sunrise and sunset times.
 #define SHOW_MODE_TEST                          // Show tests.
 
 #define WEATHER                                 // Show weather data.
@@ -52,23 +52,23 @@
 // This also sets the language of the menu and website (where available).
 //*****************************************************************************
 
-//#define FRONTCOVER_EN
+// #define FRONTCOVER_EN
 #define FRONTCOVER_DE_DE
-//#define FRONTCOVER_DE_SW
-//#define FRONTCOVER_DE_BA
-//#define FRONTCOVER_DE_SA
-//#define FRONTCOVER_DE_MKF_DE
-//#define FRONTCOVER_DE_MKF_SW
-//#define FRONTCOVER_DE_MKF_BA
-//#define FRONTCOVER_DE_MKF_SA
-//#define FRONTCOVER_D3
-//#define FRONTCOVER_CH
-//#define FRONTCOVER_CH_GS
-//#define FRONTCOVER_ES
-//#define FRONTCOVER_FR
-//#define FRONTCOVER_IT
-//#define FRONTCOVER_NL
-//#define FRONTCOVER_BINARY
+// #define FRONTCOVER_DE_SW
+// #define FRONTCOVER_DE_BA
+// #define FRONTCOVER_DE_SA
+// #define FRONTCOVER_DE_MKF_DE
+// #define FRONTCOVER_DE_MKF_SW
+// #define FRONTCOVER_DE_MKF_BA
+// #define FRONTCOVER_DE_MKF_SA
+// #define FRONTCOVER_D3
+// #define FRONTCOVER_CH
+// #define FRONTCOVER_CH_GS
+// #define FRONTCOVER_ES
+// #define FRONTCOVER_FR
+// #define FRONTCOVER_IT
+// #define FRONTCOVER_NL
+// #define FRONTCOVER_BINARY
 
 //*****************************************************************************
 // NTP and Timezone - The timezone in which the clock is located.
@@ -89,31 +89,28 @@
 #define MIN_BRIGHTNESS 20                       // Minimum brightness of LEDs from 0 to 255.
 #define MAX_BRIGHTNESS 240                      // Maximum brightness of LEDs from 0 to 255.
 
-//#define ONOFF_BUTTON                          // Use a hardware on/off-button.
-//#define MODE_BUTTON                           // Use a hardware mode-button.
-//#define TIME_BUTTON                           // Use a hardware time-button. Debug to serial will not work if defined.
+// #define ONOFF_BUTTON                         // Use a hardware on/off-button.
+// #define MODE_BUTTON                          // Use a hardware mode-button.
+// #define TIME_BUTTON                          // Use a hardware time-button. Debug to serial will not work if defined.
 
-//#define SENSOR_DHT22                          // Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
+// #define SENSOR_DHT22                         // Use a DHT22 sensor module (not the plain sensor) for room temperature and humidity.
 #define DHT_TEMPERATURE_OFFSET 0.5              // Sets how many degrees the measured room temperature (+ or -) should be corrected.
 #define DHT_HUMIDITY_OFFSET -2.0                // Sets how many degrees the measured room humidity (+ or -) should be corrected.
 
-//#define RTC_BACKUP                            // Use an RTC as backup and room temperature.
-#define RTC_TEMPERATURE_OFFSET -1.15            // Sets how many degrees the measured room temperature (+ or -) should be corrected.
+// #define LDR                                  // Use an LDR for adaptive brightness control (ABC).
+// #define LDR_IS_INVERSE                       // Inverses the value read from the LDR.
 
-//#define LDR                                   // Use an LDR for adaptive brightness control (ABC).
-//#define LDR_IS_INVERSE                        // Inverses the value read from the LDR.
-
-//#define BUZZER                                // Use a buzzer to make noise for alarms and timer. If not defined alarms are disabled.
+// #define BUZZER                               // Use a buzzer to make noise for alarms and timer. If not defined alarms are disabled.
 #define BUZZTIME_ALARM_1 30                     // Maximum time in seconds for alarm 1 to be active if not turned off manually.
 #define BUZZTIME_ALARM_2 30                     // Maximum time in seconds for alarm 2 to be active if not turned off manually.
 #define BUZZTIME_TIMER 30                       // Maximum time in seconds for the timer alarm to be active if not turned off manually.
 
 #define NEOPIXEL_RGB                            // Enable if your LEDs are RGB only.
-//#define NEOPIXEL_RGBW                         // Enable if your LEDs have a distinct white channel (RGBW).
+// #define NEOPIXEL_RGBW                        // Enable if your LEDs have a distinct white channel (RGBW).
 
 #define NEOPIXEL_TYPE NEO_GRB + NEO_KHZ800      // Specifies the NeoPixel driver. 400kHz, 800kHz, GRB, RGB, GRBW, RGBW...
-//#define NEOPIXEL_TYPE NEO_WRGB + NEO_KHZ800   // Check out "Adafruit_NeoPixel.h" for more information.
-//#define NEOPIXEL_TYPE NEO_GRBW + NEO_KHZ800
+// #define NEOPIXEL_TYPE NEO_WRGB + NEO_KHZ800  // Check out "Adafruit_NeoPixel.h" for more information.
+// #define NEOPIXEL_TYPE NEO_GRBW + NEO_KHZ800
 
 //*****************************************************************************
 // IR remote control
@@ -122,15 +119,15 @@
 // DEBUG has to be defined to show you the code.
 //*****************************************************************************
 
-//#define IR_RECEIVER                           // Use an IR remote control.
+// #define IR_RECEIVER                          // Use an IR remote control.
 #define IR_CODE_ONOFF 16769565                  // HX1838 Remote CH+
 #define IR_CODE_TIME  16753245                  // HX1838 Remote CH-
 #define IR_CODE_MODE  16736925                  // HX1838 Remote CH
-//#define IR_CODE_ONOFF 0xFFE01F                // CLT2 V1.1 Remote Power
-//#define IR_CODE_TIME  0xFFA05F                // CLT2 V1.1 Remote Time
-//#define IR_CODE_MODE  0xFF20DF                // CLT2 V1.1 Remote Region
+// #define IR_CODE_ONOFF 0xFFE01F               // CLT2 V1.1 Remote Power
+// #define IR_CODE_TIME  0xFFA05F               // CLT2 V1.1 Remote Time
+// #define IR_CODE_MODE  0xFF20DF               // CLT2 V1.1 Remote Region
 
-//#define IR_LETTER_OFF                         // Turns off the LED behind the IR sensor permanently.
+// #define IR_LETTER_OFF                        // Turns off the LED behind the IR sensor permanently.
 #define IR_LETTER_X 8                           // This improves IR reception.
 #define IR_LETTER_Y 10                          // X any Y coordinates
 
@@ -153,7 +150,7 @@
                                                 //    109 108 107 106 105 104 103 102 101 100 099
                                                 // 110                                           113
 
-//#define LED_LAYOUT_VERTICAL_1                 // Vertical, corner and alarm LEDs (almost) within the strip. (As seen from the front.)
+// #define LED_LAYOUT_VERTICAL_1                // Vertical, corner and alarm LEDs (almost) within the strip. (As seen from the front.)
 
                                                 // 000                    114                    102
                                                 //    001 021 022 041 042 061 062 081 082 101 103
@@ -168,7 +165,7 @@
                                                 //    010 012 031 032 051 052 071 072 091 092 112
                                                 // 011                                           113
 
-//#define LED_LAYOUT_VERTICAL_2                 // Vertical, corner and alarm LEDs at the end of the strip. (As seen from the front.)
+// #define LED_LAYOUT_VERTICAL_2                // Vertical, corner and alarm LEDs at the end of the strip. (As seen from the front.)
 
                                                 // 112                    111                    110
                                                 //    009 010 029 030 049 050 069 070 089 090 109
@@ -183,7 +180,7 @@
                                                 //    000 019 020 039 040 059 060 079 080 099 100
                                                 // 113                                           114
 
-//#define LED_LAYOUT_VERTICAL_3                 // Vertical, corner and alarm LEDs at the end of the strip. (As seen from the front.)
+// #define LED_LAYOUT_VERTICAL_3                // Vertical, corner and alarm LEDs at the end of the strip. (As seen from the front.)
 
                                                 // 111                    114                    110
                                                 //    009 010 029 030 049 050 069 070 089 090 109
@@ -202,17 +199,17 @@
 // Misc
 //*****************************************************************************
 
-//#define DEBUG                                 // Show debug infos in the serial console.
-//#define DEBUG_WEB                             // Show debug infos on the web page.
-//#define DEBUG_MATRIX                          // Renders the LED matrix to serial console. German only.
-//#define DEBUG_IR                              // Show debug infos from the IR remote.
-//#define DEBUG_LDR                             // Show debug infos for the LDR.
-//#define DEBUG_FPS                             // Show number of loops per second in the serial console.
+// #define DEBUG                                // Show debug infos in the serial console.
+// #define DEBUG_WEB                            // Show debug infos on the web page.
+// #define DEBUG_MATRIX                         // Renders the LED matrix to serial console. German only.
+// #define DEBUG_IR                             // Show debug infos from the IR remote.
+// #define DEBUG_LDR                            // Show debug infos for the LDR.
+// #define DEBUG_FPS                            // Show number of loops per second in the serial console.
 
 // WeMos D1 R2 & mini (Espressif 8266)
 #define PIN_IR_RECEIVER  16                     // D0 (no interrupt)
-//#define PIN_WIRE_SCL     05                   // D1 SCL
-//#define PIN_WIRE_SDA     04                   // D2 SDA
+// #define PIN_WIRE_SCL     05                  // D1 SCL
+// #define PIN_WIRE_SDA     04                  // D2 SDA
 #define PIN_MODE_BUTTON  00                     // D3 LOW_Flash
 #define PIN_LED          02                     // D4 ESP8266_LED
 #define PIN_BUZZER       14                     // D5
