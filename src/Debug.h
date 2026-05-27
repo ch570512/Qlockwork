@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <cstdint>
+#include <Arduino.h>
 
 #ifdef DEBUG
 #define DEBUG_SERIAL_PRINT(x)       Serial.print(x)

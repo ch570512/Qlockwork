@@ -4,7 +4,7 @@
 <a href="https://www.buymeacoffee.com/ch570512" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 150px !important;"></a>
 
 ```
- -----------
++-----------+
 |ES IST     |
 |    ZWANZIG|
 |           |
@@ -15,9 +15,9 @@
 |           |
 |           |
 |           |
- -----------
++-----------+
 ```
-**QLOCKWORK** is a free and open-source (FOSS) word clock written in C++ for the **ESP8266** microcontroller. The project drives an 11x10 RGB LED matrix—which can be easily constructed from a standard LED strip—to display time as legible text. The clock maintains accurate date and time via NTP synchronization.
+**QLOCKWORK** is a free and open-source (FOSS) word clock written in C++ for the **ESP8266** micro-controller. The project drives an 11x10 RGB LED matrix—which can be easily constructed from a standard LED strip—to display time as legible text. The clock maintains accurate date and time via NTP synchronization.
 
 ## Key Features
 
@@ -84,13 +84,13 @@ Schematics and a Bill of Materials (BOM) can be found in the [`/misc`](./misc) d
 | Outdoor temperature | Displays the temperature for your location from MeteoWeather. |
 | Outdoor humidity | Displays the humidity for your location from MeteoWeather. |
 | Timer | Displays of the remaining time if a timer is set. |
-| LED-adress-test | Moves a horizontal bar across the display. |
+| LED-address-test | Moves a horizontal bar across the display. |
 | All LED "red" | Set all LEDs to red. |
 | All LED "green" | Set all LEDs to green. |
 | All LED "blue" | Set all LEDs to blue. |
 | All LED "white" | Set all LEDs to white. |
 
-## Buttons on webpage
+## Buttons on web-page
 
 - Press "on/off" to switch the LEDs on and off.
 - Press "Settings" to configure the clock via web-site.
@@ -99,7 +99,7 @@ Schematics and a Bill of Materials (BOM) can be found in the [`/misc`](./misc) d
 
 ## Settings
 
-| Setting on webpage | Description |
+| Setting on web-page | Description |
 |---|---|
 | Alarm 1: | Enable (on) or disable (off) alarm 1.<br>Time for alarm 1.<br>Weekdays on which alarm 1 is active. |
 | Alarm 2: | Enable (on) or disable (off) alarm 2.<br>Time for alarm 2.<br>Weekdays on which alarm 2 is active. |
@@ -173,8 +173,8 @@ mode=0                              Set clock to mode=0 (time), mode=1 (am/pm), 
 http://your_clocks_ip/reset         Restart the clock.
 ```
 
-## Changelog:
-#### 20260527
+## Change-log:
+#### 20260530
 * Moved to ESP Core (LwIP) timekeeping and NTP.
 
 #### 20260516

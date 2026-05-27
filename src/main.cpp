@@ -21,7 +21,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260529
+#define FIRMWARE_VERSION 20260530
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -60,7 +60,6 @@ void handleRoot();
 void handleSetEvent();
 void handleShowText();
 void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness);
-String padStringZeros(String input);
 void setLedsOff();
 void setLedsOn();
 void setMode(Mode newMode);
@@ -261,6 +260,11 @@ int getMoonphase(int y, int m, int d)
 }
 #endif
 
+String padStringZeros(String input)
+{
+    return (input.length() > 1) ? input : "0" + input;
+}
+
 //=============================================================================
 // Setup()
 //=============================================================================
@@ -275,9 +279,9 @@ void setup()
 
     // And the monkey flips the switch. (Akiva Goldsman)
     Serial.println(F("\n\n*** QLOCKWORK ***"));
-    Serial.print(F("Firmware: ") + String(FIRMWARE_VERSION));
-    Serial.print(F("\nStarting on ") + String(ARDUINO_BOARD));
-    Serial.print(F("\nCPU Frequency = "));
+    Serial.println(F("Firmware: ") + String(FIRMWARE_VERSION));
+    Serial.println(F("Starting on ") + String(ARDUINO_BOARD));
+    Serial.print(F("CPU Frequency = "));
     Serial.print(F_CPU / 1000000);
     Serial.println(F(" MHz"));
 
@@ -288,62 +292,61 @@ void setup()
 
 #ifdef POWERON_SELFTEST
     renderer.setAllScreenBuffer(matrix);
-    Serial.println(F("Set all LEDs to red."));
+    DEBUG_SERIAL_PRINTLN(F("Set all LEDs to red."));
     writeScreenBuffer(matrix, RED, brightness);
     delay(2500);
-    Serial.println(F("Set all LEDs to green."));
+    DEBUG_SERIAL_PRINTLN(F("Set all LEDs to green."));
     writeScreenBuffer(matrix, GREEN, brightness);
     delay(2500);
-    Serial.println(F("Set all LEDs to blue."));
+    DEBUG_SERIAL_PRINTLN(F("Set all LEDs to blue."));
     writeScreenBuffer(matrix, BLUE, brightness);
     delay(2500);
-    Serial.println(F("Set all LEDs to white."));
+    DEBUG_SERIAL_PRINTLN(F("Set all LEDs to white."));
     writeScreenBuffer(matrix, WHITE, brightness);
     delay(2500);
 #endif
 
 #ifdef ESP_LED
-    Serial.println(F("Setting up ESP-LED"));
+    DEBUG_SERIAL_PRINTLN(F("Setting up ESP-LED"));
     pinMode(PIN_LED, OUTPUT);
     digitalWrite(PIN_LED, HIGH);
 #endif
 
 #ifdef MODE_BUTTON
-    Serial.println(F("Setting up Mode-Button."));
+    DEBUG_SERIAL_PRINTLN(F("Setting up Mode-Button."));
     pinMode(PIN_MODE_BUTTON, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_MODE_BUTTON), buttonModeInterrupt, FALLING);
 #endif
 
 #ifdef ONOFF_BUTTON
-    Serial.println(F("Setting up Back-Button."));
+    DEBUG_SERIAL_PRINTLN(F("Setting up Back-Button."));
     pinMode(PIN_ONOFF_BUTTON, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_ONOFF_BUTTON), buttonOnOffInterrupt, FALLING);
 #endif
 
 #ifdef TIME_BUTTON
-    Serial.println(F("Setting up Time-Button."));
+    DEBUG_SERIAL_PRINTLN(F("Setting up Time-Button."));
     pinMode(PIN_TIME_BUTTON, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_TIME_BUTTON), buttonTimeInterrupt, FALLING);
 #endif
 
 #ifdef BUZZER
-    Serial.println(F("Setting up Buzzer"));
+    DEBUG_SERIAL_PRINTLN(F("Setting up Buzzer"));
     pinMode(PIN_BUZZER, OUTPUT);
 #endif
 
 #ifdef SENSOR_DHT22
-    Serial.println(F("Setting up DHT22"));
+    DEBUG_SERIAL_PRINTLN(F("Setting up DHT22"));
     dht.begin();
 #endif
 
 #ifdef LDR
-    Serial.print(F("Setting up LDR. ABC: "));
-    settings.mySettings.useAbc ? Serial.println(F("enabled")) : Serial.println(F("disabled"));
+    DEBUG_SERIAL_PRINTLN(F("Setting up LDR."));
     pinMode(PIN_LDR, INPUT);
 #endif
 
 #ifdef IR_RECEIVER
-    Serial.println(F("Setting up IR-Receiver"));
+    DEBUG_SERIAL_PRINTLN(F("Setting up IR-Receiver"));
     irrecv.enableIRIn();
 #endif
 
@@ -363,7 +366,7 @@ void setup()
     if (!WiFi.isConnected())
     {
         // WiFi.mode(WIFI_AP);
-        Serial.println(F("No WiFi connected"));
+        DEBUG_SERIAL_PRINTLN(F("No WiFi connected"));
         writeScreenBuffer(matrix, RED, brightness);
         delay(1000);
         // myIP = WiFi.softAPIP();
@@ -371,8 +374,10 @@ void setup()
     else
     {
         WiFi.mode(WIFI_STA);
-        Serial.println("Hostname: " + String(HOSTNAME));
-        Serial.println("RSSI: " + String(WiFi.RSSI()));
+        DEBUG_SERIAL_PRINT(F("Hostname: "));
+        DEBUG_SERIAL_PRINTLN(String(HOSTNAME));
+        DEBUG_SERIAL_PRINT(F("RSSI: "));
+        DEBUG_SERIAL_PRINTLN(String(WiFi.RSSI()));
         writeScreenBuffer(matrix, GREEN, brightness);
         delay(1000);
         myIP = WiFi.localIP();
@@ -388,12 +393,12 @@ void setup()
 #endif
 
 #ifdef WEBSERVER
-    Serial.println(F("Starting webserver"));
+    DEBUG_SERIAL_PRINTLN(F("Starting webserver"));
     setupWebServer();
 #endif
 
 #ifdef ARDUINO_OTA
-    Serial.println(F("Starting OTA"));
+    DEBUG_SERIAL_PRINTLN(F("Starting OTA"));
     ArduinoOTA.begin();
 #endif
 
@@ -426,7 +431,6 @@ void setup()
     Serial.printf("Sunrise: %02u:%02u\n", sunriseTime->tm_hour, sunriseTime->tm_min);
     struct tm *sunsetTime = localtime(&outdoorWeather.sunset);
     Serial.printf("Sunset: %02u:%02u\n", sunsetTime->tm_hour, sunsetTime->tm_min);
-
 #endif
 #endif
 
@@ -449,9 +453,9 @@ void setup()
     settings.mySettings.alarm2 ? Serial.print("on ") : Serial.print("off ");
     Serial.println(settings.mySettings.alarm2Weekdays, BIN);
     Serial.printf("Random time: %02u:%02u\n", randomHour, randomMinute);
-    Serial.println("DEBUG enabled.");
+    Serial.println(F("DEBUG enabled"));
 #else
-    Serial.println(F("DEBUG disabled."));
+    Serial.println(F("DEBUG disabled"));
 #endif
 
 #ifdef FRONTCOVER_BINARY
@@ -519,7 +523,7 @@ void loop()
         {
             settings.mySettings.color = random(0, COLOR_COUNT + 1);
 #ifdef DEBUG
-            Serial.printf("Color changed to: %d\n", (int)settings.mySettings.color);
+            Serial.printf("Color changed to: %u\n", (int)settings.mySettings.color);
 #endif
         }
 
@@ -530,9 +534,7 @@ void loop()
             digitalWrite(PIN_BUZZER, HIGH);
             delay(25);
             digitalWrite(PIN_BUZZER, LOW);
-#ifdef DEBUG
-            Serial.println("Beep!");
-#endif
+            DEBUG_SERIAL_PRINTLN("Beep!");
         }
 #endif
 
@@ -555,7 +557,7 @@ void loop()
         screenBufferNeedsUpdate = true;
 
 #ifdef DEBUG
-        Serial.printf("\nTime (ESP): %02d:%02d:%02d %02d.%02d.%02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
+        Serial.printf("\nTime (ESP): %02d:%02d:%02d %02d.%02d.%02d\n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
 #endif
 
 #if defined(SENSOR_DHT22)
@@ -568,34 +570,26 @@ void loop()
         if (settings.mySettings.alarm1 && (tmNow.tm_hour == getHour(settings.mySettings.alarm1Time)) && (tmNow.tm_min == getMinute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm1Weekdays, tmNow.tm_wday))
         {
             alarmOn = BUZZTIME_ALARM_1;
-#ifdef DEBUG
-            Serial.println("Alarm1 on");
-#endif
+            DEBUG_SERIAL_PRINTLN(F("Alarm1 on"));
         }
 
         // Switch on buzzer for alarm 2
         if (settings.mySettings.alarm2 && (tmNow.tm_hour == getHour(settings.mySettings.alarm2Time)) && (tmNow.tm_min == getMinute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm2Weekdays, tmNow.tm_wday))
         {
             alarmOn = BUZZTIME_ALARM_2;
-#ifdef DEBUG
-            Serial.println("Alarm2 on");
-#endif
+            DEBUG_SERIAL_PRINTLN(F("Alarm2 on"));
         }
 #endif
 
         // Set night- and daymode
         if ((tmNow.tm_hour == getHour(settings.mySettings.nightOffTime)) && (tmNow.tm_min == getMinute(settings.mySettings.nightOffTime)))
         {
-#ifdef DEBUG
-            Serial.println("Night off");
-#endif
+            DEBUG_SERIAL_PRINTLN(F("Night off"));
             setMode(MODE_BLANK);
         }
         if ((tmNow.tm_hour == getHour(settings.mySettings.dayOnTime)) && (tmNow.tm_min == getMinute(settings.mySettings.dayOnTime)))
         {
-#ifdef DEBUG
-            Serial.println("Day on");
-#endif
+            DEBUG_SERIAL_PRINTLN(F("Day on"));
             setMode(lastMode);
         }
 
@@ -610,14 +604,12 @@ void loop()
                 // Get weather from MeteoWeather
 #ifdef WEATHER
                 !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
-#ifdef DEBUG
-                Serial.print(F("Outdoor temperature: "));
-                Serial.print(outdoorWeather.temperature);
-                Serial.println(F(" °C"));
-                Serial.print(F("Outdoor humidity: "));
-                Serial.print(outdoorWeather.humidity);
-                Serial.println(F(" %rH"));
-#endif
+                DEBUG_SERIAL_PRINT(F("Outdoor temperature: "));
+                DEBUG_SERIAL_PRINT(outdoorWeather.temperature);
+                DEBUG_SERIAL_PRINTLN(F(" °C"));
+                DEBUG_SERIAL_PRINT(F("Outdoor humidity: "));
+                DEBUG_SERIAL_PRINT(outdoorWeather.humidity);
+                DEBUG_SERIAL_PRINTLN(F(" %rH"));
 #endif
             }
         }
@@ -665,9 +657,7 @@ void loop()
             digitalRead(PIN_BUZZER) ? digitalWrite(PIN_BUZZER, LOW) : digitalWrite(PIN_BUZZER, HIGH);
             if (!alarmOn)
             {
-#ifdef DEBUG
-                Serial.println("Alarm: off");
-#endif
+                DEBUG_SERIAL_PRINTLN(F("Alarm: off"));
                 digitalWrite(PIN_BUZZER, LOW);
                 screenBufferNeedsUpdate = true;
             }
@@ -708,9 +698,7 @@ void loop()
         {
             alarmTimerSet = false;
             alarmOn = BUZZTIME_TIMER;
-#ifdef DEBUG
-            Serial.println("Timeralarm: on");
-#endif
+            DEBUG_SERIAL_PRINTLN(F("Timeralarm: on"));
         }
 #endif
 
@@ -720,9 +708,9 @@ void loop()
             autoModeChangeTimer--;
             if (!autoModeChangeTimer)
             {
-#ifdef DEBUG
-                Serial.println("Auto modechange (" + String(autoMode) + ")");
-#endif
+                DEBUG_SERIAL_PRINT(F("Auto modechange ("));
+                DEBUG_SERIAL_PRINT(String(autoMode));
+                DEBUG_SERIAL_PRINTLN(F(")"));
                 autoModeChangeTimer = AUTO_MODECHANGE_TIME;
                 switch (autoMode)
                 {
@@ -784,9 +772,7 @@ void loop()
                         }
                         feedPosition = 0;
                         feedColor = events[i].color;
-#ifdef DEBUG
-                        Serial.println("Event: \"" + feedText + "\"");
-#endif
+                        DEBUG_SERIAL_PRINTLN("Event: \"" + feedText + "\"");
                         setMode(MODE_FEED);
                     }
                 }
@@ -830,7 +816,7 @@ void loop()
     if (irrecv.decode(&irDecodeResult))
     {
 #ifdef DEBUG_IR
-        Serial.print("IR signal: 0x");
+        Serial.print(F("IR signal: 0x"));
         serialPrintUint64(irDecodeResult.value, HEX);
         Serial.println();
 #endif
@@ -859,12 +845,16 @@ void loop()
         if (testFlag)
         {
             for (uint8_t i = 0; i <= 9; i++)
+            {
                 matrixOld[i] = 0;
+            }
             testFlag = false;
         }
         else
             for (uint8_t i = 0; i <= 9; i++)
+            {
                 matrixOld[i] = matrix[i];
+            }
 
         switch (mode)
         {
@@ -1039,11 +1029,11 @@ void loop()
             break;
 #endif
 
-#if defined(SENSOR_DHT22)
+#ifdef SENSOR_DHT22
         case MODE_TEMP:
-#ifdef DEBUG
-            Serial.println("Room Temperature: " + String(roomTemperature) + " �C");
-#endif
+            DEBUG_SERIAL_PRINT(F("Room Temperature: "));
+            DEBUG_SERIAL_PRINT(String(roomTemperature));
+            DEBUG_SERIAL_PRINTLN(F(" °C"));
             renderer.clearScreenBuffer(matrix);
             if (roomTemperature == 0)
             {
@@ -1069,11 +1059,10 @@ void loop()
             renderer.setSmallText(String(int(abs(roomTemperature) + 0.5)), TEXT_POS_BOTTOM, matrix);
             break;
 
-#ifdef SENSOR_DHT22
         case MODE_HUMIDITY:
-#ifdef DEBUG
-            Serial.println("Room Humidity: " + String(roomHumidity) + " %rH");
-#endif
+            DEBUG_SERIAL_PRINT(F("Room Humidity: "));
+            DEBUG_SERIAL_PRINT(String(roomHumidity));
+            DEBUG_SERIAL_PRINTLN(F(" %rH"));
             renderer.clearScreenBuffer(matrix);
             renderer.setSmallText(String(int(roomHumidity + 0.5)), TEXT_POS_TOP, matrix);
             matrix[6] = 0b0100100001000000;
@@ -1082,13 +1071,12 @@ void loop()
             matrix[9] = 0b0100100011100000;
             break;
 #endif
-#endif
 
 #ifdef WEATHER
         case MODE_EXT_TEMP:
-#ifdef DEBUG
-            Serial.println("Outdoor temperature: " + String(outdoorWeather.temperature) + "°C");
-#endif
+            DEBUG_SERIAL_PRINT(F("Outdoor temperature: "));
+            DEBUG_SERIAL_PRINT(String(outdoorWeather.temperature));
+            DEBUG_SERIAL_PRINTLN(F(" °C"));
             renderer.clearScreenBuffer(matrix);
             if (outdoorWeather.temperature > 0)
             {
@@ -1101,9 +1089,9 @@ void loop()
             renderer.setSmallText(String(int(abs(outdoorWeather.temperature) + 0.5)), TEXT_POS_BOTTOM, matrix);
             break;
         case MODE_EXT_HUMIDITY:
-#ifdef DEBUG
-            Serial.println("Outdoor humidity: " + String(outdoorWeather.humidity) + " %rH");
-#endif
+            DEBUG_SERIAL_PRINT(F("Outdoor humidity: "));
+            DEBUG_SERIAL_PRINT(String(outdoorWeather.humidity));
+            DEBUG_SERIAL_PRINTLN(F(" %rH"));
             renderer.clearScreenBuffer(matrix);
             if (outdoorWeather.humidity < 100)
                 renderer.setSmallText(String(outdoorWeather.humidity), TEXT_POS_TOP, matrix);
@@ -1401,9 +1389,7 @@ ICACHE_RAM_ATTR void buttonOnOffInterrupt()
 
 void buttonOnOffPressed()
 {
-#ifdef DEBUG
-    Serial.println("On/off pressed");
-#endif
+    DEBUG_SERIAL_PRINTLN(F("On/off pressed"));
     mode == MODE_BLANK ? setLedsOn() : setLedsOff();
 }
 
@@ -1424,17 +1410,13 @@ ICACHE_RAM_ATTR void buttonTimeInterrupt()
 
 void buttonTimePressed()
 {
-#ifdef DEBUG
-    Serial.println("Time pressed");
-#endif
+    DEBUG_SERIAL_PRINTLN(F("Time pressed"));
 
     // Switch off alarm
 #ifdef BUZZER
     if (alarmOn)
     {
-#ifdef DEBUG
-        Serial.println("Alarm: off");
-#endif
+        DEBUG_SERIAL_PRINTLN(F("Alarm: off"));
         digitalWrite(PIN_BUZZER, LOW);
         alarmOn = false;
     }
@@ -1460,17 +1442,13 @@ ICACHE_RAM_ATTR void buttonModeInterrupt()
 
 void buttonModePressed()
 {
-#ifdef DEBUG
-    Serial.println("Mode pressed");
-#endif
+    DEBUG_SERIAL_PRINTLN(F("Mode pressed"));
 
     // Switch off alarm
 #ifdef BUZZER
     if (alarmOn)
     {
-#ifdef DEBUG
-        Serial.println("Alarm: off");
-#endif
+        DEBUG_SERIAL_PRINTLN(F("Alarm: off"));
         digitalWrite(PIN_BUZZER, LOW);
         alarmOn = false;
         setMode(MODE_TIME);
@@ -1574,10 +1552,12 @@ void getRoomConditions()
         errorCounterDHT = 0;
         roomTemperature = dhtTemperature + DHT_TEMPERATURE_OFFSET;
         roomHumidity = dhtHumidity + DHT_HUMIDITY_OFFSET;
-#ifdef DEBUG
-        Serial.println("Temperature (DHT): " + String(roomTemperature) + " °C");
-        Serial.println("Humidity (DHT): " + String(roomHumidity) + " %rH");
-#endif
+        DEBUG_SERIAL_PRINT(F("Temperature (DHT): "));
+        DEBUG_SERIAL_PRINT(String(roomTemperature));
+        DEBUG_SERIAL_PRINTLN(F(" °C"));
+        DEBUG_SERIAL_PRINT(F("Humidity (DHT): "));
+        DEBUG_SERIAL_PRINT(String(roomHumidity));
+        DEBUG_SERIAL_PRINTLN(F(" %rH"));
     }
     else
     {
@@ -1599,24 +1579,15 @@ void getRoomConditions()
 // Switch off LEDs
 void setLedsOff()
 {
-#ifdef DEBUG
-    Serial.println("LEDs: off");
-#endif
+    DEBUG_SERIAL_PRINTLN(F("LEDs: off"));
     setMode(MODE_BLANK);
 }
 
 // Switch on LEDs
 void setLedsOn()
 {
-#ifdef DEBUG
-    Serial.println("LEDs: on");
-#endif
+    DEBUG_SERIAL_PRINTLN(F("LEDs: on"));
     setMode(lastMode);
-}
-
-String padStringZeros(String input)
-{
-    return (input.length() > 1) ? input : "0" + input;
 }
 
 //=============================================================================
@@ -1685,8 +1656,8 @@ void handleRoot()
                "<button title=\"Return to time\" onclick=\"window.location.href='/handleButtonTime'\"><i class=\"fa fa-clock-o\"></i></button>";
 #ifdef SENSOR_DHT22
     message += "<br><br><i class = \"fa fa-home\" style=\"font-size:20px;\"></i>";
-    message += "<br><i class=\"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(roomTemperature) + "&deg;C / " + String(roomTemperature * 1.8 + 32.0) + "&deg;F";
-    message += "<br><i class=\"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(roomHumidity) + "%rH"
+    message += "<br><i class=\"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(roomTemperature) + " &deg;C / " + String(roomTemperature * 1.8 + 32.0) + " &deg;F";
+    message += "<br><i class=\"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(roomHumidity) + " %rH"
                                                                                                       "<br><span style=\"font-size:20px;\">";
     if (roomHumidity < 30)
         message += "<i style=\"color:Red;\" class=\"fa fa-square\"\"></i>";
@@ -1713,8 +1684,8 @@ void handleRoot()
 #ifdef WEATHER
     message += "<br><br><i class = \"fa fa-tree\" style=\"font-size:20px;\"></i>"
                "<br><i class = \"fa fa-thermometer\" style=\"font-size:20px;\"></i> " +
-               String(outdoorWeather.temperature) + "&deg;C / " + String(outdoorWeather.temperature * 1.8 + 32.0) + "&deg;F" +
-               "<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + "%rH" +
+               String(outdoorWeather.temperature) + " &deg;C / " + String(outdoorWeather.temperature * 1.8 + 32.0) + " &deg;F" +
+               "<br><i class = \"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(outdoorWeather.humidity) + " %rH" +
                "<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg";
 
     struct tm *sunriseTime = localtime(&outdoorWeather.sunrise);

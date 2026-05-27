@@ -1,8 +1,5 @@
 #include "WebServer.h"
 
-#include <ESP8266WebServer.h>
-#include <cstdint>
-
 // Webpage 404
 void handleNotFound(ESP8266WebServer &webServer)
 {

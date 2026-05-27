@@ -1,8 +1,5 @@
 #include "Debug.h"
 
-#include <Arduino.h>
-#include <cstdint>
-
 void debugScreenBuffer(uint16_t screenBuffer[])
 {
     const char buchstabensalat[][12] =
