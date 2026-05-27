@@ -52,7 +52,6 @@ void buttonTimeInterrupt();
 void buttonTimePressed();
 void callRoot();
 uint8_t getBrightnessFromLDR();
-int getMoonphase(int y, int m, int d);
 void getRoomConditions();
 void handleButtonSettings();
 void handleCommitSettings();
@@ -234,6 +233,33 @@ void handleTimeSetting(String input) // 2026-05-01T17:58
         Serial.println(F("[ERROR] Wrong format"));
     }
 }
+
+// Calculate moonphase
+#ifdef SHOW_MODE_MOONPHASE
+int getMoonphase(int y, int m, int d)
+{
+    int b = 0;
+    int c = 0;
+    int e = 0;
+    double jd = 0;
+
+    if (m < 3)
+    {
+        y--;
+        m += 12;
+    }
+    ++m;
+    c = 365.25 * y;
+    e = 30.6 * m;
+    jd = c + e + d - 694039.09; // jd is total days elapsed
+    jd /= 29.53;                // divide by the moon cycle (29.53 days)
+    b = jd;                     // int(jd) -> b, take integer part of jd
+    jd -= b;                    // subtract integer part to leave fractional part of original jd
+    b = jd * 8 + 0.5;           // scale fraction from 0-8 and round by adding 0.5
+    b = b & 7;                  // 0 and 8 are the same so turn 8 into 0
+    return b;
+}
+#endif
 
 //=============================================================================
 // Setup()
@@ -1588,33 +1614,6 @@ void setLedsOn()
     setMode(lastMode);
 }
 
-// Calculate moonphase
-#ifdef SHOW_MODE_MOONPHASE
-int getMoonphase(int y, int m, int d)
-{
-    int b = 0;
-    int c = 0;
-    int e = 0;
-    double jd = 0;
-
-    if (m < 3)
-    {
-        y--;
-        m += 12;
-    }
-    ++m;
-    c = 365.25 * y;
-    e = 30.6 * m;
-    jd = c + e + d - 694039.09; // jd is total days elapsed
-    jd /= 29.53;                // divide by the moon cycle (29.53 days)
-    b = jd;                     // int(jd) -> b, take integer part of jd
-    jd -= b;                    // subtract integer part to leave fractional part of original jd
-    b = jd * 8 + 0.5;           // scale fraction from 0-8 and round by adding 0.5
-    b = b & 7;                  // 0 and 8 are the same so turn 8 into 0
-    return b;
-}
-#endif
-
 String padStringZeros(String input)
 {
     return (input.length() > 1) ? input : "0" + input;
@@ -1800,7 +1799,7 @@ void handleRoot()
 void handleButtonSettings()
 {
 #ifdef DEBUG
-    Serial.println("Settings pressed.");
+    Serial.println(F("Settings pressed"));
 #endif
     String message = "<!doctype html>"
                      "<html>"
@@ -2241,7 +2240,7 @@ void handleButtonSettings()
 void handleCommitSettings()
 {
 #ifdef DEBUG
-    Serial.println("Commit settings pressed.");
+    Serial.println(F("Commit settings pressed"));
 #endif
     // ------------------------------------------------------------------------
 #ifdef BUZZER
@@ -2284,7 +2283,7 @@ void handleCommitSettings()
         alarmTimerSet = true;
         setMode(MODE_TIMER);
 #ifdef DEBUG
-        Serial.println("Timer started.");
+        Serial.println(F("Timer started"));
 #endif
     }
     else
@@ -2296,7 +2295,7 @@ void handleCommitSettings()
             alarmTimerSet = false;
             setMode(MODE_TIME);
 #ifdef DEBUG
-            Serial.println("Timer stopped.");
+            Serial.println(F("Timer stopped"));
 #endif
         }
     }
