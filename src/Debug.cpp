@@ -28,8 +28,5 @@ void debugScreenBuffer(uint16_t screenBuffer[])
     }
     Serial.println("+-----------+");
     
-    struct tm tmNow = getTime();
-    Serial.printf("Time (ESP): %02d:%02d:%02d %02d.%02d.%02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
-
     return;
 }

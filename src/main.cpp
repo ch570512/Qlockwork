@@ -21,7 +21,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260530
+#define FIRMWARE_VERSION 20260601
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -457,6 +457,7 @@ void loop()
 
         if (tmNow.tm_hour == randomHour)
         {
+            randomHour = tmNow.tm_hour;
         }
     }
 
@@ -1082,6 +1083,11 @@ void loop()
 #ifdef DEBUG_MATRIX
         // debugScreenBuffer(matrixOld);
         debugScreenBuffer(matrix);
+#endif
+
+#ifdef DEBUG
+        struct tm tmNow = getTime();
+        Serial.printf("Time (ESP): %02d:%02d:%02d %02d.%02d.%02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
 #endif
 
         // write screenbuffer to display
