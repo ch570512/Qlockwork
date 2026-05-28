@@ -374,7 +374,7 @@ void setup()
 #ifdef FRONTCOVER_BINARY
     settings.mySettings.transition = TRANSITION_NORMAL;
 #endif
-} // setup()
+}
 
 //=============================================================================
 // Loop()
@@ -1153,7 +1153,7 @@ void loop()
     // debugFps();
     fps++;
 #endif
-} // loop()
+}
 
 //=============================================================================
 // Transitions
@@ -1206,7 +1206,7 @@ void writeScreenBuffer(uint16_t screenBuffer[], uint8_t color, uint8_t brightnes
 #endif
 
     ledDriver.show();
-} // writeScreenBuffer
+}
 
 void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness)
 {
@@ -1220,7 +1220,7 @@ void moveScreenBufferUp(uint16_t screenBufferOld[], uint16_t screenBufferNew[], 
         writeScreenBuffer(screenBufferOld, color, brightness);
         delay(50);
     }
-} // moveScreenBufferUp
+}
 
 void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[], uint8_t color, uint8_t brightness)
 {
@@ -1285,7 +1285,7 @@ void writeScreenBufferFade(uint16_t screenBufferOld[], uint16_t screenBufferNew[
 #endif
         ledDriver.show();
     }
-} // writeScreenBufferFade
+}
 
 //=============================================================================
 // "On/off" pressed
@@ -1515,7 +1515,7 @@ void setupWebServer()
     webServer.on("/handleButtonMode", []()
                  { buttonModePressed(); callRoot(); });
     webServer.on("/handleButtonTime", []()
-                 {    buttonTimePressed(); callRoot(); });
+                 { buttonTimePressed(); callRoot(); });
     webServer.on("/commitSettings", handleCommitSettings);
     webServer.on("/reset", []()
                  { handleReset(webServer); });
