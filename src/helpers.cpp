@@ -15,12 +15,12 @@ struct tm getTime()
 
 uint8_t getHour(time_t zeit)
 {
-    return zeit / 3600;
+    return static_cast<uint8_t>((zeit % 86400) / 3600);
 }
 
 uint8_t getMinute(time_t zeit)
 {
-    return (zeit % 3600) / 60;
+    return static_cast<uint8_t>((zeit % 3600) / 60);
 }
 
 // Calculate moonphase
