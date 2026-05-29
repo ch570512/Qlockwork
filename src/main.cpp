@@ -781,8 +781,8 @@ void loop()
             matrix[3] = tmNow.tm_sec << 5;
             matrix[5] = 0b1111000000000000;
             matrix[6] = tmNow.tm_mday << 5;
-            matrix[7] = tmNow.tm_mon << 5;
-            matrix[8] = tmNow.tm_year - 2000 << 5;
+            matrix[7] = tmNow.tm_mon + 1 << 5;
+            matrix[8] = tmNow.tm_year + 1900 << 5;
 #else
             renderer.setTime(tmNow.tm_hour, tmNow.tm_min, matrix);
             renderer.setCorners(tmNow.tm_min, matrix);
