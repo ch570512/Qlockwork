@@ -21,7 +21,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260602
+#define FIRMWARE_VERSION 20260603
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
