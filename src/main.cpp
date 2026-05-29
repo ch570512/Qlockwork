@@ -21,7 +21,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260601
+#define FIRMWARE_VERSION 20260602
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -117,9 +117,9 @@ uint8_t randomHour = 0;
 uint8_t randomMinute = 0;
 uint8_t moonphase = 0;
 time_t upTime = 0;
-const String dayOfWeek[] = {
+const char *dayOfWeek[] = {
     "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-const String monthOfYear[] = {
+const char *monthOfYear[] = {
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"};
 
@@ -825,8 +825,8 @@ void loop()
                 renderer.setSmallText(("0" + String(tmNow.tm_mday)), TEXT_POS_TOP, matrix);
             else
                 renderer.setSmallText(String(tmNow.tm_mday), TEXT_POS_TOP, matrix);
-            if (tmNow.tm_mday < 10)
-                renderer.setSmallText(("0" + String(tmNow.tm_mday)), TEXT_POS_BOTTOM, matrix);
+            if (tmNow.tm_mon < 10)
+                renderer.setSmallText(("0" + String(tmNow.tm_mon)), TEXT_POS_BOTTOM, matrix);
             else
                 renderer.setSmallText(String(tmNow.tm_mday), TEXT_POS_BOTTOM, matrix);
             renderer.setPixelInScreenBuffer(5, 4, matrix);
@@ -1087,7 +1087,10 @@ void loop()
 
 #ifdef DEBUG
         struct tm tmNow = getTime();
-        Serial.printf("Time (ESP): %02d:%02d:%02d %02d.%02d.%02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, tmNow.tm_mday, tmNow.tm_mon + 1, tmNow.tm_year + 1900);
+        Serial.printf("Time (ESP): %02d:%02d:%02d %s, %s %02d. %02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, dayOfWeek[tmNow.tm_wday], monthOfYear[tmNow.tm_mon], tmNow.tm_mday, tmNow.tm_year + 1900);
+        DEBUG_SERIAL_PRINT(F("Total Free Heap: "));
+        DEBUG_SERIAL_PRINT(ESP.getFreeHeap() / 1024);
+        DEBUG_SERIAL_PRINTLN(F(" kB"));
 #endif
 
         // write screenbuffer to display
@@ -1620,7 +1623,7 @@ void handleRoot()
     if (tm_uptime->tm_min < 10)
         message += "0";
     message += String(tm_uptime->tm_min);
-    message += "<br>" + dayOfWeek[tmNow.tm_wday] + ", " + monthOfYear[tmNow.tm_mon] + " " + String(tmNow.tm_mday) + ". " + String(1900 + tmNow.tm_year);
+    message += "<br>" + String(dayOfWeek[tmNow.tm_wday]) + ", " + String(monthOfYear[tmNow.tm_mon]) + " " + String(tmNow.tm_mday) + ". " + String(1900 + tmNow.tm_year);
     message += "<br>Moonphase: " + String(moonphase);
     message += "<br>Free RAM: " + String(ESP.getFreeHeap()) + " bytes";
     message += "<br>RSSI: " + String(WiFi.RSSI());

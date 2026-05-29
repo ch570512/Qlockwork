@@ -2,14 +2,13 @@
 
 #if defined(FRONTCOVER_EN) || defined(FRONTCOVER_BINARY)
 const char sWeekday[][2] = {
-    { ' ', ' ' }, // 00
-    { 'S', 'U' }, // 01
-    { 'M', 'O' }, // 02
-    { 'T', 'U' }, // 03
-    { 'W', 'E' }, // 04
-    { 'T', 'H' }, // 05
-    { 'F', 'R' }, // 06
-    { 'S', 'A' }  // 07
+    { 'S', 'U' },
+    { 'M', 'O' },
+    { 'T', 'U' },
+    { 'W', 'E' },
+    { 'T', 'H' },
+    { 'F', 'R' },
+    { 'S', 'A' }
 };
 #define LANGSTR "en"
 #define TXT_SETTINGS "Settings"
@@ -23,14 +22,13 @@ const char sWeekday[][2] = {
 
 #if defined(FRONTCOVER_DE_DE) || defined(FRONTCOVER_DE_SW) || defined(FRONTCOVER_DE_BA) || defined(FRONTCOVER_DE_SA) || defined(FRONTCOVER_D3) || defined(FRONTCOVER_DE_MKF_DE) || defined(FRONTCOVER_DE_MKF_SW) || defined(FRONTCOVER_DE_MKF_BA) || defined(FRONTCOVER_DE_MKF_SA) || defined(FRONTCOVER_CH) || defined(FRONTCOVER_CH_GS)
 const char sWeekday[][2] = {
-    { ' ', ' ' }, // 00
-    { 'S', 'O' }, // 01
-    { 'M', 'O' }, // 02
-    { 'D', 'I' }, // 03
-    { 'M', 'I' }, // 04
-    { 'D', 'O' }, // 05
-    { 'F', 'R' }, // 06
-    { 'S', 'A' }  // 07
+    { 'S', 'O' },
+    { 'M', 'O' },
+    { 'D', 'I' },
+    { 'M', 'I' },
+    { 'D', 'O' },
+    { 'F', 'R' },
+    { 'S', 'A' }
 };
 #define LANGSTR "de"
 #define TXT_SETTINGS "Einstellungen"
@@ -44,14 +42,13 @@ const char sWeekday[][2] = {
 
 #if defined(FRONTCOVER_FR)
 const char sWeekday[][2] = {
-    { ' ', ' ' }, // 00
-    { 'D', 'I' }, // 01
-    { 'L', 'U' }, // 02
-    { 'M', 'A' }, // 03
-    { 'M', 'E' }, // 04
-    { 'J', 'E' }, // 05
-    { 'V', 'E' }, // 06
-    { 'S', 'A' }  // 07
+    { 'D', 'I' },
+    { 'L', 'U' },
+    { 'M', 'A' },
+    { 'M', 'E' },
+    { 'J', 'E' },
+    { 'V', 'E' },
+    { 'S', 'A' }
 };
 #define LANGSTR "fr"
 #define TXT_SETTINGS "Param�tres"
@@ -65,14 +62,13 @@ const char sWeekday[][2] = {
 
 #if defined(FRONTCOVER_IT)
 const char sWeekday[][2] = {
-    { ' ', ' ' }, // 00
-    { 'D', 'O' }, // 01
-    { 'L', 'U' }, // 02
-    { 'M', 'A' }, // 03
-    { 'M', 'E' }, // 04
-    { 'G', 'I' }, // 05
-    { 'V', 'E' }, // 06
-    { 'S', 'A' }  // 07
+    { 'D', 'O' },
+    { 'L', 'U' },
+    { 'M', 'A' },
+    { 'M', 'E' },
+    { 'G', 'I' },
+    { 'V', 'E' },
+    { 'S', 'A' }
 };
 #define LANGSTR "it"
 #define TXT_SETTINGS "Settings"
@@ -86,14 +82,13 @@ const char sWeekday[][2] = {
 
 #if defined(FRONTCOVER_ES)
 const char sWeekday[][2] = {
-    { ' ', ' ' }, // 00
-    { 'D', 'O' }, // 01
-    { 'L', 'U' }, // 02
-    { 'M', 'A' }, // 03
-    { 'M', 'I' }, // 04
-    { 'J', 'U' }, // 05
-    { 'V', 'I' }, // 06
-    { 'S', 'A' }  // 07
+    { 'D', 'O' },
+    { 'L', 'U' },
+    { 'M', 'A' },
+    { 'M', 'I' },
+    { 'J', 'U' },
+    { 'V', 'I' },
+    { 'S', 'A' }
 };
 #define LANGSTR "es"
 #define TXT_SETTINGS "Settings"
@@ -107,14 +102,13 @@ const char sWeekday[][2] = {
 
 #if defined(FRONTCOVER_NL)
 const char sWeekday[][2] = {
-    { ' ', ' ' }, // 00
-    { 'Z', 'O' }, // 01
-    { 'M', 'A' }, // 02
-    { 'D', 'I' }, // 03
-    { 'W', 'O' }, // 04
-    { 'D', 'O' }, // 05
-    { 'V', 'R' }, // 06
-    { 'Z', 'A' }  // 07
+    { 'Z', 'O' },
+    { 'M', 'A' },
+    { 'D', 'I' },
+    { 'W', 'O' },
+    { 'D', 'O' },
+    { 'V', 'R' },
+    { 'Z', 'A' }
 };
 #define LANGSTR "nl"
 #define TXT_SETTINGS "Settings"
