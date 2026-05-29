@@ -405,7 +405,10 @@ void loop()
         screenBufferNeedsUpdate = true;
 
 #ifdef SHOW_MODE_MOONPHASE
-        moonphase = getMoonphase(tmNow.tm_year, tmNow.tm_mon, tmNow.tm_mday);
+        int currentYear = tmNow.tm_year + 1900; // Convert 124 -> 2024
+        int currentMonth = tmNow.tm_mon + 1;    // Convert 9 -> 10 (October)
+        int currentDay = tmNow.tm_mday;         // This is already 1-31
+        moonphase = getMoonphase(currentYear, currentMonth, currentDay);
 #endif
 
         // Reset URL event 0
@@ -821,17 +824,25 @@ void loop()
 #ifdef SHOW_MODE_DATE
         case MODE_DATE:
             renderer.clearScreenBuffer(matrix);
-            if (tmNow.tm_mday < 10)
-                renderer.setSmallText(("0" + String(tmNow.tm_mday)), TEXT_POS_TOP, matrix);
-            else
-                renderer.setSmallText(String(tmNow.tm_mday), TEXT_POS_TOP, matrix);
-            if (tmNow.tm_mon < 10)
-                renderer.setSmallText(("0" + String(tmNow.tm_mon)), TEXT_POS_BOTTOM, matrix);
-            else
-                renderer.setSmallText(String(tmNow.tm_mday), TEXT_POS_BOTTOM, matrix);
+
+            // Create buffers to hold the formatted strings (max 3 chars: "01")
+            char dayBuf[4];
+            char monBuf[4];
+
+            // Use snprintf for safe, heap-free formatting
+            // %02d means: integer, at least 2 digits wide, pad with '0'
+            snprintf(dayBuf, sizeof(dayBuf), "%02d", (uint8_t)tmNow.tm_mday);
+            snprintf(monBuf, sizeof(monBuf), "%02d", (uint8_t)tmNow.tm_mon + 1);
+
+            // Render the pre-formatted strings
+            renderer.setSmallText(dayBuf, TEXT_POS_TOP, matrix);
+            renderer.setSmallText(monBuf, TEXT_POS_BOTTOM, matrix);
+
+            // Manual pixel overrides
             renderer.setPixelInScreenBuffer(5, 4, matrix);
             renderer.setPixelInScreenBuffer(5, 9, matrix);
             break;
+
 #endif
 
 #ifdef SHOW_MODE_MOONPHASE
