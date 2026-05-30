@@ -11,3 +11,4 @@ uint8_t getMinute(time_t zeit);
 int getMoonphase(int y, int m, int d);
 String padStringZeros(String input);
 void handleTimeSetting(String input);
+String formatUptime(time_t total_seconds);

@@ -1623,17 +1623,16 @@ void handleRoot()
                String(FIRMWARE_VERSION);
 #ifdef DEBUG_WEB
     struct tm tmNow = getTime();
-    message += "<br><br>Time: " + String(tmNow.tm_hour) + ":";
-    if (tmNow.tm_min < 10)
-        message += "0";
-    message += String(tmNow.tm_min);
+    char timeBuffer[20];
+    snprintf(timeBuffer, sizeof(timeBuffer), "<br><br>Time: %02d:%02d",
+             tmNow.tm_hour, tmNow.tm_min);
+    message += String(timeBuffer);
+
     if (tmNow.tm_isdst)
         message += " (DST)";
-    tm *tm_uptime = gmtime(&upTime);
-    message += " up " + String(tm_uptime->tm_yday) + " days, " + String(tm_uptime->tm_hour) + ":";
-    if (tm_uptime->tm_min < 10)
-        message += "0";
-    message += String(tm_uptime->tm_min);
+
+    message += " up " + formatUptime(upTime);
+
     message += "<br>" + String(dayOfWeek[tmNow.tm_wday]) + ", " + String(monthOfYear[tmNow.tm_mon]) + " " + String(tmNow.tm_mday) + ". " + String(1900 + tmNow.tm_year);
     message += "<br>Moonphase: " + String(moonphase);
     message += "<br>Free RAM: " + String(ESP.getFreeHeap()) + " bytes";

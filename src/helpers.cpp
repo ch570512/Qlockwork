@@ -24,11 +24,13 @@ uint8_t getMinute(time_t zeit)
 }
 
 // Calculate moonphase
-int getMoonphase(int y, int m, int d) {
+int getMoonphase(int y, int m, int d)
+{
     // Use double for everything to prevent precision loss/overflow
-    double jd; 
-    
-    if (m < 3) {
+    double jd;
+
+    if (m < 3)
+    {
         y--;
         m += 12;
     }
@@ -36,19 +38,18 @@ int getMoonphase(int y, int m, int d) {
 
     // More precise Julian Date calculation (simplified astronomical epoch)
     // This is a standard approximation
-    jd = 365.25 * y + 30.6001 * m + d + 1720994.5; 
+    jd = 365.25 * y + 30.6001 * m + d + 1720994.5;
 
     // The actual mean synodic month: 29.530588853 days
     double phase = jd / 29.530588853;
-    
+
     // Get the fractional part of the cycle (0.0 to 1.0)
     double fraction = phase - floor(phase);
-    
+
     // Map 0.0-1.0 to 0-7 scale
     int b = (int)round(fraction * 8);
-    return b % 8; 
+    return b % 8;
 }
-
 
 String padStringZeros(String input)
 {
@@ -91,4 +92,16 @@ void handleTimeSetting(String input) // 2026-05-01T17:58
     {
         DEBUG_SERIAL_PRINTLN(F("[ERROR] Wrong format"));
     }
+}
+
+String formatUptime(time_t total_seconds)
+{
+    long days = total_seconds / 86400;
+    long remaining_sec = total_seconds % 86400;
+    int hours = remaining_sec / 3600;
+    remaining_sec %= 3600;
+    int minutes = remaining_sec / 60;
+    char buffer[32];
+    snprintf(buffer, sizeof(buffer), "%ld days, %02d:%02dh", days, hours, minutes);
+    return String(buffer);
 }
