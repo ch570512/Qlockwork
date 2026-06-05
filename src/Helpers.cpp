@@ -1,4 +1,4 @@
-#include "helpers.h"
+#include "Helpers.h"
 
 struct tm getTime()
 {
@@ -56,6 +56,7 @@ String padStringZeros(String input)
     return (input.length() > 1) ? input : "0" + input;
 }
 
+// Set ESP time from Webpage
 void handleTimeSetting(String input) // 2026-05-01T17:58
 {
     int year, month, day, hour, minute, second = 0;
@@ -80,8 +81,7 @@ void handleTimeSetting(String input) // 2026-05-01T17:58
             tv.tv_sec = epoch;
             tv.tv_usec = 0;
             settimeofday(&tv, NULL);
-            DEBUG_SERIAL_PRINT(F("[INFO] Manual time set to: "));
-            DEBUG_SERIAL_PRINTLN(input);
+            DEBUG_SERIAL_PRINTLN(F("[INFO] Manual time set to: ") + input);
         }
         else
         {
@@ -94,6 +94,7 @@ void handleTimeSetting(String input) // 2026-05-01T17:58
     }
 }
 
+// Used on Webpage to show the total uptime
 String formatUptime(time_t total_seconds)
 {
     long days = total_seconds / 86400;

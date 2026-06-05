@@ -21,7 +21,7 @@
 #error This code is designed to run on ESP8266-based boards! Please check your Tools->Board setting.
 #endif
 
-#define FIRMWARE_VERSION 20260603
+#define FIRMWARE_VERSION 20260605
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -32,10 +32,11 @@
 #include <IRremoteESP8266.h>
 #include <IRutils.h>
 #include <time.h>
+#include "Debug.h"
 #include "Colors.h"
 #include "Configuration.h"
-#include "Debug.h"
 #include "Events.h"
+#include "Helpers.h"
 #include "LedDriver.h"
 #include "MeteoWeather.h"
 #include "Modes.h"
@@ -177,20 +178,15 @@ void setup()
 {
     // Init serial port
     Serial.begin(115200);
-    while (!Serial && millis() < 5000)
-        ;
     delay(1000);
 
     // And the monkey flips the switch. (Akiva Goldsman)
-    Serial.println(F("\n\n*** QLOCKWORK ***"));
-    Serial.println(F("Firmware: ") + String(FIRMWARE_VERSION));
-    DEBUG_SERIAL_PRINTLN(F("Starting on ") + String(ARDUINO_BOARD));
-    DEBUG_SERIAL_PRINT(F("CPU Frequency = "));
-    DEBUG_SERIAL_PRINT(F_CPU / 1000000);
-    DEBUG_SERIAL_PRINTLN(F(" MHz"));
+    DEBUG_SERIAL_PRINTLN(F("*** QLOCKWORK ***"));
+    DEBUG_SERIAL_PRINTLN("Firmware: " + String(FIRMWARE_VERSION));
+    DEBUG_SERIAL_PRINTLN("Starting on " + String(ARDUINO_BOARD));
+    DEBUG_SERIAL_PRINTLN("CPU Frequency = " + String(F_CPU / 1000000) + " MHz");
 
     // Load settings
-    DEBUG_SERIAL_PRINTLN(F("Loading settings"));
     settings.loadFromEEPROM();
     maxBrightness = map(settings.mySettings.brightness, 0, 100, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
     brightness = maxBrightness;
@@ -261,7 +257,6 @@ void setup()
     renderer.setSmallText("FI", TEXT_POS_BOTTOM, matrix);
     writeScreenBuffer(matrix, WHITE, brightness);
     WiFiManager wifiManager;
-    // wifiManager.resetSettings();
     wifiManager.setConnectTimeout(30);
     wifiManager.setTimeout(120);
     wifiManager.autoConnect(HOSTNAME, WIFI_AP_PASS);
@@ -276,7 +271,7 @@ void setup()
         delay(1000);
         if (WiFi.softAP(String(HOSTNAME) + " AP", WIFI_AP_PASS))
         {
-            DEBUG_SERIAL_PRINT(F("AP started with IP: "));
+            DEBUG_SERIAL_PRINTLN(F("AP started with IP: "));
             myIP = WiFi.softAPIP();
             DEBUG_SERIAL_PRINTLN(myIP);
         }
@@ -288,24 +283,22 @@ void setup()
     else
     {
         WiFi.mode(WIFI_STA);
-        DEBUG_SERIAL_PRINT(F("Hostname: "));
-        DEBUG_SERIAL_PRINTLN(String(HOSTNAME));
-        DEBUG_SERIAL_PRINT(F("RSSI: "));
-        DEBUG_SERIAL_PRINTLN(String(WiFi.RSSI()));
+        DEBUG_SERIAL_PRINTLN("Hostname: " + String(HOSTNAME));
+        DEBUG_SERIAL_PRINTLN("RSSI: " + String(WiFi.RSSI()));
         writeScreenBuffer(matrix, GREEN, brightness);
         delay(1000);
         myIP = WiFi.localIP();
 
         // Configure NTP-Client
         configTime(NTP_TIMEZONE, NTP_SERVER);
-        DEBUG_SERIAL_PRINTLN(F("NTP Server: ") + String(NTP_SERVER));
-        DEBUG_SERIAL_PRINTLN(F("NTP Timezone: ") + String(NTP_TIMEZONE));
+        DEBUG_SERIAL_PRINTLN("NTP Server: " + String(NTP_SERVER));
+        DEBUG_SERIAL_PRINTLN("NTP Timezone: " + String(NTP_TIMEZONE));
         time_t now_time_t = time(nullptr);
         while (now_time_t < 8 * 3600 * 2)
         {
             delay(500);
             now_time_t = time(nullptr);
-            DEBUG_SERIAL_PRINT(".");
+            DEBUG_SERIAL_PRINTLN(".");
         }
 
 #ifdef ARDUINO_OTA
@@ -316,18 +309,6 @@ void setup()
         // Get weather from MeteoWeather
 #ifdef WEATHER
         !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
-#ifdef DEBUG
-        Serial.print(F("Outdoor temperature: "));
-        Serial.print(outdoorWeather.temperature);
-        Serial.println(F(" °C"));
-        Serial.print(F("Outdoor humidity: "));
-        Serial.print(outdoorWeather.humidity);
-        Serial.println(F(" %rH"));
-        struct tm *sunriseTime = localtime(&outdoorWeather.sunrise);
-        Serial.printf("Sunrise: %02u:%02u\n", sunriseTime->tm_hour, sunriseTime->tm_min);
-        struct tm *sunsetTime = localtime(&outdoorWeather.sunset);
-        Serial.printf("Sunset: %02u:%02u\n", sunsetTime->tm_hour, sunsetTime->tm_min);
-#endif
 #endif
     }
 
@@ -512,19 +493,13 @@ void loop()
 
         if (tmNow.tm_min == randomMinute)
         {
+#ifdef WEATHER
             if (WiFi.isConnected())
             {
                 // Get weather from MeteoWeather
-#ifdef WEATHER
                 !outdoorWeather.getOutdoorConditions(LATITUDE, LONGITUDE, TIMEZONE) ? errorCounterOutdoorWeather++ : errorCounterOutdoorWeather = 0;
-                DEBUG_SERIAL_PRINT(F("Outdoor temperature: "));
-                DEBUG_SERIAL_PRINT(outdoorWeather.temperature);
-                DEBUG_SERIAL_PRINTLN(F(" °C"));
-                DEBUG_SERIAL_PRINT(F("Outdoor humidity: "));
-                DEBUG_SERIAL_PRINT(outdoorWeather.humidity);
-                DEBUG_SERIAL_PRINTLN(F(" %rH"));
-#endif
             }
+#endif
         }
 
         //=============================================================================
@@ -621,9 +596,7 @@ void loop()
             autoModeChangeTimer--;
             if (!autoModeChangeTimer)
             {
-                DEBUG_SERIAL_PRINT(F("Auto modechange ("));
-                DEBUG_SERIAL_PRINT(String(autoMode));
-                DEBUG_SERIAL_PRINTLN(F(")"));
+                DEBUG_SERIAL_PRINTLN(F("Auto modechange (") + String(autoMode) + F(")"));
                 autoModeChangeTimer = AUTO_MODECHANGE_TIME;
                 switch (autoMode)
                 {
@@ -952,9 +925,7 @@ void loop()
 
 #ifdef SENSOR_DHT22
         case MODE_TEMP:
-            DEBUG_SERIAL_PRINT(F("Room Temperature: "));
-            DEBUG_SERIAL_PRINT(String(roomTemperature));
-            DEBUG_SERIAL_PRINTLN(F(" °C"));
+            DEBUG_SERIAL_PRINTLN(F("Room Temperature: ") + String(roomTemperature) + F(" °C"));
             renderer.clearScreenBuffer(matrix);
             if (roomTemperature == 0)
             {
@@ -981,9 +952,7 @@ void loop()
             break;
 
         case MODE_HUMIDITY:
-            DEBUG_SERIAL_PRINT(F("Room Humidity: "));
-            DEBUG_SERIAL_PRINT(String(roomHumidity));
-            DEBUG_SERIAL_PRINTLN(F(" %rH"));
+            DEBUG_SERIAL_PRINTLN(F("Room Humidity: ") + String(roomHumidity) + F(" %rH"));
             renderer.clearScreenBuffer(matrix);
             renderer.setSmallText(String(int(roomHumidity + 0.5)), TEXT_POS_TOP, matrix);
             matrix[6] = 0b0100100001000000;
@@ -995,9 +964,7 @@ void loop()
 
 #ifdef WEATHER
         case MODE_EXT_TEMP:
-            DEBUG_SERIAL_PRINT(F("Outdoor temperature: "));
-            DEBUG_SERIAL_PRINT(String(outdoorWeather.temperature));
-            DEBUG_SERIAL_PRINTLN(F(" °C"));
+            DEBUG_SERIAL_PRINTLN(F("Outdoor temperature: ") + String(outdoorWeather.temperature) + F(" °C"));
             renderer.clearScreenBuffer(matrix);
             if (outdoorWeather.temperature > 0)
             {
@@ -1010,9 +977,7 @@ void loop()
             renderer.setSmallText(String(int(abs(outdoorWeather.temperature) + 0.5)), TEXT_POS_BOTTOM, matrix);
             break;
         case MODE_EXT_HUMIDITY:
-            DEBUG_SERIAL_PRINT(F("Outdoor humidity: "));
-            DEBUG_SERIAL_PRINT(String(outdoorWeather.humidity));
-            DEBUG_SERIAL_PRINTLN(F(" %rH"));
+            DEBUG_SERIAL_PRINTLN(F("Outdoor humidity: ") + String(outdoorWeather.humidity) + F(" %rH"));
             renderer.clearScreenBuffer(matrix);
             if (outdoorWeather.humidity < 100)
                 renderer.setSmallText(String(outdoorWeather.humidity), TEXT_POS_TOP, matrix);
@@ -1099,9 +1064,7 @@ void loop()
 #ifdef DEBUG
         struct tm tmNow = getTime();
         Serial.printf("Time (ESP): %02d:%02d:%02d %s, %s %02d. %02d \n", tmNow.tm_hour, tmNow.tm_min, tmNow.tm_sec, dayOfWeek[tmNow.tm_wday], monthOfYear[tmNow.tm_mon], tmNow.tm_mday, tmNow.tm_year + 1900);
-        DEBUG_SERIAL_PRINT(F("Total Free Heap: "));
-        DEBUG_SERIAL_PRINT(ESP.getFreeHeap() / 1024);
-        DEBUG_SERIAL_PRINTLN(F(" kB"));
+        DEBUG_SERIAL_PRINTLN(F("Total Free Heap: ") + String(ESP.getFreeHeap() / 1024.0f) + F(" kB"));
 #endif
 
         // write screenbuffer to display
@@ -1481,12 +1444,8 @@ void getRoomConditions()
         errorCounterDHT = 0;
         roomTemperature = dhtTemperature + DHT_TEMPERATURE_OFFSET;
         roomHumidity = dhtHumidity + DHT_HUMIDITY_OFFSET;
-        DEBUG_SERIAL_PRINT(F("Temperature (DHT): "));
-        DEBUG_SERIAL_PRINT(String(roomTemperature));
-        DEBUG_SERIAL_PRINTLN(F(" °C"));
-        DEBUG_SERIAL_PRINT(F("Humidity (DHT): "));
-        DEBUG_SERIAL_PRINT(String(roomHumidity));
-        DEBUG_SERIAL_PRINTLN(F(" %rH"));
+        DEBUG_SERIAL_PRINTLN(F("Temperature (DHT): ") + String(roomTemperature) + F(" °C"));
+        DEBUG_SERIAL_PRINTLN(F("Humidity (DHT): ") + String(roomHumidity) + F(" %rH"));
     }
     else
     {
@@ -1635,7 +1594,7 @@ void handleRoot()
 
     message += "<br>" + String(dayOfWeek[tmNow.tm_wday]) + ", " + String(monthOfYear[tmNow.tm_mon]) + " " + String(tmNow.tm_mday) + ". " + String(1900 + tmNow.tm_year);
     message += "<br>Moonphase: " + String(moonphase);
-    message += "<br>Free RAM: " + String(ESP.getFreeHeap()) + " bytes";
+    message += "<br>Free Heap: " + String(ESP.getFreeHeap() / 1024.0f) + " kB";
     message += "<br>RSSI: " + String(WiFi.RSSI());
 #ifdef LDR
     message += "<br>Brightness: " + String(brightness) + " (ABC: ";
@@ -2268,10 +2227,7 @@ void handleSetEvent()
     events[0].text = webServer.arg("text").substring(0, 40);
     events[0].color = (eColor)webServer.arg("color").toInt();
     webServer.send(200, "text/plain", "OK.");
-    DEBUG_SERIAL_PRINT(F("Event set: "));
-    DEBUG_SERIAL_PRINT(String(events[0].day) + "." + String(events[0].month));
-    DEBUG_SERIAL_PRINT(F(". "));
-    DEBUG_SERIAL_PRINTLN(events[0].text);
+    DEBUG_SERIAL_PRINTLN(F("Event set: ") + String(events[0].day) + "." + String(events[0].month) + F(". ") + events[0].text);
 }
 
 // Page showText
@@ -2284,8 +2240,7 @@ void handleShowText()
     feedText = "  " + webServer.arg("text").substring(0, 80) + "   ";
     feedPosition = 0;
     webServer.send(200, "text/plain", "OK.");
-    DEBUG_SERIAL_PRINT(F("Show text: "));
-    DEBUG_SERIAL_PRINTLN(webServer.arg("text").substring(0, 80));
+    DEBUG_SERIAL_PRINTLN(F("Show text: ") + webServer.arg("text").substring(0, 80));
 
 #ifdef BUZZER
     for (uint8_t i = 0; i < feedBuzzer; i++)

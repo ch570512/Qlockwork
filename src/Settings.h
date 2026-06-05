@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
+#include "Debug.h"
 #include "Colors.h"
 #include "Configuration.h"
 #include "Languages.h"

@@ -37,7 +37,7 @@ void Settings::resetToDefault() {
     mySettings.dayOnTime = 21600; // 06:00 * 3600
     mySettings.hourBeep = false;
 #ifdef DEBUG
-    Serial.println(F("Default settings set"));
+    DEBUG_SERIAL_PRINTLN(F("Default settings set"));
 #endif
     saveToEEPROM();
 }
@@ -48,7 +48,7 @@ void Settings::loadFromEEPROM() {
     EEPROM.get(0, mySettings);
     EEPROM.end();
 #ifdef DEBUG
-    Serial.println(F("Settings loaded"));
+    DEBUG_SERIAL_PRINTLN(F("Settings loaded"));
 #endif
     if ((mySettings.magicNumber != SETTINGS_MAGIC_NUMBER) || (mySettings.version != SETTINGS_VERSION))
         resetToDefault();
@@ -61,7 +61,7 @@ void Settings::saveToEEPROM() {
     //EEPROM.commit();
     EEPROM.end();
 #ifdef DEBUG
-    Serial.println(F("Settings saved"));
+    DEBUG_SERIAL_PRINTLN(F("Settings saved"));
 #endif
 }
 

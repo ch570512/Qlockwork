@@ -194,7 +194,6 @@
 // Misc
 //*****************************************************************************
 
-// #define DEBUG                                // Show debug infos in the serial console.
 // #define DEBUG_WEB                            // Show debug infos on the web page.
 // #define DEBUG_MATRIX                         // Renders the LED matrix to serial console. German only.
 // #define DEBUG_IR                             // Show debug infos from the IR remote.

@@ -176,6 +176,10 @@ http://your_clocks_ip/reset         Restart the clock.
 ```
 
 ## Change-log:
+
+#### 20260605
+* see GIT log.
+
 #### 20260530
 * Moved to ESP Core (LwIP) timekeeping and NTP.
 

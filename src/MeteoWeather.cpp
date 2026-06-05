@@ -18,9 +18,11 @@ uint8_t MeteoWeather::getOutdoorConditions(String lat, String lon, String timezo
     WiFiClient client;
     JsonDocument doc;
     timezone.replace("/", "%2F");
-    if (client.connect("api.open-meteo.com", 80))
+    if (client.connect(F("api.open-meteo.com"), 80))
     {
         String url = "/v1/forecast?latitude=" + String(lat) + "&longitude=" + String(lon) + "&current=temperature_2m,relative_humidity_2m,surface_pressure&daily=sunrise,sunset&timeformat=unixtime&timezone=" + timezone + "&forecast_days=1";
+        DEBUG_SERIAL_PRINTLN(F("Weather API GET:"));
+        DEBUG_SERIAL_PRINTLN(url);
         client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: api.open-meteo.com" + "\r\n" + "Connection: close\r\n\r\n");
         unsigned long startMillis = millis();
         while (client.available() == 0)
@@ -35,11 +37,8 @@ uint8_t MeteoWeather::getOutdoorConditions(String lat, String lon, String timezo
         while (client.available())
             response = client.readString();
 
-// #define DEBUG
-#ifdef DEBUG
-        Serial.println("Weather api response:");
-        Serial.println(response);
-#endif
+        DEBUG_SERIAL_PRINTLN(F("Weather API response:"));
+        DEBUG_SERIAL_PRINTLN(response);
 
         response.trim();
         int first = response.indexOf("{"); // Extract json file content of message.
@@ -49,8 +48,8 @@ uint8_t MeteoWeather::getOutdoorConditions(String lat, String lon, String timezo
 
         if (error)
         {
-            Serial.print("deserializeJson() failed: ");
-            Serial.println(error.c_str());
+            DEBUG_SERIAL_PRINTLN(F("deserializeJson() failed: "));
+            DEBUG_SERIAL_PRINTLN(error.c_str());
             return 0;
         }
 
@@ -68,6 +67,15 @@ uint8_t MeteoWeather::getOutdoorConditions(String lat, String lon, String timezo
         pressure = (int)current_surface_pressure;
         sunrise = (int)daily_sunrise_0;
         sunset = (int)daily_sunset_0;
+
+        DEBUG_SERIAL_PRINTLN("Outdoor temperature: " + String(temperature) + " °C");
+        DEBUG_SERIAL_PRINTLN("Outdoor humidity: " + String(humidity) + " %rH");
+#ifdef DEBUG
+        struct tm *sunriseTime = localtime(&sunrise);
+        Serial.printf("Sunrise: %02u:%02u\n", sunriseTime->tm_hour, sunriseTime->tm_min);
+        struct tm *sunsetTime = localtime(&sunset);
+        Serial.printf("Sunset: %02u:%02u\n", sunsetTime->tm_hour, sunsetTime->tm_min);
+#endif
         return 1;
     }
     return 0;
