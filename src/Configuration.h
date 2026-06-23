@@ -40,7 +40,7 @@
 #define WEATHER                                 // Show weather data.
 #define LATITUDE "56.2345678"                   // Set the location for which you want the current weather data displayed
 #define LONGITUDE "12.123456789"                // as latitude and longitude and the time zone.
-#define TIMEZONE "Europe/Berlin"                // Check out https://open-meteo.com/ 
+#define TIMEZONE "Europe/Berlin"                // Check out https://open-meteo.com/ for more info.
 
 //*****************************************************************************
 // Frontcover of the clock.
@@ -194,6 +194,7 @@
 // Misc
 //*****************************************************************************
 
+// #define DEBUG                                // Print debug infos.
 // #define DEBUG_WEB                            // Show debug infos on the web page.
 // #define DEBUG_MATRIX                         // Renders the LED matrix to serial console. German only.
 // #define DEBUG_IR                             // Show debug infos from the IR remote.

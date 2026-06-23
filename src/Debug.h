@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "Configuration.h"
 
 #ifdef DEBUG
 #define DEBUG_SERIAL_PRINTLN(x) \
