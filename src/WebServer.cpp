@@ -175,23 +175,23 @@ String WebServerClass::generateRootPage()
     message += "<br><i class=\"fa fa-thermometer\" style=\"font-size:20px;\"></i> " + String(roomTemperature) + " &deg;C / " + String(roomTemperature * 1.8 + 32.0) + " &deg;F";
     message += "<br><i class=\"fa fa-tint\" style=\"font-size:20px;\"></i> " + String(roomHumidity) + " %rH"
                                                                                                       "<br><span style=\"font-size:20px;\">";
-    if (roomHumidity < 30)
+    if (roomHumidity < 20)
         message += "<i style=\"color:Red;\" class=\"fa fa-square\"\"></i>";
     else
         message += "<i style=\"color:Red;\" class=\"fa fa-square-o\"></i>";
-    if ((roomHumidity >= 30) && (roomHumidity < 40))
+    if ((roomHumidity >= 20) && (roomHumidity < 40))
         message += "&nbsp;<i style=\"color:Orange;\" class=\"fa fa-square\"></i>";
     else
         message += "&nbsp;<i style=\"color:Orange;\" class=\"fa fa-square-o\"></i>";
-    if ((roomHumidity >= 40) && (roomHumidity <= 50))
+    if ((roomHumidity >= 40) && (roomHumidity <= 60))
         message += "&nbsp;<i style=\"color:MediumSeaGreen;\" class=\"fa fa-square\"></i>";
     else
         message += "&nbsp;<i style=\"color:MediumSeaGreen;\" class=\"fa fa-square-o\"></i>";
-    if ((roomHumidity > 50) && (roomHumidity < 60))
+    if ((roomHumidity > 60) && (roomHumidity < 80))
         message += "&nbsp;<i style=\"color:Lightblue;\" class=\"fa fa-square\"></i>";
     else
         message += "&nbsp;<i style=\"color:Lightblue;\" class=\"fa fa-square-o\"></i>";
-    if (roomHumidity >= 60)
+    if (roomHumidity >= 80)
         message += "&nbsp;<i style=\"color:Blue;\" class=\"fa fa-square\"></i>";
     else
         message += "&nbsp;<i style=\"color:Blue;\" class=\"fa fa-square-o\"></i>";
@@ -206,10 +206,14 @@ String WebServerClass::generateRootPage()
                "<br>" + String(outdoorWeather.pressure) + " hPa / " + String(outdoorWeather.pressure / 33.865) + " inHg";
 
     struct tm *sunriseTime = localtime(&outdoorWeather.sunrise);
-    message += "<br><i class = \"fa fa-sun-o\" style=\"font-size:20px;\"></i> " + String(sunriseTime->tm_hour) + ":" + String(sunriseTime->tm_min);
+    char sunriseBuf[6]; // "HH:MM" + null
+    snprintf(sunriseBuf, sizeof(sunriseBuf), "%02d:%02d", sunriseTime->tm_hour, sunriseTime->tm_min);
+    message += "<br><i class = \"fa fa-sun-o\" style=\"font-size:20px;\"></i> " + String(sunriseBuf);
 
     struct tm *sunsetTime = localtime(&outdoorWeather.sunset);
-    message += " <i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + String(sunsetTime->tm_hour) + ":" + String(sunsetTime->tm_min);
+    char sunsetBuf[6];
+    snprintf(sunsetBuf, sizeof(sunsetBuf), "%02d:%02d", sunsetTime->tm_hour, sunsetTime->tm_min);
+    message += " <i class = \"fa fa-moon-o\" style=\"font-size:20px;\"></i> " + String(sunsetBuf);
 #endif
 
     message += "<span style=\"font-size:12px;\">"
