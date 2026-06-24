@@ -819,7 +819,7 @@ void loop()
             renderer.clearScreenBuffer(matrix);
             switch (moonphase)
             {
-            case 0:
+            case 0: // New moon
                 matrix[0] = 0b0000111000000000;
                 matrix[1] = 0b0011000110000000;
                 matrix[2] = 0b0100000001000000;
@@ -831,7 +831,7 @@ void loop()
                 matrix[8] = 0b0011000110000000;
                 matrix[9] = 0b0000111000000000;
                 break;
-            case 1:
+            case 1: // Waxing crescent
                 matrix[0] = 0b0000111000000000;
                 matrix[1] = 0b0000001110000000;
                 matrix[2] = 0b0000000111000000;
@@ -843,7 +843,7 @@ void loop()
                 matrix[8] = 0b0000001110000000;
                 matrix[9] = 0b0000111000000000;
                 break;
-            case 2:
+            case 2: // First quarter
                 matrix[0] = 0b0000011000000000;
                 matrix[1] = 0b0000011110000000;
                 matrix[2] = 0b0000011111000000;
@@ -855,7 +855,7 @@ void loop()
                 matrix[8] = 0b0000011110000000;
                 matrix[9] = 0b0000011000000000;
                 break;
-            case 3:
+            case 3: // Waxing gibbous
                 matrix[0] = 0b0000111000000000;
                 matrix[1] = 0b0001111110000000;
                 matrix[2] = 0b0001111111000000;
@@ -867,7 +867,7 @@ void loop()
                 matrix[8] = 0b0001111110000000;
                 matrix[9] = 0b0000111000000000;
                 break;
-            case 4:
+            case 4: // Full moon
                 matrix[0] = 0b0000111000000000;
                 matrix[1] = 0b0011111110000000;
                 matrix[2] = 0b0111111111000000;
@@ -879,7 +879,7 @@ void loop()
                 matrix[8] = 0b0011111110000000;
                 matrix[9] = 0b0000111000000000;
                 break;
-            case 5:
+            case 5: // Waning gibbous
                 matrix[0] = 0b0000111000000000;
                 matrix[1] = 0b0011111100000000;
                 matrix[2] = 0b0111111100000000;
@@ -891,7 +891,7 @@ void loop()
                 matrix[8] = 0b0011111100000000;
                 matrix[9] = 0b0000111000000000;
                 break;
-            case 6:
+            case 6: // Last quarter
                 matrix[0] = 0b0000110000000000;
                 matrix[1] = 0b0011110000000000;
                 matrix[2] = 0b0111110000000000;
@@ -903,7 +903,7 @@ void loop()
                 matrix[8] = 0b0011110000000000;
                 matrix[9] = 0b0000110000000000;
                 break;
-            case 7:
+            case 7: // Waning crescent
                 matrix[0] = 0b0000111000000000;
                 matrix[1] = 0b0011100000000000;
                 matrix[2] = 0b0111000000000000;

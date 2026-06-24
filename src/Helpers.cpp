@@ -23,32 +23,30 @@ uint8_t getMinute(time_t zeit)
     return static_cast<uint8_t>((zeit % 3600) / 60);
 }
 
-// Calculate moonphase
 int getMoonphase(int y, int m, int d)
 {
-    // Use double for everything to prevent precision loss/overflow
-    double jd;
-
-    if (m < 3)
-    {
+    // Gregorian JDN (Meeus) – all integer steps before the final floating‑point
+    if (m <= 2) {
         y--;
         m += 12;
     }
-    m++; // Adjusting for calculation logic
+    long long a = y / 100;
+    long long b = 2 - a + a / 4;
+    double jd = static_cast<long long>(365.25 * (y + 4716)) +
+                static_cast<long long>(30.6001 * (m + 1)) +
+                d + b - 1524 + 0.5;   // midnight UTC
 
-    // More precise Julian Date calculation (simplified astronomical epoch)
-    // This is a standard approximation
-    jd = 365.25 * y + 30.6001 * m + d + 1720994.5;
+    // Reference new moon: 2000‑01‑06 18:14 UTC ≈ JDN 2451550.09765
+    const double epoch = 2451550.09765;
+    const double synMonth = 29.530588853;
 
-    // The actual mean synodic month: 29.530588853 days
-    double phase = jd / 29.530588853;
+    double days = jd - epoch;
+    double cycles = days / synMonth;
+    double fraction = cycles - floor(cycles);
+    if (fraction < 0.0) fraction += 1.0;
 
-    // Get the fractional part of the cycle (0.0 to 1.0)
-    double fraction = phase - floor(phase);
-
-    // Map 0.0-1.0 to 0-7 scale
-    int b = (int)round(fraction * 8);
-    return b % 8;
+    int phase = static_cast<int>(round(fraction * 8));
+    return phase % 8;
 }
 
 String padStringZeros(String input)
