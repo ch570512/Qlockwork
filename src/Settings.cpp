@@ -58,7 +58,6 @@ void Settings::loadFromEEPROM() {
 void Settings::saveToEEPROM() {
     EEPROM.begin(512);
     EEPROM.put(0, mySettings);
-    //EEPROM.commit();
     EEPROM.end();
 #ifdef DEBUG
     DEBUG_SERIAL_PRINTLN(F("Settings saved"));

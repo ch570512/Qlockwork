@@ -13,7 +13,6 @@
 
 // Mode
 extern Mode mode;
-extern Mode lastMode;
 
 // Time
 extern const char *dayOfWeek[];
@@ -48,9 +47,6 @@ extern uint8_t alarmTimer;
 extern uint8_t alarmTimerSecond;
 extern bool alarmOn;
 #endif
-
-// Misc
-extern IPAddress myIP;
 
 // Screenbuffer
 extern bool screenBufferNeedsUpdate;

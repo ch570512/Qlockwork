@@ -41,12 +41,10 @@
 #include "Settings.h"
 #include "WebServer.h"
 
-// Event definitions
+// Event definitions (from Configuration.h)
 event_t events[] = {
-    {0, 0, "", 0, WHITE}, // Do not remove
-    {1, 1, "Happy New Year!", 0, YELLOW_25},
-    {3, 14, "Albert Einsteins birthday!", 1879, MAGENTA},
-    {12, 24, "Merry Christmas!", 0, RED}};
+    EVENTS_LIST
+};
 
 void buttonModeInterrupt();
 void buttonModePressed();
@@ -464,7 +462,7 @@ void loop()
         }
 
         // Switch on buzzer for alarm 2
-        if (settings.mySettings.alarm2 && (tmNow.tm_hour == getHour(settings.mySettings.alarm2Time)) && (tmNow.tm_min == getMinute(settings.mySettings.alarm1Time)) && bitRead(settings.mySettings.alarm2Weekdays, tmNow.tm_wday))
+        if (settings.mySettings.alarm2 && (tmNow.tm_hour == getHour(settings.mySettings.alarm2Time)) && (tmNow.tm_min == getMinute(settings.mySettings.alarm2Time)) && bitRead(settings.mySettings.alarm2Weekdays, tmNow.tm_wday))
         {
             alarmOn = BUZZTIME_ALARM_2;
             DEBUG_SERIAL_PRINTLN(F("Alarm2 on"));
@@ -642,11 +640,11 @@ void loop()
                 showEventTimer = EVENT_TIME;
                 for (uint8_t i = 0; i < (sizeof(events) / sizeof(event_t)); i++)
                 {
-                    if ((tmNow.tm_mday == events[i].day) && (tmNow.tm_mon == events[i].month))
+                    if ((tmNow.tm_mday == events[i].day) && (tmNow.tm_mon + 1 == events[i].month))
                     {
                         if (events[i].year)
                         {
-                            feedText = "  " + events[i].text + " (" + String(tmNow.tm_year - events[i].year) + ")   ";
+                            feedText = "  " + events[i].text + " (" + String(tmNow.tm_year + 1900 - events[i].year) + ")   ";
                         }
                         else
                         {

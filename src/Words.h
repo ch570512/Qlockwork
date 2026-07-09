@@ -2,6 +2,7 @@
 
 #if defined(FRONTCOVER_CH) || defined(FRONTCOVER_CH_GS)
 
+#define ES_IST_ROW0_MASK	0b1101111000000000	// ES ISCH (row 0)
 #define CH_VOR				matrix[2] |= 0b0000000011100000
 #define CH_AB				matrix[3] |= 0b1100000000000000
 #define CH_ESISCH			matrix[0] |= 0b1101111000000000
@@ -32,6 +33,7 @@
 
 #if defined(FRONTCOVER_D3)
 
+#define ES_IST_ROW0_MASK	0b1101111000000000	// ES ISCH (row 0)
 #define D3_ESISCH			matrix[0] |= 0b1101111000000000
 #define D3_VOR				matrix[3] |= 0b0000000011100000
 #define D3_NACH				matrix[3] |= 0b1111000000000000
@@ -61,6 +63,7 @@
 
 #if defined(FRONTCOVER_DE_DE) || defined(FRONTCOVER_DE_SW) || defined(FRONTCOVER_DE_BA) || defined(FRONTCOVER_DE_SA)
 
+#define ES_IST_ROW0_MASK	0b1101110000000000	// ES IST (row 0)
 #define DE_VOR				matrix[3] |= 0b1110000000000000
 #define DE_NACH				matrix[3] |= 0b0000000111100000
 #define DE_ESIST			matrix[0] |= 0b1101110000000000
@@ -93,6 +96,7 @@
 
 #if defined(FRONTCOVER_DE_MKF_DE) || defined(FRONTCOVER_DE_MKF_SW) || defined(FRONTCOVER_DE_MKF_BA) || defined(FRONTCOVER_DE_MKF_SA)
 
+#define ES_IST_ROW0_MASK	0b1101110000000000	// ES IST (row 0)
 #define DE_MKF_VOR			matrix[3] |= 0b0000001110000000
 #define DE_MKF_NACH			matrix[3] |= 0b0011110000000000
 #define DE_MKF_ESIST		matrix[0] |= 0b1101110000000000
@@ -125,6 +129,7 @@
 
 #if defined(FRONTCOVER_EN)
 
+#define ES_IST_ROW0_MASK	0b1101100000000000	// IT IS (row 0)
 #define EN_ITIS				matrix[0] |= 0b1101100000000000
 #define EN_TIME				matrix[0] |= 0b0000000111100000
 #define EN_A				matrix[1] |= 0b1000000000000000
@@ -157,6 +162,7 @@
 
 #if defined(FRONTCOVER_ES)
 
+#define ES_IST_ROW0_MASK	0b1111011100000000	// SON LAS / ES LA (row 0)
 #define ES_SONLAS			matrix[0] |= 0b0111011100000000
 #define ES_ESLA				matrix[0] |= 0b1100011000000000
 #define ES_Y				matrix[6] |= 0b0000010000000000
@@ -188,6 +194,7 @@
 
 #if defined(FRONTCOVER_FR)
 
+#define ES_IST_ROW0_MASK	0b1101110000000000	// IL EST (row 0)
 #define FR_TRAIT			matrix[8] |= 0b0000010000000000
 #define FR_ET				matrix[7] |= 0b1100000000000000
 #define FR_LE				matrix[6] |= 0b0000001100000000
@@ -222,6 +229,7 @@
 
 #if defined(FRONTCOVER_IT)
 
+#define ES_IST_ROW0_MASK	0b1111011111100000	// SONO LE ORE (row 0)
 #define IT_SONOLE			matrix[0] |= 0b1111011000000000
 #define IT_LE				matrix[0] |= 0b0000011000000000
 #define IT_ORE				matrix[0] |= 0b0000000011100000
@@ -255,6 +263,7 @@
 
 #if defined(FRONTCOVER_NL)
 
+#define ES_IST_ROW0_MASK	0b1110110000000000	// HET IS (row 0)
 #define NL_VOOR				matrix[1] |= 0b0000000111100000
 #define NL_OVER				matrix[2] |= 0b1111000000000000
 #define NL_VOOR2			matrix[4] |= 0b1111000000000000
@@ -284,4 +293,9 @@
 #define NL_H_ELF			matrix[8] |= 0b0000000011100000
 #define NL_H_TWAALF			matrix[9] |= 0b1111110000000000
 
+#endif
+
+// Default fallback: no boost if no layout defines it (e.g. FRONTCOVER_BINARY)
+#ifndef ES_IST_ROW0_MASK
+#define ES_IST_ROW0_MASK 0
 #endif

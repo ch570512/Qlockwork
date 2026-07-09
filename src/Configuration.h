@@ -28,6 +28,15 @@
                                                 // BLUE_25, BLUE_50, VIOLET, MAGENTA, MAGENTA_25, MAGENTA_50, PINK.
 // #define ABUSE_CORNER_LED_FOR_ALARM           // Use the upper right minute LED as alarm LED. Only works if ALARM_LED_COLOR is defined.
 
+// Event definitions: {month, day, "text", year, color}
+// Year is used to calculate age (0 = no age shown).
+// The first entry {0, 0, "", 0, WHITE} must not be removed.
+#define EVENTS_LIST                                       \
+    {0, 0, "", 0, WHITE}, /* Do not remove */             \
+    {1, 1, "Happy New Year!", 0, YELLOW_25},              \
+    {3, 14, "Albert Einsteins birthday!", 1879, MAGENTA}, \
+    {12, 24, "Merry Christmas!", 0, RED}
+
 #define SHOW_IP                                 // Show local IP at startup. Use this to access the clocks on WiFi or AP.
 // #define POWERON_SELFTEST                     // Test LEDs at startup. Order is: red, green, blue, white.
 #define SHOW_MODE_AMPM                          // Show AM/PM.
@@ -83,6 +92,7 @@
 #define NUMPIXELS 115                           // Number of LEDs in the strip.
 #define MIN_BRIGHTNESS 20                       // Minimum brightness of LEDs from 0 to 255.
 #define MAX_BRIGHTNESS 240                      // Maximum brightness of LEDs from 0 to 255.
+#define ES_IST_BOOST 0                          // In percent to compensate for perceived dimming from shared row lines. 
 
 // #define ONOFF_BUTTON                         // Use a hardware on/off-button.
 // #define MODE_BUTTON                          // Use a hardware mode-button.

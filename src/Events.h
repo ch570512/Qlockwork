@@ -28,4 +28,9 @@ struct event_t
     eColor color;
 };
 
+#ifndef EVENTS_LIST
+#define EVENTS_LIST \
+    {0, 0, "", 0, WHITE}
+#endif
+
 extern event_t events[];
