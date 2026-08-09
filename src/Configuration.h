@@ -92,7 +92,6 @@
 #define NUMPIXELS 115                           // Number of LEDs in the strip.
 #define MIN_BRIGHTNESS 20                       // Minimum brightness of LEDs from 0 to 255.
 #define MAX_BRIGHTNESS 240                      // Maximum brightness of LEDs from 0 to 255.
-#define ES_IST_BOOST 0                          // In percent to compensate for perceived dimming from shared row lines. 
 
 // #define ONOFF_BUTTON                         // Use a hardware on/off-button.
 // #define MODE_BUTTON                          // Use a hardware mode-button.

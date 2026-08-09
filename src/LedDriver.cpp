@@ -3,7 +3,6 @@
 //*****************************************************************************
 
 #include "LedDriver.h"
-#include "Words.h"
 
 LedDriver::LedDriver()
 {
@@ -95,17 +94,6 @@ void LedDriver::setPixel(uint8_t num, uint8_t color, uint8_t brightness)
     uint8_t red = brightness * 0.0039 * defaultColors[color].red;
     uint8_t green = brightness * 0.0039 * defaultColors[color].green;
     uint8_t blue = brightness * 0.0039 * defaultColors[color].blue;
-
-    // Boost the "ES IST" (or equivalent) text LEDs in row 0
-    // to compensate for perceived dimming from shared row lines.
-    // Use 32-bit intermediate with clamping to prevent uint8_t overflow.
-    if ((num / 11 == 0) && bitRead(ES_IST_ROW0_MASK, 15 - (num % 11)))
-    {
-        float boost = (ES_IST_BOOST + 100) / 100.0f;
-        red = (uint8_t)min(255.0f, brightness * 0.0039f * defaultColors[color].red * boost);
-        green = (uint8_t)min(255.0f, brightness * 0.0039f * defaultColors[color].green * boost);
-        blue = (uint8_t)min(255.0f, brightness * 0.0039f * defaultColors[color].blue * boost);
-    }
 
 #ifdef NEOPIXEL_RGBW
     uint8_t white = 0xFF;
