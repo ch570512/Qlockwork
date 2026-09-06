@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Adafruit_NeoPixel.h>
-#include "Configuration.h"
+#include "config.h"
 #include "Colors.h"
 
 class LedDriver {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "Configuration.h"
+#include "config.h"
 #include "Languages.h"
 #include "Letters.h"
 #include "Numbers.h"

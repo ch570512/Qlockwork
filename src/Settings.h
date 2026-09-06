@@ -4,7 +4,7 @@
 #include <EEPROM.h>
 #include "Debug.h"
 #include "Colors.h"
-#include "Configuration.h"
+#include "config.h"
 #include "Languages.h"
 #include "Modes.h"
 

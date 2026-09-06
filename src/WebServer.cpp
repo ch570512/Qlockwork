@@ -1,4 +1,4 @@
-#include "Configuration.h"
+#include "config.h"
 #include "WebServer.h"
 #include "Helpers.h"
 #include "MeteoWeather.h"

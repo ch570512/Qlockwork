@@ -31,7 +31,7 @@
 #include <time.h>
 #include "Debug.h"
 #include "Colors.h"
-#include "Configuration.h"
+#include "config.h"
 #include "Events.h"
 #include "Helpers.h"
 #include "LedDriver.h"
