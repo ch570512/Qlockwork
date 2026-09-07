@@ -64,7 +64,7 @@ If you wish to use the clock without an internet connection, it will automatical
 Schematics and a Bill of Materials (BOM) can be found in the [`/misc`](./misc) directory.
 
 > [!IMPORTANT]
-> Rename `config.example.h` to `config.h` to set up your hardware.
+> Copy `config.example.h` to `config.h` to set up your hardware.
 
 > [!WARNING]
 > You must not power the clock from USB alone. The LED strip's high power demand will overload your USB port and may damage your ESP board and PC.

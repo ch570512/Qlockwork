@@ -1,3 +1,7 @@
+// Template for the git-ignored config.h.
+//
+// Copy this file to config.h and replace the placeholders.
+
 #pragma once
 
 //*****************************************************************************
